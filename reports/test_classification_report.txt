@@ -1,0 +1,13 @@
+              precision    recall  f1-score   support
+
+    Browsing      0.961     0.976     0.968       375
+   Streaming      0.868     0.881     0.874        67
+        VoIP      1.000     0.998     0.999       424
+FileTransfer      0.960     0.922     0.941       129
+         P2P      0.972     0.986     0.979       141
+        Chat      0.954     0.932     0.943       133
+        Mail      0.944     0.944     0.944        36
+
+    accuracy                          0.969      1305
+   macro avg      0.951     0.948     0.950      1305
+weighted avg      0.969     0.969     0.969      1305

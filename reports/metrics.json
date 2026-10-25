@@ -1,0 +1,26 @@
+{
+  "best_model": "LightGBM",
+  "test_accuracy": 0.9686,
+  "test_macro_f1": 0.9497,
+  "latency_ms_per_flow": 2.204,
+  "validation_comparison": [
+    {
+      "model": "RandomForest",
+      "val_accuracy": 0.9371,
+      "val_macro_f1": 0.8977,
+      "train_seconds": 1.4042
+    },
+    {
+      "model": "XGBoost",
+      "val_accuracy": 0.9509,
+      "val_macro_f1": 0.9105,
+      "train_seconds": 2.3693
+    },
+    {
+      "model": "LightGBM",
+      "val_accuracy": 0.9571,
+      "val_macro_f1": 0.919,
+      "train_seconds": 3.2701
+    }
+  ]
+}
