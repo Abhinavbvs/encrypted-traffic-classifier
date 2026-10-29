@@ -1,4 +1,4 @@
 model,val_accuracy,val_macro_f1,train_seconds
-RandomForest,0.9371,0.8977,1.4042
-XGBoost,0.9509,0.9105,2.3693
-LightGBM,0.9571,0.919,3.2701
+RandomForest,0.9371,0.8977,0.905
+XGBoost,0.9509,0.9105,1.4662
+LightGBM,0.9571,0.919,1.5653

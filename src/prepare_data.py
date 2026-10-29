@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 
 # ---------- Settings ----------
 RAW_FILE = Path(
-    "data/raw/Scenario A2-ARFF/Scenario A2-ARFF/"
+    "data/raw/Scenario A2-ARFF/"
     "TimeBasedFeatures-Dataset-15s-NO-VPN.arff"
 )
 OUT_DIR = Path("data/processed")

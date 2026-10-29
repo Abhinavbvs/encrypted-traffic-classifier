@@ -46,13 +46,13 @@ The overwhelming majority of Streaming classification errors stem from confusion
 | Feature | Importance Rank | Splits in LightGBM | Streaming Mean (Scaled) | Browsing Mean (Scaled) | Absolute Diff |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | `flowBytesPerSecond` | 1 | 6794 | 0.978 | -0.047 | 1.025 |
-| `min_flowiat` | 2 | 5681 | 0.510 | -0.089 | 0.599 |
+| `min_flowiat` | 2 | 5682 | 0.510 | -0.089 | 0.599 |
 | `min_fiat` | 3 | 4384 | -0.049 | -0.191 | 0.142 |
 | `min_biat` | 4 | 3078 | 0.105 | -0.187 | 0.292 |
-| `flowPktsPerSecond` | 5 | 2642 | 0.492 | -0.076 | 0.568 |
+| `flowPktsPerSecond` | 5 | 2636 | 0.492 | -0.076 | 0.568 |
 | `mean_fiat` | 6 | 2257 | -0.127 | 0.051 | 0.178 |
-| `duration` | 7 | 2222 | -0.096 | 0.131 | 0.228 |
-| `mean_flowiat` | 8 | 2038 | 0.027 | 0.064 | 0.037 |
+| `duration` | 7 | 2225 | -0.096 | 0.131 | 0.228 |
+| `mean_flowiat` | 8 | 2039 | 0.027 | 0.064 | 0.037 |
 | `mean_biat` | 9 | 1952 | -0.057 | -0.076 | 0.019 |
 | `std_flowiat` | 10 | 1841 | -0.115 | 0.214 | 0.329 |
 

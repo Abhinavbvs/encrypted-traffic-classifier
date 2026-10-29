@@ -3,6 +3,8 @@ import time
 from pathlib import Path
 
 import joblib
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -264,8 +266,10 @@ def main():
     print("Saved in reports/: val_comparison.csv, test_classification_report.txt, metrics.json")
     print("Saved in reports/plots/: 7 single charts + results_dashboard.png + data_overview.png")
     print("\nOpening chart windows... close them to finish the program.")
-    plt.show()
+    # plt.show()  # disabled for headless/terminal execution
 
 
 if __name__ == "__main__":
     main()
+
+

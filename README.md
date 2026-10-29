@@ -79,12 +79,35 @@ All commands should be executed from the repository root:
 
 | Command | Description | Outputs |
 | :--- | :--- | :--- |
+| `streamlit run app.py` | Launches interactive web dashboard for batch inference, single-flow tuning, and visual reports. | Interactive UI at `http://localhost:8501` |
 | `python src/train.py` | Trains Random Forest, XGBoost, and LightGBM baseline models. Evaluates on test set. | `models/best_model.pkl`, `models/scaler.pkl`, `reports/val_comparison.csv`, `reports/plots/` |
 | `python src/predict.py --input <csv> --output <csv>` | Runs inference on input flows with column validation and top-3 ranked confidence. | `predictions.csv`, latency metrics |
+| `python src/llm_explainer.py` | Generates natural-language Computer Networks explanations with multi-tier fallback (Ollama -> Cloud -> Heuristic Rule Engine). | Technical explanation & provider metadata |
 | `python src/tune.py` | Performs Randomized Search Cross-Validation (CV) on training split only (scored on macro F1). | `models/best_params.json`, `reports/tuning_results.csv` |
 | `python src/cross_validate.py` | Executes 5-fold Stratified Cross-Validation on combined train+val data for all 3 models. | `reports/cv_results.csv`, `reports/cv_comparison.png` |
 | `python src/analyze_weak_spot.py` | Analyzes Streaming vs Browsing confusion, feature overlap, and suggests concrete improvements. | `reports/streaming_vs_browsing_analysis.md`, `reports/plots/streaming_vs_browsing.png` |
-| `pytest` | Runs unit tests checking feature column validation, output shapes, and training pipeline consistency. | Test results summary |
+| `pytest` | Runs complete 17-test suite (unit tests, fallback resilience, end-to-end integration). | Test results summary |
+
+---
+
+## LLM Explanation Layer & Multi-Tier Fallback
+
+Classifications are translated into human-readable Computer Networks rationales via `src/llm_explainer.py`:
+- **Tier 1 (Local Ollama)**: Queries local Mistral or Phi-3 server at `http://localhost:11434` (free, offline, private).
+- **Tier 2 (Cloud LLM)**: Seamlessly uses Groq, OpenAI, or Gemini if an API key is present in `.env`.
+- **Tier 3 (Domain-Expert Rule Engine)**: Deterministic, zero-dependency Computer Networks heuristic fallback that guarantees 100% operational availability without internet or API keys.
+
+---
+
+## Continuous Integration (CI)
+
+A GitHub Actions workflow is configured in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) to automatically validate every push and pull request:
+- Environment setup on `ubuntu-latest` with Python 3.11.
+- Full artifact verification (23 features, 7 classes).
+- 17 automated tests (`pytest -v`).
+- CLI prediction execution test.
+- LLM explainer fallback execution test.
+- Weak spot diagnostic analysis generation test.
 
 ---
 

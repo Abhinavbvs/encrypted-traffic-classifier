@@ -1,0 +1,60 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Automated Tests & Pipeline Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify Model & Data Artifacts
+        run: |
+          python -c "
+          import json, joblib, os
+          assert os.path.exists('models/best_model.pkl'), 'Missing models/best_model.pkl'
+          assert os.path.exists('models/scaler.pkl'), 'Missing models/scaler.pkl'
+          cols = json.load(open('data/processed/feature_columns.json'))
+          assert len(cols) == 23, f'Expected 23 features, got {len(cols)}'
+          lmap = json.load(open('data/processed/label_map.json'))
+          assert len(lmap) == 7, f'Expected 7 classes, got {len(lmap)}'
+          print('Artifact verification passed: 23 features, 7 classes.')
+          "
+
+      - name: Run Pytest Unit & End-to-End Tests
+        run: |
+          pytest -v
+
+      - name: Test CLI Prediction Workflow
+        run: |
+          python src/predict.py --input data/processed/sample_raw_flows.csv --output predictions.csv
+          test -f predictions.csv
+          python -c "import pandas as pd; df = pd.read_csv('predictions.csv'); assert len(df) == 10; print(df[['predicted_class', 'confidence']].head())"
+
+      - name: Test LLM Explainer Fallback Layer
+        run: |
+          python src/llm_explainer.py
+
+      - name: Test Weak Spot Diagnostic Analysis
+        run: |
+          python src/analyze_weak_spot.py
+          test -f reports/streaming_vs_browsing_analysis.md
+          test -f reports/plots/streaming_vs_browsing.png

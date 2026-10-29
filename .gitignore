@@ -6,6 +6,10 @@ venv/
 .ipynb_checkpoints/
 .pytest_cache/
 
+# Environment variables & secrets
+.env
+.env.local
+
 # Raw dataset (download from UNB, see README)
 data/raw/
 
