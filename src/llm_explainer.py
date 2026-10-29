@@ -3,17 +3,17 @@
 This module provides natural language explanations for flow classifications based
 strictly on the 23 timing flow features.
 
-Fallback Architecture:
-- Tier 1: Local Ollama server (e.g. Mistral or Phi-3 at http://localhost:11434).
-- Tier 2: Cloud LLM API (Groq, OpenAI, or Gemini if API key is in environment/.env).
-- Tier 3: Deterministic Computer Networks Domain-Expert Rule Engine (100% offline, zero-dependency).
+Supported LLM Providers & Fallback Architecture:
+- Tier 1: Local Ollama (e.g. Mistral or Phi-3 at http://localhost:11434, zero keys needed).
+- Tier 2: Cloud LLM APIs (Groq, OpenAI, Google Gemini, Anthropic Claude via .env keys).
+- Tier 3: Deterministic Computer Networks Domain-Expert Rule Engine (100% offline, zero keys).
 
-Abbreviations used in this module:
-- IAT: Inter-Arrival Time (time between consecutive packets in a flow).
-- FIAT: Forward Inter-Arrival Time.
-- BIAT: Backward Inter-Arrival Time.
-- CN: Computer Networks.
-- LLM: Large Language Model.
+Supported Environment Variables (.env):
+- OLLAMA_HOST, OLLAMA_MODEL
+- GROQ_API_KEY
+- OPENAI_API_KEY
+- GEMINI_API_KEY
+- ANTHROPIC_API_KEY
 """
 
 from __future__ import annotations
@@ -33,13 +33,13 @@ if str(PROJECT_ROOT) not in sys.path:
 import requests
 from dotenv import load_dotenv
 
-# Load optional .env file
+# Load .env file automatically
 load_dotenv()
 
 DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
 DEFAULT_CONNECT_TIMEOUT = 0.8  # fast probe if server is unreachable
-DEFAULT_READ_TIMEOUT = 5.0  # seconds for model generation
+DEFAULT_READ_TIMEOUT = 5.0     # seconds for model generation
 
 
 def build_prompt(
@@ -102,8 +102,9 @@ def explain_with_cloud_api(
     prompt: str,
     timeout: float = DEFAULT_READ_TIMEOUT,
 ) -> Optional[tuple[str, str]]:
-    """Attempt explanation via cloud API if GROQ_API_KEY or OPENAI_API_KEY is set."""
-    # Check Groq first (very fast inference)
+    """Attempt explanation via cloud API if any key is set in .env."""
+
+    # 1. Groq API (Ultra-fast Llama-3.1 inference)
     groq_key = os.getenv("GROQ_API_KEY")
     if groq_key:
         try:
@@ -122,7 +123,25 @@ def explain_with_cloud_api(
         except Exception:
             pass
 
-    # Check OpenAI
+    # 2. Google Gemini API
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if gemini_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": 0.2, "maxOutputTokens": 150},
+            }
+            res = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            if res.status_code == 200:
+                data = res.json()
+                text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                return text, "gemini (gemini-1.5-flash)"
+        except Exception:
+            pass
+
+    # 3. OpenAI API
     openai_key = os.getenv("OPENAI_API_KEY")
     if openai_key:
         try:
@@ -138,6 +157,29 @@ def explain_with_cloud_api(
             if res.status_code == 200:
                 text = res.json()["choices"][0]["message"]["content"].strip()
                 return text, "openai (gpt-4o-mini)"
+        except Exception:
+            pass
+
+    # 4. Anthropic Claude API
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    if anthropic_key:
+        try:
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "x-api-key": anthropic_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": "claude-3-5-haiku-20241022",
+                "max_tokens": 150,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+            res = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            if res.status_code == 200:
+                data = res.json()
+                text = data["content"][0]["text"].strip()
+                return text, "anthropic (claude-3-5-haiku)"
         except Exception:
             pass
 
