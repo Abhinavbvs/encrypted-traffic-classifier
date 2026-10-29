@@ -4,9 +4,13 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.pytest_cache/
 
 # Raw dataset (download from UNB, see README)
 data/raw/
+
+# Temporary prediction files
+predictions*.csv
 
 # Zips and system files
 *.zip
