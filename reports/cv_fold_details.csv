@@ -1,0 +1,16 @@
+model,fold,accuracy,macro_f1,fit_time_seconds
+RandomForest,1,0.9303,0.8976,1.01
+RandomForest,2,0.9296,0.8839,1.0
+RandomForest,3,0.9472,0.919,1.02
+RandomForest,4,0.9398,0.9054,0.99
+RandomForest,5,0.9479,0.915,1.02
+XGBoost,1,0.952,0.9239,2.81
+XGBoost,2,0.9526,0.9141,3.36
+XGBoost,3,0.9547,0.9302,4.89
+XGBoost,4,0.956,0.932,9.65
+XGBoost,5,0.9438,0.9081,9.07
+LightGBM,1,0.956,0.9315,3.26
+LightGBM,2,0.952,0.9125,4.07
+LightGBM,3,0.9614,0.9379,3.88
+LightGBM,4,0.9621,0.9383,2.69
+LightGBM,5,0.9492,0.9138,3.66
