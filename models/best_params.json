@@ -1,0 +1,30 @@
+{
+  "LightGBM": {
+    "best_params": {
+      "subsample": 0.7,
+      "num_leaves": 31,
+      "n_estimators": 300,
+      "min_child_samples": 30,
+      "max_depth": -1,
+      "learning_rate": 0.15,
+      "colsample_bytree": 0.8,
+      "class_weight": null
+    },
+    "best_cv_macro_f1": 0.9213,
+    "val_accuracy": 0.9571,
+    "val_macro_f1": 0.9201
+  },
+  "XGBoost": {
+    "best_params": {
+      "subsample": 0.8,
+      "n_estimators": 150,
+      "min_child_weight": 1,
+      "max_depth": 6,
+      "learning_rate": 0.15,
+      "colsample_bytree": 0.8
+    },
+    "best_cv_macro_f1": 0.9185,
+    "val_accuracy": 0.9525,
+    "val_macro_f1": 0.9162
+  }
+}
