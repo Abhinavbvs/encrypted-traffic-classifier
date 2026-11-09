@@ -1671,25 +1671,41 @@ MF.$$("[data-marquee]").forEach(function (el) {
       if (!par && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn("fx/30-depth shader", gl.getShaderInfoLog(s)); return null; }
       return s;
     }
-    var fsrc = HEAD + (kind === "pulse" ? PULSE : TUNNEL) + "\n" + MAIN;
-    var vs = sh(gl.VERTEX_SHADER, es3 ? toES3(VS, false) : VS), fs = sh(gl.FRAGMENT_SHADER, es3 ? toES3(fsrc, true) : fsrc);
-    if (!vs || !fs) return null;
-    var pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.bindAttribLocation(pr, 0, "a"); gl.linkProgram(pr);
+    /* The pulse gets one program per traffic class with the class baked in (#define CLS): the rhythm branch folds
+       away at compile time. Switching the class through a uniform made the Direct3D driver stall for 1.5-2.5 s. */
+    var srcs = kind === "pulse"
+      ? [0, 1, 2, 3, 4, 5, 6].map(function (c) {
+          return HEAD + "#define CLS " + c + ".0\n" + PULSE.replace("float h=uM>.5?sig(uB,u,id):sig(uA,u,id);", "float h=sig(CLS,u,id);") + "\n" + MAIN;
+        })
+      : [HEAD + TUNNEL + "\n" + MAIN];
+    var vs = sh(gl.VERTEX_SHADER, es3 ? toES3(VS, false) : VS);
+    if (!vs) return null;
+    var progs = srcs.map(function (src) {
+      var fs = sh(gl.FRAGMENT_SHADER, es3 ? toES3(src, true) : src);
+      if (!fs) return null;
+      var pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.bindAttribLocation(pr, 0, "a"); gl.linkProgram(pr);
+      return { pr: pr, fs: fs, locs: {}, ok: 0 };
+    });
+    if (progs.some(function (p) { return !p; })) return null;
     var state = 0;   // 0 compiling, 1 ready, -1 failed
-    var locs = {};
-    function U(n) { if (!(n in locs)) locs[n] = gl.getUniformLocation(pr, n); return locs[n]; }
+    function U(P, n) { if (!(n in P.locs)) P.locs[n] = gl.getUniformLocation(P.pr, n); return P.locs[n]; }
     function poll() {
       if (state) return state;
-      if (par && !gl.getProgramParameter(pr, par.COMPLETION_STATUS_KHR)) return 0;
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
-        console.warn("fx/30-depth link", gl.getProgramInfoLog(pr), gl.getShaderInfoLog(fs));
-        state = -1; cv.style.display = "none"; return state;
+      for (var i = 0; i < progs.length; i++) {
+        var P = progs[i];
+        if (P.ok) continue;
+        if (par && !gl.getProgramParameter(P.pr, par.COMPLETION_STATUS_KHR)) return 0;
+        if (!gl.getProgramParameter(P.pr, gl.LINK_STATUS)) {
+          console.warn("fx/30-depth link", gl.getProgramInfoLog(P.pr), gl.getShaderInfoLog(P.fs));
+          state = -1; cv.style.display = "none"; return state;
+        }
+        P.ok = 1;
       }
-      gl.useProgram(pr);
       var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
       gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-      gl.viewport(0, 0, 1, 1); gl.drawArrays(gl.TRIANGLES, 0, 3);   // warm-up draw: any lazy driver work happens now, off screen
+      gl.viewport(0, 0, 1, 1);
+      progs.forEach(function (P) { gl.useProgram(P.pr); gl.drawArrays(gl.TRIANGLES, 0, 3); });   // warm-up draws, off screen
       state = 1; return state;
     }
     return {
@@ -1697,10 +1713,13 @@ MF.$$("[data-marquee]").forEach(function (el) {
       poll: poll,
       draw: function (u) {
         if (gl.isContextLost() || poll() !== 1) return;
+        var P = progs[0];
+        if (progs.length > 1) P = progs[MF.clamp(Math.round(u.uM > .5 ? u.uB : u.uA) || 0, 0, progs.length - 1)];
+        gl.useProgram(P.pr);
         gl.viewport(0, 0, cv.width, cv.height);
-        gl.uniform2f(U("uR"), cv.width, cv.height);
+        gl.uniform2f(U(P, "uR"), cv.width, cv.height);
         for (var k in u) {
-          var v = u[k], l = U(k === "uS" ? "uS[0]" : k);
+          var v = u[k], l = U(P, k === "uS" ? "uS[0]" : k);
           if (l === null) continue;
           if (k === "uS") gl.uniform1fv(l, v);
           else if (k === "uCam") gl.uniform3f(l, v[0], v[1], v[2]);

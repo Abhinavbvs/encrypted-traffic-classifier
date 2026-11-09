@@ -11,3 +11,10 @@ a.btn.fx-cl-btn--ghost { background: rgba(5, 4, 7, .7) !important; }
 /* Blend modes force the browser to re-composite everything underneath on every frame. */
 .mf-cursor { mix-blend-mode: normal !important; }
 .fx-hero [style*="mix-blend"], .fx-hero *, .fx-warp *, .fx-cl * { mix-blend-mode: normal !important; }
+
+/* Scroll-linked blur on giant display text was re-filtered every frame (the 1-15 fps hotspot at the band).
+   The motion stays (scale, slide, fade); only the per-frame blur and the animated glow radius go. */
+.fx-cl__h, .fx-warp__content, .fx-band__w { filter: none !important; }
+.fx-warp__step { filter: none !important; }
+.fx-cl__mk { text-shadow: none !important; }
+.fx-band__w--acc { text-shadow: 0 0 34px rgba(255, 43, 214, .5) !important; }

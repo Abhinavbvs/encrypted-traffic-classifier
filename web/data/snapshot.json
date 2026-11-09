@@ -71,8 +71,8 @@
      "duration_sec": 2.975
     }
    ],
-   "latency_ms": 5.986,
-   "elapsed_ms": 2089.8,
+   "latency_ms": 4.775,
+   "elapsed_ms": 2070.1,
    "model": "LGBMClassifier"
   },
   "browsing_https.pcap": {
@@ -146,8 +146,8 @@
      "duration_sec": 6.92
     }
    ],
-   "latency_ms": 2.259,
-   "elapsed_ms": 1648.0,
+   "latency_ms": 2.28,
+   "elapsed_ms": 1631.7,
    "model": "LGBMClassifier"
   },
   "file_transfer.pcap": {
@@ -221,8 +221,8 @@
      "duration_sec": 0.083
     }
    ],
-   "latency_ms": 1.972,
-   "elapsed_ms": 1634.4,
+   "latency_ms": 2.21,
+   "elapsed_ms": 1633.6,
    "model": "LGBMClassifier"
   },
   "streaming_video.pcap": {
@@ -296,8 +296,8 @@
      "duration_sec": 5.382
     }
    ],
-   "latency_ms": 2.134,
-   "elapsed_ms": 1637.8,
+   "latency_ms": 2.499,
+   "elapsed_ms": 1638.0,
    "model": "LGBMClassifier"
   }
  },
@@ -663,6 +663,6 @@
    "FileTransfer": 1,
    "Chat": 1
   },
-  "latency_ms": 0.2969
+  "latency_ms": 0.2257
  }
 }

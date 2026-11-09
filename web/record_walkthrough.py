@@ -336,9 +336,9 @@ def main():
         wp.goto(a.site + "/index.html", wait_until="load")
         wp.wait_for_timeout(4000)
         hh = wp.evaluate("document.documentElement.scrollHeight")
-        for y in range(0, hh, 500):
+        for y in range(0, hh, 250):   # fine steps: every 3D scene and every pulse class renders once
             wp.evaluate("y => window.scrollTo(0, y)", y)
-            wp.wait_for_timeout(250)
+            wp.wait_for_timeout(220)
         wp.wait_for_timeout(1500)
         warm.close()
         ctx = browser.new_context(viewport={"width": W, "height": H}, device_scale_factor=1,
