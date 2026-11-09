@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCAP ingestion · MetaFlow</title>
+<meta name="description" content="Raw .pcap and .pcapng in, bidirectional flows out.">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr">
+  <a class="logo" href="index.html" aria-label="MetaFlow home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mfh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8ac8"/><stop offset=".5" stop-color="#ff2d8a"/><stop offset="1" stop-color="#6c3bff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mfh)"/><path d="M7.5 22V13.2c0-2.3 1.3-3.7 3.1-3.7 1.5 0 2.5.9 3.2 2.6L16 17.4l2.2-5.3c.7-1.7 1.7-2.6 3.2-2.6 1.8 0 3.1 1.4 3.1 3.7V22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="25.6" r="1.25" fill="#fff" opacity=".55"/><circle cx="12" cy="25.6" r="1.25" fill="#fff" opacity=".8"/><circle cx="16.5" cy="25.6" r="1.25" fill="#fff"/></svg><span class="logo-word">Meta<b>Flow</b></span><sup>v1.0</sup></a>
+  <div class="hdr-mid"><span class="clock" data-clock></span></div>
+  <div class="hdr-right">
+    <span class="live-badge" data-live-badge hidden><span class="live-dot"></span>Live model</span>
+    <a class="btn sm" href="analyze.html">Classify a capture <span class="arr">→</span></a>
+    <button class="menu-btn" data-menu-open aria-expanded="false" aria-controls="menu" aria-label="Open menu"><span></span></button>
+  </div>
+</header>
+<nav class="menu" id="menu" aria-hidden="true" aria-label="Main">
+  <button class="menu-close" data-menu-close aria-label="Close menu">×</button>
+  <ol class="menu-main"><li><a href="index.html"><span class="n">01</span>Home</a></li><li><a href="benchmarks.html"><span class="n">02</span>Benchmarks</a></li><li><a href="capabilities.html" aria-current="page"><span class="n">03</span>Capabilities</a></li><li><a href="analyze.html"><span class="n">04</span>Analyze</a></li><li><a href="project.html"><span class="n">05</span>Project</a></li><li><a href="demo.html"><span class="n">06</span>Demo</a></li><li><a href="reports.html"><span class="n">07</span>Reports</a></li><li><a href="get-started.html"><span class="n">08</span>Get started</a></li></ol>
+  <div class="menu-side">
+    <div class="grp"><h4>Capabilities</h4><a href="capability-pcap-ingestion.html">PCAP ingestion</a><a href="capability-timing-features.html">Timing features</a><a href="capability-lightgbm.html">LightGBM classifier</a><a href="capability-explainable-ai.html">Explainable AI</a><a href="capability-unknown-detection.html">Unknown detection</a></div>
+    <div class="grp"><h4>More</h4>
+      <a href="system.html">Design system</a>
+      <a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">GitHub repository ↗</a>
+      <a href="../reports/encrypted_traffic_classifier_demo.mp4" target="_blank" rel="noopener">Demo video (mp4) ↗</a>
+    </div>
+  </div>
+</nav>
+<main id="main"><section class="page-hero"><div class="wrap cap-hero">
+  <div><div class="crumbs"><a href="index.html">MetaFlow</a><span>/</span><a href="capabilities.html">Capabilities</a><span>/</span><span>PCAP ingestion</span></div>
+  <div class="eyebrow rv">01 · Capability</div><h1 class="h-xl rv rv-d1">PCAP ingestion</h1><p class="lead rv rv-d2">Raw .pcap and .pcapng in, bidirectional flows out.</p></div>
+  <div class="cap-obj rv rv-d2"><div class="obj obj-dish" aria-hidden="true"></div></div>
+</div></section><section class="sec"><div class="wrap split">
+  <div><div class="eyebrow">In short</div><p class="lead" style="font-size:20px">Native Scapy parser builds 5-tuple flows and throws payload bytes away on arrival.</p><a class="btn ghost mt-s" href="get-started.html">Run it <span class="arr">→</span></a></div>
+  <div class="prose rv">
+<h2>From capture file to flows</h2>
+<p><code>src/pcap_extractor.py</code> reads standard <code>.pcap</code> and <code>.pcapng</code> files with Scapy. It needs no proprietary tools and no decryption keys.</p>
+<ul><li>Extracts IPv4 and IPv6 network headers and TCP and UDP transport ports.</li><li>Discards payload bytes as packets are read, so they never reach memory beyond the parser.</li><li>Builds bidirectional flows on a canonical key: <code>(IP_min, IP_max, Port_min, Port_max, Protocol)</code>.</li><li>Tracks the initiator so every packet is labelled forward (client to server) or backward (server to client).</li></ul>
+<h2>Built to survive bad input</h2>
+<p>The test suite covers empty and corrupt captures, so a truncated file returns a clean error instead of a crash.</p>
+<div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0"><span class="c"># classify a raw capture directly</span>
+python src/predict.py --pcap data/sample_pcaps/voip_call.pcap --threshold 0.5</pre></div>
+<h2>Four captures included</h2>
+<p><code>data/sample_pcaps/</code> ships ground-truth captures for browsing, VoIP, streaming and file transfer, generated by <code>src/generate_sample_pcaps.py</code>, so you can test without capturing anything yourself.</p>
+</div>
+</div></section>
+<div class="wrap"><div class="next-cap"><span class="mono mute">Next · 02</span><a href="capability-timing-features.html">Timing features →</a></div></div></main>
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div>
+        <a class="logo" href="index.html" aria-label="MetaFlow home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mff" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8ac8"/><stop offset=".5" stop-color="#ff2d8a"/><stop offset="1" stop-color="#6c3bff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mff)"/><path d="M7.5 22V13.2c0-2.3 1.3-3.7 3.1-3.7 1.5 0 2.5.9 3.2 2.6L16 17.4l2.2-5.3c.7-1.7 1.7-2.6 3.2-2.6 1.8 0 3.1 1.4 3.1 3.7V22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="25.6" r="1.25" fill="#fff" opacity=".55"/><circle cx="12" cy="25.6" r="1.25" fill="#fff" opacity=".8"/><circle cx="16.5" cy="25.6" r="1.25" fill="#fff"/></svg><span class="logo-word">Meta<b>Flow</b></span><sup>v1.0</sup></a>
+        <p class="addr mt-s">A privacy-preserving classifier for encrypted network traffic. It reads packet timing, never payload. Open source under the MIT licence.</p>
+        <a class="btn light sm mt-s" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">Star on GitHub <span class="arr">↗</span></a>
+      </div>
+      <div><h4>Pages</h4><ul><li><a href="benchmarks.html">Benchmarks</a></li><li><a href="capabilities.html">Capabilities</a></li><li><a href="analyze.html">Analyze</a></li><li><a href="project.html">Project</a></li><li><a href="demo.html">Demo</a></li><li><a href="reports.html">Reports</a></li><li><a href="get-started.html">Get started</a></li><li><a href="system.html">Design system</a></li></ul></div>
+      <div><h4>Capabilities</h4><ul><li><a href="capability-pcap-ingestion.html">PCAP ingestion</a></li><li><a href="capability-timing-features.html">Timing features</a></li><li><a href="capability-lightgbm.html">LightGBM classifier</a></li><li><a href="capability-explainable-ai.html">Explainable AI</a></li><li><a href="capability-unknown-detection.html">Unknown detection</a></li></ul></div>
+      <div><h4>Run it</h4><ul>
+        <li><a href="get-started.html#install">Install</a></li>
+        <li><a href="get-started.html#site">MetaFlow server</a></li>
+        <li><a href="get-started.html#dashboard">Streamlit dashboard</a></li>
+        <li><a href="get-started.html#cli">Command line</a></li>
+        <li><a href="get-started.html#docker">Docker</a></li>
+        <li><a href="get-started.html#tests">Test suite</a></li>
+      </ul></div>
+      <div><h4>Source</h4><ul>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">Repository ↗</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions" target="_blank" rel="noopener">CI pipeline ↗</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/issues" target="_blank" rel="noopener">Issues ↗</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier#readme" target="_blank" rel="noopener">README ↗</a></li>
+      </ul></div>
+    </div>
+    <div class="ftr-big" aria-hidden="true">MetaFlow</div>
+    <div class="ftr-legal">
+      <span>© 2026 MetaFlow · encrypted-traffic-classifier · MIT</span>
+      <nav aria-label="Legal"><a href="license.html">Licence</a><a href="privacy.html">Privacy</a><a href="security.html">Security</a><a href="system.html">Design system</a></nav>
+    </div>
+  </div>
+</footer>
+<div class="notice" role="dialog" aria-label="Privacy notice">
+  <p><b>No cookies, no tracking.</b> Like the classifier, this site keeps nothing about you. One flag in your browser remembers that you closed this. <a class="mag" href="privacy.html">Privacy</a></p>
+  <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

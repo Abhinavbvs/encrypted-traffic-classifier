@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmarks · MetaFlow</title>
+<meta name="description" content="Cross-validation, held-out test and real-world PCAP results for MetaFlow.">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr">
+  <a class="logo" href="index.html" aria-label="MetaFlow home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mfh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8ac8"/><stop offset=".5" stop-color="#ff2d8a"/><stop offset="1" stop-color="#6c3bff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mfh)"/><path d="M7.5 22V13.2c0-2.3 1.3-3.7 3.1-3.7 1.5 0 2.5.9 3.2 2.6L16 17.4l2.2-5.3c.7-1.7 1.7-2.6 3.2-2.6 1.8 0 3.1 1.4 3.1 3.7V22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="25.6" r="1.25" fill="#fff" opacity=".55"/><circle cx="12" cy="25.6" r="1.25" fill="#fff" opacity=".8"/><circle cx="16.5" cy="25.6" r="1.25" fill="#fff"/></svg><span class="logo-word">Meta<b>Flow</b></span><sup>v1.0</sup></a>
+  <div class="hdr-mid"><span class="clock" data-clock></span></div>
+  <div class="hdr-right">
+    <span class="live-badge" data-live-badge hidden><span class="live-dot"></span>Live model</span>
+    <a class="btn sm" href="analyze.html">Classify a capture <span class="arr">→</span></a>
+    <button class="menu-btn" data-menu-open aria-expanded="false" aria-controls="menu" aria-label="Open menu"><span></span></button>
+  </div>
+</header>
+<nav class="menu" id="menu" aria-hidden="true" aria-label="Main">
+  <button class="menu-close" data-menu-close aria-label="Close menu">×</button>
+  <ol class="menu-main"><li><a href="index.html"><span class="n">01</span>Home</a></li><li><a href="benchmarks.html" aria-current="page"><span class="n">02</span>Benchmarks</a></li><li><a href="capabilities.html"><span class="n">03</span>Capabilities</a></li><li><a href="analyze.html"><span class="n">04</span>Analyze</a></li><li><a href="project.html"><span class="n">05</span>Project</a></li><li><a href="demo.html"><span class="n">06</span>Demo</a></li><li><a href="reports.html"><span class="n">07</span>Reports</a></li><li><a href="get-started.html"><span class="n">08</span>Get started</a></li></ol>
+  <div class="menu-side">
+    <div class="grp"><h4>Capabilities</h4><a href="capability-pcap-ingestion.html">PCAP ingestion</a><a href="capability-timing-features.html">Timing features</a><a href="capability-lightgbm.html">LightGBM classifier</a><a href="capability-explainable-ai.html">Explainable AI</a><a href="capability-unknown-detection.html">Unknown detection</a></div>
+    <div class="grp"><h4>More</h4>
+      <a href="system.html">Design system</a>
+      <a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">GitHub repository ↗</a>
+      <a href="../reports/encrypted_traffic_classifier_demo.mp4" target="_blank" rel="noopener">Demo video (mp4) ↗</a>
+    </div>
+  </div>
+</nav>
+<main id="main"><section class="page-hero"><div class="wrap">
+  <div class="crumbs"><a href="index.html">MetaFlow</a><span>/</span><span>Benchmarks</span></div>
+  <div class="eyebrow rv">02 · Benchmarks</div>
+  <h1 class="h-xl rv rv-d1">Numbers that hold up.</h1>
+  <p class="lead rv rv-d2">Every figure on this page comes from the repository's reports. The test set was held out from the start and never touched during training or tuning.</p><div class="kv rv rv-d3"><div><b>96.9%</b><span>Held-out accuracy</span></div><div><b>0.950</b><span>Macro F1, test</span></div><div><b>95.61%</b><span>5-fold CV mean</span></div><div><b>2.31 ms</b><span>CPU latency per flow</span></div><div><b>1,305</b><span>Unseen test flows</span></div></div>
+</div></section>
+<section class="sec"><div class="wrap split">
+  <div><div class="eyebrow">Model selection</div><h2 class="h-m rv">Five-fold stratified cross-validation.</h2><p class="lead rv rv-d1" style="font-size:18px">7,389 flows (train plus validation), with the 15% test split kept out. LightGBM won on accuracy, F1 and latency together.</p></div>
+  <div class="table-wrap rv"><table class="data-table"><thead><tr><th>Classifier</th><th class="num">Accuracy</th><th class="num">Macro F1</th><th class="num">Fit time</th><th class="num">Latency</th></tr></thead><tbody><tr><td>Random Forest <span class="mono mute">300 trees</span></td><td class="num">93.90% ± 0.88%</td><td class="num">0.9042 ± 0.0141</td><td class="num">1.08 s</td><td class="num">3.8 ms</td></tr><tr><td>XGBoost <span class="mono mute">hist boosted</span></td><td class="num">95.18% ± 0.48%</td><td class="num">0.9217 ± 0.0103</td><td class="num">5.76 s</td><td class="num">3.2 ms</td></tr><tr class="best"><td>LightGBM <span class="mono mute">selected</span></td><td class="num">95.61% ± 0.57%</td><td class="num">0.9268 ± 0.0128</td><td class="num">3.01 s</td><td class="num">2.31 ms</td></tr></tbody></table></div>
+</div></section>
+
+<section class="sec" id="per-class" style="padding-top:0"><div class="wrap split">
+  <div><div class="eyebrow">Held-out test · 1,305 flows</div><h2 class="h-m rv">Per-class F1.</h2><p class="lead rv rv-d1" style="font-size:18px">VoIP is nearly perfect because its 20 ms cadence is unmistakable. Streaming is the honest weak spot, explained in its own report.</p></div>
+  <div><div class="f1bars rv" data-fill><div class="f1"><span>VoIP</span><span class="t"><i data-w="99.9%"></i></span><span class="v">0.999</span></div><div class="f1"><span>P2P</span><span class="t"><i data-w="97.9%"></i></span><span class="v">0.979</span></div><div class="f1"><span>Browsing</span><span class="t"><i data-w="96.8%"></i></span><span class="v">0.968</span></div><div class="f1"><span>Mail</span><span class="t"><i data-w="94.4%"></i></span><span class="v">0.944</span></div><div class="f1"><span>Chat</span><span class="t"><i data-w="94.3%"></i></span><span class="v">0.943</span></div><div class="f1"><span>File transfer</span><span class="t"><i data-w="94.1%"></i></span><span class="v">0.941</span></div><div class="f1 low"><span>Streaming</span><span class="t"><i data-w="87.4%"></i></span><span class="v">0.874</span></div></div>
+  <div class="table-wrap mt-m rv"><table class="data-table"><thead><tr><th>Class</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">F1</th><th class="num">Support</th></tr></thead><tbody><tr><td>VoIP</td><td class="num">1.000</td><td class="num">0.998</td><td class="num">0.999</td><td class="num">424</td></tr><tr><td>P2P</td><td class="num">0.972</td><td class="num">0.986</td><td class="num">0.979</td><td class="num">141</td></tr><tr><td>Browsing</td><td class="num">0.961</td><td class="num">0.976</td><td class="num">0.968</td><td class="num">375</td></tr><tr><td>Mail</td><td class="num">0.944</td><td class="num">0.944</td><td class="num">0.944</td><td class="num">36</td></tr><tr><td>Chat</td><td class="num">0.954</td><td class="num">0.932</td><td class="num">0.943</td><td class="num">133</td></tr><tr><td>File transfer</td><td class="num">0.960</td><td class="num">0.922</td><td class="num">0.941</td><td class="num">129</td></tr><tr><td>Streaming</td><td class="num">0.868</td><td class="num">0.881</td><td class="num">0.874</td><td class="num">67</td></tr>
+  <tr class="best"><td>Accuracy</td><td class="num"></td><td class="num"></td><td class="num">0.969</td><td class="num">1305</td></tr></tbody></table></div></div>
+</div></section>
+
+<section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="fig-head"><div><div class="eyebrow">Sample captures · live model output</div><h2 class="h-m rv">The four PCAPs in the repo.</h2></div><a class="btn ghost" href="analyze.html">Run them yourself <span class="arr">→</span></a></div>
+  <div class="table-wrap rv"><table class="data-table"><thead><tr><th>Capture</th><th>Generated as</th><th>Model says</th><th class="num">Confidence</th><th>README reports</th><th>Result</th></tr></thead><tbody><tr><td><code>voip_call.pcap</code></td><td>VoIP</td><td><b>VoIP</b> <span class="mute">· then Chat 0.1%</span></td><td class="num">99.87%</td><td class="mute">VoIP 99.87%</td><td><span class="pill ok">matches</span></td></tr><tr><td><code>browsing_https.pcap</code></td><td>Browsing</td><td><b>Chat</b> <span class="mute">· then Browsing 12.1%</span></td><td class="num">87.50%</td><td class="mute">Browsing 89.24%</td><td><span class="pill unk">misclassified</span></td></tr><tr><td><code>file_transfer.pcap</code></td><td>FileTransfer</td><td><b>P2P</b> <span class="mute">· then Browsing 36.5%</span></td><td class="num">54.72%</td><td class="mute">FileTransfer 91.40%</td><td><span class="pill unk">misclassified</span></td></tr><tr><td><code>streaming_video.pcap</code></td><td>Streaming</td><td><b>Browsing</b> <span class="mute">· then FileTransfer 0.3%</span></td><td class="num">99.48%</td><td class="mute">Browsing 52.3% / Streaming 41.8%</td><td><span class="pill unk">misclassified</span></td></tr></tbody></table></div>
+  <p class="mono mute mt-s">Produced by models/best_model.pkl on data/sample_pcaps at build time. These synthetic captures are short single flows, so they are a smoke test, not the benchmark; the README's figures for them could not be reproduced with the committed model. See <a class="mag" href="../reports/real_world_pcap_evaluation.md" target="_blank" rel="noopener">real_world_pcap_evaluation.md</a>.</p>
+</div></section>
+
+<section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="fig-head"><div><div class="eyebrow">Against the field</div><h2 class="h-m rv">Approach comparison.</h2></div></div>
+  <div class="compare-wrap rv"><table class="cmp">
+<thead><tr><th>What matters</th><th>Deep packet inspection</th><th>IP / port rules</th><th>Deep learning (CNN / LSTM)</th><th class="us">MetaFlow</th></tr></thead>
+<tbody><tr><th scope="row">Encrypted traffic (TLS 1.3, QUIC)</th><td><span class="x">✕</span> Fails completely</td><td><span class="x">✕</span> Port 443 hides everything</td><td><span class="y">✓</span> Works</td><td class="us"><span class="y">✓</span> 96.9% test accuracy</td></tr><tr><th scope="row">Privacy and compliance</th><td><span class="x">✕</span> Conflicts with GDPR / HIPAA</td><td><span class="p">!</span> Privacy concerns</td><td><span class="y">✓</span> Preserved</td><td class="us"><span class="y">✓</span> No payload inspected, ever</td></tr><tr><th scope="row">Raw capture ingestion</th><td><span class="x">✕</span> Needs decryption keys</td><td><span class="p">!</span> Headers only</td><td><span class="p">!</span> Byte truncation</td><td class="us"><span class="y">✓</span> Native .pcap / .pcapng flows</td></tr><tr><th scope="row">Port and IP evasion</th><td><span class="x">✕</span> Vulnerable</td><td><span class="x">✕</span> Easily bypassed</td><td><span class="y">✓</span> High</td><td class="us"><span class="y">✓</span> Rhythm is hard to spoof</td></tr><tr><th scope="row">Inference latency</th><td><span class="x">✕</span> 100 to 500 ms</td><td><span class="y">✓</span> Under 1 ms</td><td><span class="x">✕</span> 15 to 40 ms on GPU</td><td class="us"><span class="y">✓</span> About 2.3 ms on CPU</td></tr><tr><th scope="row">Explainability</th><td><span class="p">!</span> Plain logs</td><td><span class="x">✕</span> None</td><td><span class="x">✕</span> Black box</td><td class="us"><span class="y">✓</span> Plain-language reasons</td></tr><tr><th scope="row">Deployment cost</th><td><span class="x">✕</span> Heavy hardware</td><td><span class="p">!</span> Cheap but inaccurate</td><td><span class="x">✕</span> GPU middleboxes</td><td class="us"><span class="y">✓</span> Lightweight CPU</td></tr></tbody></table></div>
+</div></section>
+
+<section class="sec" style="padding-top:0" id="charts"><div class="wrap">
+  <div class="fig-head"><div><div class="eyebrow">reports/plots</div><h2 class="h-m rv">The charts, straight from the repo.</h2></div></div>
+  <div class="gallery"><figure class="shot rv"><a href="../reports/plots/results_dashboard.png" target="_blank" rel="noopener"><img src="../reports/plots/results_dashboard.png" alt="Results dashboard chart from the repository" loading="lazy"></a><figcaption><span>Fig. 01 · Results dashboard</span><span>results_dashboard.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/confusion_matrix.png" target="_blank" rel="noopener"><img src="../reports/plots/confusion_matrix.png" alt="Confusion matrix chart from the repository" loading="lazy"></a><figcaption><span>Fig. 02 · Confusion matrix</span><span>confusion_matrix.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/cv_comparison.png" target="_blank" rel="noopener"><img src="../reports/plots/cv_comparison.png" alt="Cross-validation comparison chart from the repository" loading="lazy"></a><figcaption><span>Fig. 03 · Cross-validation comparison</span><span>cv_comparison.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/feature_importance.png" target="_blank" rel="noopener"><img src="../reports/plots/feature_importance.png" alt="Feature importance chart from the repository" loading="lazy"></a><figcaption><span>Fig. 04 · Feature importance</span><span>feature_importance.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/per_class_f1.png" target="_blank" rel="noopener"><img src="../reports/plots/per_class_f1.png" alt="Per-class F1 chart from the repository" loading="lazy"></a><figcaption><span>Fig. 05 · Per-class F1</span><span>per_class_f1.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/model_comparison.png" target="_blank" rel="noopener"><img src="../reports/plots/model_comparison.png" alt="Model comparison chart from the repository" loading="lazy"></a><figcaption><span>Fig. 06 · Model comparison</span><span>model_comparison.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/class_distribution.png" target="_blank" rel="noopener"><img src="../reports/plots/class_distribution.png" alt="Class distribution chart from the repository" loading="lazy"></a><figcaption><span>Fig. 07 · Class distribution</span><span>class_distribution.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/streaming_vs_browsing.png" target="_blank" rel="noopener"><img src="../reports/plots/streaming_vs_browsing.png" alt="Streaming vs browsing chart from the repository" loading="lazy"></a><figcaption><span>Fig. 08 · Streaming vs browsing</span><span>streaming_vs_browsing.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/top_features_by_class.png" target="_blank" rel="noopener"><img src="../reports/plots/top_features_by_class.png" alt="Top features by class chart from the repository" loading="lazy"></a><figcaption><span>Fig. 09 · Top features by class</span><span>top_features_by_class.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/correlation_heatmap.png" target="_blank" rel="noopener"><img src="../reports/plots/correlation_heatmap.png" alt="Feature correlation chart from the repository" loading="lazy"></a><figcaption><span>Fig. 10 · Feature correlation</span><span>correlation_heatmap.png</span></figcaption></figure><figure class="shot rv"><a href="../reports/plots/data_overview.png" target="_blank" rel="noopener"><img src="../reports/plots/data_overview.png" alt="Data overview chart from the repository" loading="lazy"></a><figcaption><span>Fig. 11 · Data overview</span><span>data_overview.png</span></figcaption></figure></div>
+</div></section>
+<section class="sec closing"><div class="wrap">
+  <div class="eyebrow" style="justify-content:center">Get started</div>
+  <h2 class="h-xl rv">Read the rhythm.</h2>
+  <p class="lead rv rv-d1">Clone the repo, point it at a capture, and get a labelled, explained flow in about a minute. Everything runs on your machine.</p>
+  <div class="ctas rv rv-d2"><a class="btn" href="get-started.html">Run the quickstart <span class="arr">→</span></a><a class="btn ghost" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">View on GitHub ↗</a></div>
+</div></section></main>
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div>
+        <a class="logo" href="index.html" aria-label="MetaFlow home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mff" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8ac8"/><stop offset=".5" stop-color="#ff2d8a"/><stop offset="1" stop-color="#6c3bff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mff)"/><path d="M7.5 22V13.2c0-2.3 1.3-3.7 3.1-3.7 1.5 0 2.5.9 3.2 2.6L16 17.4l2.2-5.3c.7-1.7 1.7-2.6 3.2-2.6 1.8 0 3.1 1.4 3.1 3.7V22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="25.6" r="1.25" fill="#fff" opacity=".55"/><circle cx="12" cy="25.6" r="1.25" fill="#fff" opacity=".8"/><circle cx="16.5" cy="25.6" r="1.25" fill="#fff"/></svg><span class="logo-word">Meta<b>Flow</b></span><sup>v1.0</sup></a>
+        <p class="addr mt-s">A privacy-preserving classifier for encrypted network traffic. It reads packet timing, never payload. Open source under the MIT licence.</p>
+        <a class="btn light sm mt-s" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">Star on GitHub <span class="arr">↗</span></a>
+      </div>
+      <div><h4>Pages</h4><ul><li><a href="benchmarks.html">Benchmarks</a></li><li><a href="capabilities.html">Capabilities</a></li><li><a href="analyze.html">Analyze</a></li><li><a href="project.html">Project</a></li><li><a href="demo.html">Demo</a></li><li><a href="reports.html">Reports</a></li><li><a href="get-started.html">Get started</a></li><li><a href="system.html">Design system</a></li></ul></div>
+      <div><h4>Capabilities</h4><ul><li><a href="capability-pcap-ingestion.html">PCAP ingestion</a></li><li><a href="capability-timing-features.html">Timing features</a></li><li><a href="capability-lightgbm.html">LightGBM classifier</a></li><li><a href="capability-explainable-ai.html">Explainable AI</a></li><li><a href="capability-unknown-detection.html">Unknown detection</a></li></ul></div>
+      <div><h4>Run it</h4><ul>
+        <li><a href="get-started.html#install">Install</a></li>
+        <li><a href="get-started.html#site">MetaFlow server</a></li>
+        <li><a href="get-started.html#dashboard">Streamlit dashboard</a></li>
+        <li><a href="get-started.html#cli">Command line</a></li>
+        <li><a href="get-started.html#docker">Docker</a></li>
+        <li><a href="get-started.html#tests">Test suite</a></li>
+      </ul></div>
+      <div><h4>Source</h4><ul>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">Repository ↗</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions" target="_blank" rel="noopener">CI pipeline ↗</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/issues" target="_blank" rel="noopener">Issues ↗</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier#readme" target="_blank" rel="noopener">README ↗</a></li>
+      </ul></div>
+    </div>
+    <div class="ftr-big" aria-hidden="true">MetaFlow</div>
+    <div class="ftr-legal">
+      <span>© 2026 MetaFlow · encrypted-traffic-classifier · MIT</span>
+      <nav aria-label="Legal"><a href="license.html">Licence</a><a href="privacy.html">Privacy</a><a href="security.html">Security</a><a href="system.html">Design system</a></nav>
+    </div>
+  </div>
+</footer>
+<div class="notice" role="dialog" aria-label="Privacy notice">
+  <p><b>No cookies, no tracking.</b> Like the classifier, this site keeps nothing about you. One flag in your browser remembers that you closed this. <a class="mag" href="privacy.html">Privacy</a></p>
+  <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

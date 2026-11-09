@@ -161,10 +161,19 @@ cd encrypted-traffic-classifier
 pip install -r requirements.txt
 ```
 
-### 2. Interactive Web Dashboard (Streamlit)
+### 2. Interactive Web Interfaces
+
+**Option A: Streamlit Interactive Dashboard (Port 8501)**
 Launch the interactive dashboard with PCAP ingestion, batch inference, live parameter simulator, and benchmark reports:
 ```bash
 streamlit run app.py
+```
+
+**Option B: MetaFlow Web UI & Live API (Port 8600)**
+Launch the standalone landing page and live HTTP inference API (zero external HTTP dependencies):
+```bash
+python web/server.py
+# Open http://127.0.0.1:8600 in your browser
 ```
 
 ### 3. Command-Line Inference (CLI)
@@ -253,6 +262,12 @@ encrypted-traffic-classifier/
 │   ├── test_predict.py            # Schema validation & inference unit tests
 │   ├── test_explainer.py          # Fallback resilience & prompt unit tests
 │   └── test_e2e.py                # Full pipeline integration tests
+├── web/                           # MetaFlow Web UI & Live API server
+│   ├── server.py                  # Standalone HTTP server & JSON inference API
+│   ├── build.py                   # Static site generator baking in model outputs
+│   ├── record_walkthrough.py      # Automated video walkthrough recorder
+│   ├── css/ js/ data/ media/      # Styles, runtime scripts, and demo media
+│   └── *.html                     # Complete landing & live analyzer pages
 ├── app.py                         # Streamlit interactive web dashboard
 ├── Dockerfile                     # Production container configuration
 ├── docker-compose.yml             # Container orchestration

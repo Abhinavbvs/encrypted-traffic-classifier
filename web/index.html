@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaFlow · Encrypted traffic, classified by timing</title>
+<meta name="description" content="MetaFlow classifies encrypted network traffic into seven application types from 23 timing features, with zero payload inspection.">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr">
+  <a class="logo" href="index.html" aria-label="MetaFlow home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mfh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8ac8"/><stop offset=".5" stop-color="#ff2d8a"/><stop offset="1" stop-color="#6c3bff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mfh)"/><path d="M7.5 22V13.2c0-2.3 1.3-3.7 3.1-3.7 1.5 0 2.5.9 3.2 2.6L16 17.4l2.2-5.3c.7-1.7 1.7-2.6 3.2-2.6 1.8 0 3.1 1.4 3.1 3.7V22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="25.6" r="1.25" fill="#fff" opacity=".55"/><circle cx="12" cy="25.6" r="1.25" fill="#fff" opacity=".8"/><circle cx="16.5" cy="25.6" r="1.25" fill="#fff"/></svg><span class="logo-word">Meta<b>Flow</b></span><sup>v1.0</sup></a>
+  <div class="hdr-mid"><span class="clock" data-clock></span></div>
+  <div class="hdr-right">
+    <span class="live-badge" data-live-badge hidden><span class="live-dot"></span>Live model</span>
+    <a class="btn sm" href="analyze.html">Classify a capture <span class="arr">→</span></a>
+    <button class="menu-btn" data-menu-open aria-expanded="false" aria-controls="menu" aria-label="Open menu"><span></span></button>
+  </div>
+</header>
+<nav class="menu" id="menu" aria-hidden="true" aria-label="Main">
+  <button class="menu-close" data-menu-close aria-label="Close menu">×</button>
+  <ol class="menu-main"><li><a href="index.html" aria-current="page"><span class="n">01</span>Home</a></li><li><a href="benchmarks.html"><span class="n">02</span>Benchmarks</a></li><li><a href="capabilities.html"><span class="n">03</span>Capabilities</a></li><li><a href="analyze.html"><span class="n">04</span>Analyze</a></li><li><a href="project.html"><span class="n">05</span>Project</a></li><li><a href="demo.html"><span class="n">06</span>Demo</a></li><li><a href="reports.html"><span class="n">07</span>Reports</a></li><li><a href="get-started.html"><span class="n">08</span>Get started</a></li></ol>
+  <div class="menu-side">
+    <div class="grp"><h4>Capabilities</h4><a href="capability-pcap-ingestion.html">PCAP ingestion</a><a href="capability-timing-features.html">Timing features</a><a href="capability-lightgbm.html">LightGBM classifier</a><a href="capability-explainable-ai.html">Explainable AI</a><a href="capability-unknown-detection.html">Unknown detection</a></div>
+    <div class="grp"><h4>More</h4>
+      <a href="system.html">Design system</a>
+      <a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">GitHub repository ↗</a>
+      <a href="../reports/encrypted_traffic_classifier_demo.mp4" target="_blank" rel="noopener">Demo video (mp4) ↗</a>
+    </div>
+  </div>
+</nav>
+<main id="main">
+<section class="hero">
+  <div class="hero-stage"><canvas id="heroCanvas" data-rhythm="voip" data-theme="light"></canvas></div>
+  <div class="hero-orb" aria-hidden="true"></div>
+  <div class="hero-slides" role="group" aria-label="Traffic rhythm">
+    <button data-slide="voip" data-cap="<span>Fig. A · live rhythm</span><b>VoIP · 20 ms frames</b>">VoIP</button>
+    <button data-slide="browsing" data-cap="<span>Fig. B · live rhythm</span><b>Browsing · bursts and think time</b>">Browsing</button>
+    <button data-slide="file" data-cap="<span>Fig. C · live rhythm</span><b>File transfer · saturated uplink</b>">File transfer</button>
+  </div>
+  <div class="slide-cap" data-slide-cap></div>
+  <div class="hero-content">
+    <h1 class="rv">Read the<br><em>rhythm.</em></h1>
+    <div class="hero-row rv rv-d1">
+      <p class="hero-sub">Not the payload. Encrypted traffic, classified by timing alone.</p>
+      <div class="hero-ctas"><a class="btn" href="#analyzer">Classify a capture <span class="arr">→</span></a><a class="btn ghost" href="benchmarks.html">See the benchmarks</a></div>
+      <span class="hero-meta">MIT · Python 3.11 · Docker ready</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec-tight"><div class="wrap">
+  <div class="row-between" style="margin-bottom:26px"><div class="eyebrow" style="margin:0">Capabilities 01 to 05</div><a class="mono mute" href="capabilities.html">All capabilities →</a></div>
+  <div class="tiles"><a class="tile rv rv-d1" href="capability-pcap-ingestion.html"><span class="n">01</span><span class="go">→</span>
+  <div class="obj-slot"><div class="obj obj-dish" aria-hidden="true"></div></div><h3>PCAP ingestion</h3></a><a class="tile rv rv-d2" href="capability-timing-features.html"><span class="n">02</span><span class="go">→</span>
+  <div class="obj-slot"><div class="obj obj-rings" aria-hidden="true"><i></i><i></i><i></i></div></div><h3>Timing features</h3></a><a class="tile rv rv-d3" href="capability-lightgbm.html"><span class="n">03</span><span class="go">→</span>
+  <div class="obj-slot"><div class="obj obj-cube" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><h3>LightGBM classifier</h3></a><a class="tile rv rv-d4" href="capability-explainable-ai.html"><span class="n">04</span><span class="go">→</span>
+  <div class="obj-slot"><div class="obj obj-sphere" aria-hidden="true"></div></div><h3>Explainable AI</h3></a><a class="tile rv rv-d1" href="capability-unknown-detection.html"><span class="n">05</span><span class="go">→</span>
+  <div class="obj-slot"><div class="obj obj-cone" aria-hidden="true"></div></div><h3>Unknown detection</h3></a></div>
+</div></section>
+
+<section class="sec"><div class="wrap statement">
+  <div class="eyebrow rv">What it is</div>
+  <div>
+    <h2 class="h-l rv">The classifier takes the shape of your traffic.</h2>
+    <p class="lead mt-s rv rv-d1">TLS 1.3 and QUIC made payload inspection useless and port numbers meaningless. MetaFlow takes raw packet captures, builds bidirectional flows, measures how packets move in time and names the application in seven classes, with a plain-language reason for every call.</p>
+    <div class="trio rv rv-d2"><div><b>Zero payload</b><span>Headers in, payload discarded</span></div><div><b>23 features</b><span>Pure timing statistics</span></div><div><b>2.3 ms</b><span>Per flow, on a CPU</span></div></div>
+  </div>
+</div></section>
+
+<section class="sec-tight"><div class="wrap">
+  <div class="fig-head"><h2 class="h-xl rv">Built for speed.</h2><p class="lead rv rv-d1" style="margin:0">Inference latency per flow. Shorter bar is faster. Measured figures from the project's benchmarks.</p></div>
+  <div class="fig rv" data-fill><div class="race">
+    <div class="race-row"><span class="lbl">Deep packet inspection</span><span class="race-track"><span class="race-bar" data-w="100%"></span></span><span class="val">100–500 ms</span></div>
+    <div class="race-row"><span class="lbl">Deep learning (GPU)</span><span class="race-track"><span class="race-bar" data-w="34%"></span></span><span class="val">15–40 ms</span></div>
+    <div class="race-row"><span class="lbl">Random Forest</span><span class="race-track"><span class="race-bar" data-w="4.2%"></span></span><span class="val">3.8 ms</span></div>
+    <div class="race-row"><span class="lbl">XGBoost</span><span class="race-track"><span class="race-bar" data-w="3.6%"></span></span><span class="val">3.2 ms</span></div>
+    <div class="race-row us"><span class="lbl">MetaFlow · LightGBM</span><span class="race-track"><span class="race-bar" data-w="2.6%"></span></span><span class="val">2.31 ms</span></div>
+    <div class="race-note">Bars scaled to a 90 ms axis, so DPI runs off the chart. 2.31 ms per flow is more than 400 flows a second on one CPU.</div>
+  </div></div>
+  <div class="fig-cap"><span>Fig. 01 · Latency study</span><span>Source: reports/metrics.json</span></div>
+</div></section>
+
+<section class="sec"><div class="wrap">
+  <div class="row-between" style="margin-bottom:40px"><h2 class="h-l rv">Five things it does well.</h2><a class="btn ghost rv" href="capabilities.html">All capabilities <span class="arr">→</span></a></div>
+  <div class="ways"><a class="way rv" href="capability-pcap-ingestion.html"><span class="n">01</span><h3>PCAP ingestion</h3><p>Raw .pcap and .pcapng in, bidirectional flows out.</p><span class="go">→</span></a><a class="way rv" href="capability-timing-features.html"><span class="n">02</span><h3>Timing features</h3><p>23 statistics about when packets move, nothing about what they carry.</p><span class="go">→</span></a><a class="way rv" href="capability-lightgbm.html"><span class="n">03</span><h3>LightGBM classifier</h3><p>96.9% test accuracy at about 2.3 ms per flow on a CPU.</p><span class="go">→</span></a><a class="way rv" href="capability-explainable-ai.html"><span class="n">04</span><h3>Explainable AI</h3><p>Every verdict comes with a networking reason a person can read.</p><span class="go">→</span></a><a class="way rv" href="capability-unknown-detection.html"><span class="n">05</span><h3>Unknown detection</h3><p>Low-confidence flows are flagged, not forced into a class.</p><span class="go">→</span></a></div>
+</div></section>
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Zero payload</span><span>Zero decryption</span><span>Zero leakage</span><span>2.3 ms a flow</span><span>Runs on CPU</span><span>Explains itself</span><span>Zero payload</span><span>Zero decryption</span><span>Zero leakage</span><span>2.3 ms a flow</span><span>Runs on CPU</span><span>Explains itself</span></div></div>
+
+<section class="sec"><div class="wrap reel">
+  <div><div class="eyebrow">Demo · selected moments</div><h2 class="h-m rv">From a raw capture to an explained verdict.</h2><p class="lead rv rv-d1" style="font-size:18px">Ingestion, batch inference, the live parameter simulator and the benchmark reports in one walk-through.</p><a class="btn ghost mt-s rv rv-d2" href="demo.html">Watch the full demo <span class="arr">→</span></a></div>
+  <a class="reel-thumb rv rv-d1" href="demo.html" aria-label="Open the demo"><canvas data-rhythm="streaming" data-speed="1.4"></canvas><span class="play">▶</span><span class="reel-badge">1080p · reports/encrypted_traffic_classifier_demo.mp4</span></a>
+</div></section>
+
+<section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="fig-head"><div><div class="eyebrow">From the dataset · 7 classes</div><h2 class="h-xl rv">Every app has a pulse.</h2></div>
+  <p class="lead rv rv-d1" style="margin:0">Magenta rises are client to server, grey drops are server to client. These are the rhythms the model learns to tell apart.</p></div>
+  <div class="archive"><article class="card rv rv-d1"><div class="card-vis"><canvas data-rhythm="voip" data-speed="0.6" data-nogrid></canvas><span class="tag">Class 01</span></div>
+  <div class="card-body"><h3>VoIP</h3><p>Fixed 20 ms frames in both directions. The steadiest heartbeat on the network.</p><div class="card-stats"><span>F1 <b>0.999</b></span><span>test flows <b>424</b></span></div></div></article><article class="card rv rv-d2"><div class="card-vis"><canvas data-rhythm="browsing" data-speed="1" data-nogrid></canvas><span class="tag">Class 02</span></div>
+  <div class="card-body"><h3>Browsing</h3><p>A handshake, a burst of assets, then a person reading. Repeat.</p><div class="card-stats"><span>F1 <b>0.968</b></span><span>test flows <b>375</b></span></div></div></article><article class="card rv rv-d3"><div class="card-vis"><canvas data-rhythm="p2p" data-speed="1" data-nogrid></canvas><span class="tag">Class 03</span></div>
+  <div class="card-body"><h3>P2P</h3><p>Many peers, both directions, irregular sizes and gaps.</p><div class="card-stats"><span>F1 <b>0.979</b></span><span>test flows <b>141</b></span></div></div></article><article class="card rv rv-d4"><div class="card-vis"><canvas data-rhythm="file" data-speed="0.6" data-nogrid></canvas><span class="tag">Class 04</span></div>
+  <div class="card-body"><h3>File transfer</h3><p>Full-MTU packets one way, small ACKs the other, almost no idle time.</p><div class="card-stats"><span>F1 <b>0.941</b></span><span>test flows <b>129</b></span></div></div></article><article class="card rv rv-d1"><div class="card-vis"><canvas data-rhythm="chat" data-speed="1" data-nogrid></canvas><span class="tag">Class 05</span></div>
+  <div class="card-body"><h3>Chat</h3><p>Small, sparse messages with long silences and keep-alives.</p><div class="card-stats"><span>F1 <b>0.943</b></span><span>test flows <b>133</b></span></div></div></article><article class="card rv rv-d2"><div class="card-vis"><canvas data-rhythm="mail" data-speed="1" data-nogrid></canvas><span class="tag">Class 06</span></div>
+  <div class="card-body"><h3>Mail</h3><p>A short protocol exchange, then a bulk send, then quiet.</p><div class="card-stats"><span>F1 <b>0.944</b></span><span>test flows <b>36</b></span></div></div></article><article class="card rv rv-d3"><div class="card-vis"><canvas data-rhythm="streaming" data-speed="1" data-nogrid></canvas><span class="tag">Class 07</span></div>
+  <div class="card-body"><h3>Streaming</h3><p>Large chunks every few seconds as the player buffers ahead.</p><div class="card-stats"><span>F1 <b>0.874</b></span><span>test flows <b>67</b></span></div></div></article><article class="card rv rv-d4"><div class="card-vis" style="background:linear-gradient(135deg,#2a0418,#0b0b0d)"><canvas data-rhythm="p2p" data-speed="2.5" data-nogrid style="opacity:.35;filter:blur(1px)"></canvas><span class="tag">Fallback</span></div>
+  <div class="card-body"><h3>Unknown</h3><p>Anything below your confidence threshold is flagged for a person to look at.</p><div class="card-stats"><span>threshold <b>adjustable</b></span></div></div></article></div>
+  <div class="fig-cap"><span>Fig. 02 · Rhythm studies, simulated from each class's timing profile</span><a href="benchmarks.html#per-class">Per-class results →</a></div>
+</div></section>
+
+<section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="fig-head"><div><div class="eyebrow">Compared</div><h2 class="h-l rv">In good company, ahead of it.</h2></div><p class="lead rv rv-d1" style="margin:0">How timing-based LightGBM stacks up against the approaches network teams use today.</p></div>
+  <div class="compare-wrap rv"><table class="cmp">
+<thead><tr><th>What matters</th><th>Deep packet inspection</th><th>IP / port rules</th><th>Deep learning (CNN / LSTM)</th><th class="us">MetaFlow</th></tr></thead>
+<tbody><tr><th scope="row">Encrypted traffic (TLS 1.3, QUIC)</th><td><span class="x">✕</span> Fails completely</td><td><span class="x">✕</span> Port 443 hides everything</td><td><span class="y">✓</span> Works</td><td class="us"><span class="y">✓</span> 96.9% test accuracy</td></tr><tr><th scope="row">Privacy and compliance</th><td><span class="x">✕</span> Conflicts with GDPR / HIPAA</td><td><span class="p">!</span> Privacy concerns</td><td><span class="y">✓</span> Preserved</td><td class="us"><span class="y">✓</span> No payload inspected, ever</td></tr><tr><th scope="row">Raw capture ingestion</th><td><span class="x">✕</span> Needs decryption keys</td><td><span class="p">!</span> Headers only</td><td><span class="p">!</span> Byte truncation</td><td class="us"><span class="y">✓</span> Native .pcap / .pcapng flows</td></tr><tr><th scope="row">Port and IP evasion</th><td><span class="x">✕</span> Vulnerable</td><td><span class="x">✕</span> Easily bypassed</td><td><span class="y">✓</span> High</td><td class="us"><span class="y">✓</span> Rhythm is hard to spoof</td></tr><tr><th scope="row">Inference latency</th><td><span class="x">✕</span> 100 to 500 ms</td><td><span class="y">✓</span> Under 1 ms</td><td><span class="x">✕</span> 15 to 40 ms on GPU</td><td class="us"><span class="y">✓</span> About 2.3 ms on CPU</td></tr><tr><th scope="row">Explainability</th><td><span class="p">!</span> Plain logs</td><td><span class="x">✕</span> None</td><td><span class="x">✕</span> Black box</td><td class="us"><span class="y">✓</span> Plain-language reasons</td></tr><tr><th scope="row">Deployment cost</th><td><span class="x">✕</span> Heavy hardware</td><td><span class="p">!</span> Cheap but inaccurate</td><td><span class="x">✕</span> GPU middleboxes</td><td class="us"><span class="y">✓</span> Lightweight CPU</td></tr></tbody></table></div>
+</div></section>
+
+<section class="sec dark"><div class="wrap">
+  <div class="eyebrow">How the pipeline works</div>
+  <h2 class="h-l rv" style="margin-bottom:60px">Headers lead. Payload never follows.</h2>
+  <div class="steps">
+    <div class="step rv"><span class="n">01</span><h3>Capture</h3><div class="who">Scapy · .pcap / .pcapng</div><p>Parses IPv4 and IPv6 headers and TCP and UDP ports. Payload bytes are discarded as they are read.</p></div>
+    <div class="step rv rv-d1"><span class="n">02</span><h3>Extract</h3><div class="who">5-tuple flows · 23 features</div><p>Builds bidirectional flows, tracks who started them, and computes inter-arrival, rate, burst and idle statistics.</p></div>
+    <div class="step rv rv-d2"><span class="n">03</span><h3>Classify</h3><div class="who">Scaler · LightGBM</div><p>Scales with the train-only <code>scaler.pkl</code>, then predicts the top class and the full probability spread.</p></div>
+    <div class="step rv rv-d3"><span class="n">04</span><h3>Explain</h3><div class="who">3-tier router · threshold</div><p>Turns the verdict into a networking reason and flags anything below your confidence threshold.</p></div>
+  </div>
+</div></section>
+
+<section class="band"><h2><span class="rv">Private.</span><span class="rv rv-d1">Precise.</span><span class="rv rv-d2">Instant.</span></h2></section>
+
+<section class="sec dark" style="padding-top:0"><div class="wrap">
+  <div class="row-between" style="margin-bottom:50px"><h2 class="h-l rv">Twenty-three numbers.<br>One verdict.</h2><p class="lead rv rv-d1" style="margin:0">Trained on the ISCX VPN-NonVPN 2016 benchmark, with 70/15/15 stratified splits and zero leakage.</p></div>
+  <div class="stats"><div class="stat hot rv"><b data-count="96.9" data-suf="%">0</b><span>Test accuracy on unseen flows</span></div><div class="stat rv"><b data-count="2.3" data-suf=" ms">0</b><span>Inference per flow, CPU only</span></div><div class="stat rv"><b data-count="23" data-suf="">0</b><span>Timing features, no payload</span></div><div class="stat rv"><b data-count="7" data-suf="">0</b><span>Application classes</span></div><div class="stat rv"><b data-count="8694" data-suf="">0</b><span>Cleaned flows from ISCX VPN-NonVPN</span></div><div class="stat rv"><b data-count="32" data-suf="">0</b><span>Tests passing in CI</span></div><div class="stat hot rv"><b data-count="0" data-suf="">0</b><span>Payload bytes ever read</span></div><div class="stat cta rv"><a class="btn light" href="benchmarks.html">All benchmarks <span class="arr">→</span></a></div></div>
+</div></section>
+
+<section class="sec"><div class="wrap">
+  <div class="fig-head"><div><div class="eyebrow">Why timing</div><h2 class="h-l rv">Measured, not decrypted.</h2></div><p class="ratio rv rv-d1">4<span>→</span>1</p></div>
+  <div class="chains">
+    <div class="chain rv"><h3>Deep packet inspection</h3><p class="mute">Four handoffs, and each one adds cost, latency and privacy risk.</p>
+      <div class="links"><div>Encrypted packet</div><span class="arrow">↓</span><div>TLS keys and decryption <small>key escrow</small></div><span class="arrow">↓</span><div>Payload inspection <small>personal data</small></div><span class="arrow">↓</span><div>Signature rules <small>brittle</small></div><span class="arrow">↓</span><div>Verdict <small>100–500 ms</small></div></div></div>
+    <div class="chain us rv rv-d1"><h3>MetaFlow</h3><p class="mute">One timing layer between the packet and the answer.</p>
+      <div class="links"><div>Encrypted packet</div><span class="arrow">↓</span><div class="core">Timing layer <small>23 features · LightGBM</small></div><span class="arrow">↓</span><div>Verdict and reason <small>~2.3 ms</small></div></div></div>
+  </div>
+</div></section>
+
+<section class="sec" id="analyzer" style="background:var(--bg-2)"><div class="wrap chat-split">
+  <div>
+    <div class="eyebrow">Flow analyzer</div>
+    <h2 class="h-l rv">A verdict in milliseconds.</h2>
+    <p class="lead rv rv-d1">Pick one of the four captures in <code>data/sample_pcaps</code>. MetaFlow builds the flows, runs the trained LightGBM model, and explains the call. Raise the threshold to see unknown-traffic detection kick in.</p>
+    <p class="mono mute rv rv-d2" data-mode-note>Served by web/server.py, this calls the real model. Opened as a file, it replays a snapshot the same model produced at build time.</p>
+    <div class="hero-ctas mt-m rv rv-d3"><a class="btn" href="analyze.html">Open the full analyzer <span class="arr">→</span></a><a class="btn ghost" href="get-started.html#cli">Use the CLI</a></div>
+  </div>
+  <div class="chatbox rv rv-d1" data-chat>
+    <div class="chat-top"><span class="dots"><i></i><i></i><i></i></span><span class="mono mute">metaflow · predict_pcap()</span><span class="pill ok" data-mode-pill>snapshot</span></div>
+    <div class="chat-body" aria-live="polite">
+      <div class="msg bot"><span class="who">MetaFlow</span>Hi. Choose a capture below and I will classify every flow in it using timing alone. Nothing is decrypted, and no payload bytes are read.</div>
+    </div>
+    <div class="chat-ctrl">
+      <div class="chips"><button class="chip" data-sample="voip_call.pcap" aria-pressed="false">voip_call.pcap</button><button class="chip" data-sample="browsing_https.pcap" aria-pressed="false">browsing_https.pcap</button><button class="chip" data-sample="file_transfer.pcap" aria-pressed="false">file_transfer.pcap</button><button class="chip" data-sample="streaming_video.pcap" aria-pressed="false">streaming_video.pcap</button></div>
+      <label class="thresh"><span>Confidence threshold</span><input type="range" min="0.3" max="0.95" step="0.05" value="0.5" data-threshold aria-label="Confidence threshold"><output data-threshold-out>0.50</output></label>
+    </div>
+  </div>
+</div></section>
+<section class="sec"><div class="wrap faq-grid">
+  <div><div class="eyebrow">FAQ</div><h2 class="h-l rv">Good to know.</h2></div>
+  <div class="faq rv rv-d1"><details open><summary>How can you classify traffic you cannot decrypt?</summary><div class="ans"><p>Encryption hides what a packet says, not when it moves. A voice call sends a small frame every 20 ms. A file transfer fills the pipe one way. A web page loads in bursts and then goes quiet while someone reads. MetaFlow measures 23 of these timing statistics per flow and lets a LightGBM model learn which rhythm belongs to which application.</p></div></details><details><summary>Does it ever look at payload?</summary><div class="ans"><p>No. The PCAP extractor parses IP and transport headers to build flows and drops payload bytes as it reads them. The model only ever sees timing statistics, so there is nothing personal to leak and no decryption keys to manage.</p></div></details><details><summary>How accurate is it, honestly?</summary><div class="ans"><p>96.9% accuracy and 0.950 macro F1 on 1,305 held-out flows that were never used for training or tuning. Five-fold cross-validation gives 95.61% ± 0.57%. The weakest class is Streaming (F1 0.874), because buffered video inside a 15 s window can look like page-load bursts. That trade-off is documented in the reports.</p></div></details><details><summary>What happens with traffic it has never seen?</summary><div class="ans"><p>You set a confidence threshold. Any flow whose top probability falls below it is labelled <em>Uncertain (Unknown Traffic)</em> instead of being forced into the nearest class, so new protocols end up in a triage queue rather than in your statistics.</p></div></details><details><summary>Does it need a GPU or the internet?</summary><div class="ans"><p>Neither. Inference is about 2.3 ms per flow on a CPU, more than 400 flows a second. Explanations fall back to a built-in rule engine when no local Ollama model or cloud key is available, so the whole thing runs offline.</p></div></details></div>
+</div></section>
+<section class="sec closing"><div class="wrap">
+  <div class="eyebrow" style="justify-content:center">Get started</div>
+  <h2 class="h-xl rv">Classify without looking.</h2>
+  <p class="lead rv rv-d1">Clone the repo, point it at a capture, and get a labelled, explained flow in about a minute. Everything runs on your machine.</p>
+  <div class="ctas rv rv-d2"><a class="btn" href="get-started.html">Run the quickstart <span class="arr">→</span></a><a class="btn ghost" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">View on GitHub ↗</a></div>
+</div></section>
+
+<section class="final"><div class="wrap">
+  <h2 class="rv">Read the<br>rhythm<span class="mag">.</span></h2>
+  <div class="final-row rv rv-d1"><p class="hero-sub" style="max-width:none">Not the payload.</p><a class="btn" href="get-started.html">Run the quickstart <span class="arr">→</span></a></div>
+</div></section>
+</main>
+<script type="application/json" id="mf-snapshot">{"samples": {"voip_call.pcap": {"file": "voip_call.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 0.998716, "is_uncertain": false, "status": "Confident", "top3": [{"class": "VoIP", "probability": 0.998716}, {"class": "Chat", "probability": 0.001274}, {"class": "Browsing", "probability": 6e-06}], "probabilities": {"Browsing": 6e-06, "Streaming": 0.0, "VoIP": 0.998716, "FileTransfer": 0.0, "P2P": 0.0, "Chat": 0.001274, "Mail": 3e-06}, "explanation": "Classified as VoIP (99.9% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: 19930.0 us, BIAT: 19930.0 us) and continuous low-bandwidth streaming (18961 B/s). This steady bidirectional cadence differs sharply from bursty request-response traffic like Chat.", "explainer": "rule_based_fallback", "features": {"duration": 2974565.029144, "total_fiat": 2969563.961029, "total_biat": 2969564.914703, "min_fiat": 19005.060196, "min_biat": 19005.060196, "max_fiat": 20997.047424, "max_biat": 20996.809006, "mean_fiat": 19929.95947, "mean_biat": 19929.96587, "flowPktsPerSecond": 100.855082, "flowBytesPerSecond": 18960.755421, "min_flowiat": 4999.876022, "max_flowiat": 15996.932983, "mean_flowiat": 9948.378024, "std_flowiat": 4982.469057, "min_active": 2974565.029144, "mean_active": 2974565.029144, "max_active": 2974565.029144, "std_active": 0, "min_idle": 0, "mean_idle": 0, "max_idle": 0, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "52.114.128.5", "src_port": 50020, "dst_port": 50020, "protocol": "UDP", "packet_count": 300, "byte_count": 56400, "duration_sec": 2.975}], "latency_ms": 3.235, "elapsed_ms": 1945.6, "model": "LGBMClassifier"}, "browsing_https.pcap": {"file": "browsing_https.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "Chat", "top_class": "Chat", "confidence": 0.875, "is_uncertain": false, "status": "Confident", "top3": [{"class": "Chat", "probability": 0.875}, {"class": "Browsing", "probability": 0.121044}, {"class": "FileTransfer", "probability": 0.001524}], "probabilities": {"Browsing": 0.121044, "Streaming": 0.000931, "VoIP": 0.000156, "FileTransfer": 0.001524, "P2P": 0.001267, "Chat": 0.875, "Mail": 7.8e-05}, "explanation": "Classified as Chat (87.5% confidence) characterized by sporadic, low-volume packet bursts with long idle periods between human typing events and minimal packet rates (4.6 pkts/s). This distinguishes it from high-frequency or streaming sessions like Browsing.", "explainer": "rule_based_fallback", "features": {"duration": 6920080.900192, "total_fiat": 6852441.072464, "total_biat": 6895080.804825, "min_fiat": 6814.002991, "min_biat": 3044.843674, "max_fiat": 6640208.005905, "max_biat": 6602809.906006, "mean_fiat": 685244.107246, "mean_biat": 344754.040241, "flowPktsPerSecond": 4.624223, "flowBytesPerSecond": 4022.640833, "min_flowiat": 3044.843674, "max_flowiat": 6523411.989212, "mean_flowiat": 223228.416135, "std_flowiat": 1150282.066755, "min_active": 140677.928925, "mean_active": 198334.45549, "max_active": 255990.982056, "std_active": 57656.526566, "min_idle": 6523411.989212, "mean_idle": 6523411.989212, "max_idle": 6523411.989212, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "104.244.42.1", "src_port": 52410, "dst_port": 443, "protocol": "TCP", "packet_count": 32, "byte_count": 27837, "duration_sec": 6.92}], "latency_ms": 2.511, "elapsed_ms": 1630.0, "model": "LGBMClassifier"}, "file_transfer.pcap": {"file": "file_transfer.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "P2P", "top_class": "P2P", "confidence": 0.54724, "is_uncertain": false, "status": "Confident", "top3": [{"class": "P2P", "probability": 0.54724}, {"class": "Browsing", "probability": 0.364852}, {"class": "Streaming", "probability": 0.050087}], "probabilities": {"Browsing": 0.364852, "Streaming": 0.050087, "VoIP": 0.000803, "FileTransfer": 0.028031, "P2P": 0.54724, "Chat": 0.005055, "Mail": 0.003933}, "explanation": "Classified as P2P (54.7% confidence) due to distributed bidirectional timing signatures with rapid inter-arrival variations across multiple peers (mean FIAT: 936.4 us). The continuous background exchange differs from standard client-server protocols like Browsing.", "explainer": "rule_based_fallback", "features": {"duration": 83342.075348, "total_fiat": 83342.075348, "total_biat": 0, "min_fiat": 433.921814, "min_biat": 0, "max_fiat": 1483.917236, "max_biat": 0, "mean_fiat": 936.427813, "mean_biat": 0, "flowPktsPerSecond": 1079.886715, "flowBytesPerSecond": 1579874.264594, "min_flowiat": 433.921814, "max_flowiat": 1483.917236, "mean_flowiat": 936.427813, "std_flowiat": 294.598489, "min_active": 83342.075348, "mean_active": 83342.075348, "max_active": 83342.075348, "std_active": 0, "min_idle": 0, "mean_idle": 0, "max_idle": 0, "std_idle": 0}, "src_ip": "13.107.136.9", "dst_ip": "192.168.1.105", "src_port": 443, "dst_port": 51234, "protocol": "TCP", "packet_count": 90, "byte_count": 131670, "duration_sec": 0.083}], "latency_ms": 2.317, "elapsed_ms": 1628.1, "model": "LGBMClassifier"}, "streaming_video.pcap": {"file": "streaming_video.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 0.994763, "is_uncertain": false, "status": "Confident", "top3": [{"class": "Browsing", "probability": 0.994763}, {"class": "FileTransfer", "probability": 0.003293}, {"class": "P2P", "probability": 0.000813}], "probabilities": {"Browsing": 0.994763, "Streaming": 4e-06, "VoIP": 0.000202, "FileTransfer": 0.003293, "P2P": 0.000813, "Chat": 0.000525, "Mail": 0.000399}, "explanation": "Classified as Browsing (99.5% confidence) based on interactive, bursty timing profiles consisting of fast initial page component requests followed by extended idle intervals (mean idle: 5152081.0 us) reflecting user reading time. The low continuous throughput (20196 B/s) distinguishes it from continuous streaming applications.", "explainer": "rule_based_fallback", "features": {"duration": 5382369.995117, "total_fiat": 150000.095367, "total_biat": 5367369.890213, "min_fiat": 9999.990463, "min_biat": 822.067261, "max_fiat": 59999.94278, "max_biat": 5205398.082733, "mean_fiat": 15000.009537, "mean_biat": 71564.93187, "flowPktsPerSecond": 16.163883, "flowBytesPerSecond": 20196.493385, "min_flowiat": 126.838684, "max_flowiat": 5152081.012726, "mean_flowiat": 62585.697618, "std_flowiat": 552040.841576, "min_active": 80288.887024, "mean_active": 115144.491196, "max_active": 150000.095367, "std_active": 34855.604172, "min_idle": 5152081.012726, "mean_idle": 5152081.012726, "max_idle": 5152081.012726, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "142.250.190.46", "src_port": 49152, "dst_port": 443, "protocol": "TCP", "packet_count": 87, "byte_count": 108705, "duration_sec": 5.382}], "latency_ms": 1.814, "elapsed_ms": 1638.5, "model": "LGBMClassifier"}}, "health": {"status": "live", "model": "LGBMClassifier", "features": ["duration", "total_fiat", "total_biat", "min_fiat", "min_biat", "max_fiat", "max_biat", "mean_fiat", "mean_biat", "flowPktsPerSecond", "flowBytesPerSecond", "min_flowiat", "max_flowiat", "mean_flowiat", "std_flowiat", "min_active", "mean_active", "max_active", "std_active", "min_idle", "mean_idle", "max_idle", "std_idle"], "classes": ["Browsing", "Streaming", "VoIP", "FileTransfer", "P2P", "Chat", "Mail"], "explainer": "auto", "samples": [{"name": "browsing_https.pcap", "bytes": 28373}, {"name": "file_transfer.pcap", "bytes": 133134}, {"name": "streaming_video.pcap", "bytes": 110121}, {"name": "voip_call.pcap", "bytes": 61224}]}, "metrics": {"best_model": "LightGBM", "test_accuracy": 0.9686, "test_macro_f1": 0.9497, "latency_ms_per_flow": 2.312, "validation_comparison": [{"model": "RandomForest", "val_accuracy": 0.9371, "val_macro_f1": 0.8977, "train_seconds": 0.905}, {"model": "XGBoost", "val_accuracy": 0.9509, "val_macro_f1": 0.9105, "train_seconds": 1.4662}, {"model": "LightGBM", "val_accuracy": 0.9571, "val_macro_f1": 0.919, "train_seconds": 1.5653}], "cv_results": [{"model": "RandomForest", "accuracy_mean": 0.939, "accuracy_std": 0.0088, "macro_f1_mean": 0.9042, "macro_f1_std": 0.0141, "mean_fit_time_seconds": 1.08}, {"model": "XGBoost", "accuracy_mean": 0.9518, "accuracy_std": 0.0048, "macro_f1_mean": 0.9217, "macro_f1_std": 0.0103, "mean_fit_time_seconds": 5.76}, {"model": "LightGBM", "accuracy_mean": 0.9561, "accuracy_std": 0.0057, "macro_f1_mean": 0.9268, "macro_f1_std": 0.0128, "mean_fit_time_seconds": 3.01}]}, "batch": {"file": "data/processed/sample_raw_flows.csv", "threshold": 0.0, "rows": [{"id": 0, "predicted_class": "Streaming", "top_class": "Streaming", "confidence": 0.999623, "is_uncertain": false, "top3": [{"class": "Streaming", "probability": 0.999623}, {"class": "FileTransfer", "probability": 0.000263}, {"class": "Browsing", "probability": 0.000104}], "duration": 30079704, "flowBytesPerSecond": 8556.167973, "flowPktsPerSecond": 4.321851}, {"id": 1, "predicted_class": "P2P", "top_class": "P2P", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "P2P", "probability": 1.0}, {"class": "Streaming", "probability": 0.0}, {"class": "Chat", "probability": 0.0}], "duration": 96300, "flowBytesPerSecond": 4652.128764, "flowPktsPerSecond": 20.768432}, {"id": 2, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "Browsing", "probability": 0.0}, {"class": "FileTransfer", "probability": 0.0}], "duration": 14987685, "flowBytesPerSecond": 15499.258224, "flowPktsPerSecond": 113.693342}, {"id": 3, "predicted_class": "FileTransfer", "top_class": "FileTransfer", "confidence": 0.999806, "is_uncertain": false, "top3": [{"class": "FileTransfer", "probability": 0.999806}, {"class": "Browsing", "probability": 0.000193}, {"class": "Chat", "probability": 0.0}], "duration": 9619557, "flowBytesPerSecond": 353207.845226, "flowPktsPerSecond": 496.48856}, {"id": 4, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 1.0}, {"class": "Streaming", "probability": 0.0}, {"class": "Mail", "probability": 0.0}], "duration": 282691, "flowBytesPerSecond": 74484.154076, "flowPktsPerSecond": 180.408998}, {"id": 5, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "FileTransfer", "probability": 0.0}, {"class": "Chat", "probability": 0.0}], "duration": 14421830, "flowBytesPerSecond": 248.512151, "flowPktsPerSecond": 2.218858}, {"id": 6, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 0.999783, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 0.999783}, {"class": "Chat", "probability": 0.0002}, {"class": "P2P", "probability": 8e-06}], "duration": 8574291, "flowBytesPerSecond": 593.401833, "flowPktsPerSecond": 1.166277}, {"id": 7, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "FileTransfer", "probability": 0.0}, {"class": "Streaming", "probability": 0.0}], "duration": 14999067, "flowBytesPerSecond": 12279.63046, "flowPktsPerSecond": 104.539836}, {"id": 8, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 1.0}, {"class": "Chat", "probability": 0.0}, {"class": "VoIP", "probability": 0.0}], "duration": 256962, "flowBytesPerSecond": 17150.395778, "flowPktsPerSecond": 89.507398}, {"id": 9, "predicted_class": "Chat", "top_class": "Chat", "confidence": 0.979561, "is_uncertain": false, "top3": [{"class": "Chat", "probability": 0.979561}, {"class": "P2P", "probability": 0.018365}, {"class": "FileTransfer", "probability": 0.00135}], "duration": 134096, "flowBytesPerSecond": 2408.72211, "flowPktsPerSecond": 29.829376}], "counts": {"Browsing": 3, "VoIP": 3, "P2P": 1, "Streaming": 1, "FileTransfer": 1, "Chat": 1}, "latency_ms": 0.2487}}</script>
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div>
+        <a class="logo" href="index.html" aria-label="MetaFlow home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mff" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8ac8"/><stop offset=".5" stop-color="#ff2d8a"/><stop offset="1" stop-color="#6c3bff"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mff)"/><path d="M7.5 22V13.2c0-2.3 1.3-3.7 3.1-3.7 1.5 0 2.5.9 3.2 2.6L16 17.4l2.2-5.3c.7-1.7 1.7-2.6 3.2-2.6 1.8 0 3.1 1.4 3.1 3.7V22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="25.6" r="1.25" fill="#fff" opacity=".55"/><circle cx="12" cy="25.6" r="1.25" fill="#fff" opacity=".8"/><circle cx="16.5" cy="25.6" r="1.25" fill="#fff"/></svg><span class="logo-word">Meta<b>Flow</b></span><sup>v1.0</sup></a>
+        <p class="addr mt-s">A privacy-preserving classifier for encrypted network traffic. It reads packet timing, never payload. Open source under the MIT licence.</p>
+        <a class="btn light sm mt-s" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">Star on GitHub <span class="arr">↗</span></a>
+      </div>
+      <div><h4>Pages</h4><ul><li><a href="benchmarks.html">Benchmarks</a></li><li><a href="capabilities.html">Capabilities</a></li><li><a href="analyze.html">Analyze</a></li><li><a href="project.html">Project</a></li><li><a href="demo.html">Demo</a></li><li><a href="reports.html">Reports</a></li><li><a href="get-started.html">Get started</a></li><li><a href="system.html">Design system</a></li></ul></div>
+      <div><h4>Capabilities</h4><ul><li><a href="capability-pcap-ingestion.html">PCAP ingestion</a></li><li><a href="capability-timing-features.html">Timing features</a></li><li><a href="capability-lightgbm.html">LightGBM classifier</a></li><li><a href="capability-explainable-ai.html">Explainable AI</a></li><li><a href="capability-unknown-detection.html">Unknown detection</a></li></ul></div>
+      <div><h4>Run it</h4><ul>
+        <li><a href="get-started.html#install">Install</a></li>
+        <li><a href="get-started.html#site">MetaFlow server</a></li>
+        <li><a href="get-started.html#dashboard">Streamlit dashboard</a></li>
+        <li><a href="get-started.html#cli">Command line</a></li>
+        <li><a href="get-started.html#docker">Docker</a></li>
+        <li><a href="get-started.html#tests">Test suite</a></li>
+      </ul></div>
+      <div><h4>Source</h4><ul>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">Repository ↗</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions" target="_blank" rel="noopener">CI pipeline ↗</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/issues" target="_blank" rel="noopener">Issues ↗</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier#readme" target="_blank" rel="noopener">README ↗</a></li>
+      </ul></div>
+    </div>
+    <div class="ftr-big" aria-hidden="true">MetaFlow</div>
+    <div class="ftr-legal">
+      <span>© 2026 MetaFlow · encrypted-traffic-classifier · MIT</span>
+      <nav aria-label="Legal"><a href="license.html">Licence</a><a href="privacy.html">Privacy</a><a href="security.html">Security</a><a href="system.html">Design system</a></nav>
+    </div>
+  </div>
+</footer>
+<div class="notice" role="dialog" aria-label="Privacy notice">
+  <p><b>No cookies, no tracking.</b> Like the classifier, this site keeps nothing about you. One flag in your browser remembers that you closed this. <a class="mag" href="privacy.html">Privacy</a></p>
+  <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>
