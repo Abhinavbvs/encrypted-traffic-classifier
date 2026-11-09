@@ -1,0 +1,53 @@
+<section class="fx-reel" aria-labelledby="fx-reel-t" data-fx-reel>
+  <div class="wrap fx-reel__wrap">
+    <div class="fx-reel__head">
+      <p class="fx-reel__label"><span data-scramble>Demo · selected moments</span></p>
+      <a class="fx-reel__link" href="demo.html">Watch the full demo <svg class="fx-reel__arrow" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a>
+    </div>
+    <h2 class="fx-reel__title" id="fx-reel-t"><span>From a raw capture</span> <span>to an explained verdict.</span></h2>
+
+    <a class="fx-reel__stage" href="demo.html" data-cursor="Play" data-fx-reel-stage aria-label="Play the full MetaFlow demo">
+      <span class="fx-reel__rig" data-fx-reel-rig>
+        <span class="fx-reel__glow" aria-hidden="true"></span>
+
+        <span class="fx-dev fx-dev--tablet" style="--fd:7.4s;--fo:-1.8s">
+          <span class="fx-dev__body">
+            <span class="fx-dev__screen">
+              <img src="media/plots/results_dashboard.jpg" alt="Results dashboard: accuracy, confusion matrix and per-class scores" width="2250" height="1650" loading="lazy" decoding="async">
+            </span>
+            <span class="fx-dev__cam" aria-hidden="true"></span>
+          </span>
+        </span>
+
+        <span class="fx-dev fx-dev--laptop" style="--fd:8.6s;--fo:0s">
+          <span class="fx-dev__lid">
+            <span class="fx-dev__screen">
+              <video data-fx-reel-video muted autoplay loop playsinline preload="metadata" aria-hidden="true" src="media/metaflow_walkthrough.mp4"></video>            </span>
+            <span class="fx-dev__cam" aria-hidden="true"></span>
+          </span>
+          <span class="fx-dev__base" aria-hidden="true"><i></i></span>
+          <span class="fx-dev__shadow" aria-hidden="true"></span>
+        </span>
+
+        <span class="fx-dev fx-dev--phone" style="--fd:6.2s;--fo:-3.1s">
+          <span class="fx-dev__body">
+            <span class="fx-dev__screen">
+              <span class="fx-dev__bar" aria-hidden="true"><b>MetaFlow</b><b>F1 · per class</b></span>
+              <img src="../reports/plots/per_class_f1.png" alt="Per-class F1 scores of the LightGBM model on the test set" width="1200" height="750" loading="lazy" decoding="async">
+              <span class="fx-dev__stat" aria-hidden="true"><em>0.950</em><small>macro F1 · 1,305 unseen flows</small></span>
+            </span>
+            <span class="fx-dev__island" aria-hidden="true"></span>
+          </span>
+        </span>
+
+        <span class="fx-reel__play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><span>Play</span></span>
+      </span>
+    </a>
+
+    <div class="fx-reel__foot">
+      <span>Laptop · site walkthrough</span>
+      <span>Tablet · results dashboard</span>
+      <span>Phone · per-class F1</span>
+    </div>
+  </div>
+</section>

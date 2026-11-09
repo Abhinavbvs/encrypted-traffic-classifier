@@ -1,0 +1,13 @@
+/* 98-perf — lightweight pass so integrated GPUs (e.g. Intel Iris Xe at 1080p) run the site smoothly.
+   Every rule here removes per-frame GPU work that is barely visible on a black page. */
+
+/* Frosted-glass blurs over the always-moving starfield were re-filtered every frame. Solid dark glass instead. */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.notice { background: rgba(10, 10, 12, .96) !important; }
+.fx-cmp .compare-wrap { background: linear-gradient(180deg, rgba(255, 255, 255, .025), rgba(255, 255, 255, 0) 40%), rgba(8, 7, 11, .92) !important; }
+a.btn.fx-cl-btn--ghost { background: rgba(5, 4, 7, .7) !important; }
+.card-vis .tag { background: rgba(0, 0, 0, .55) !important; }
+
+/* Blend modes force the browser to re-composite everything underneath on every frame. */
+.mf-cursor { mix-blend-mode: normal !important; }
+.fx-hero [style*="mix-blend"], .fx-hero *, .fx-warp *, .fx-cl * { mix-blend-mode: normal !important; }

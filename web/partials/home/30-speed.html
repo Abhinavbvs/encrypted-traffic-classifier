@@ -1,0 +1,24 @@
+<section class="fx-depth fx-depth--speed fx-depth--fade" data-fx-depth="speed" aria-labelledby="fxd-speed-t" style="--fy:55%">
+  <div class="fx-depth__stage">
+    <div class="fx-depth__media">
+      <canvas class="fx-depth__gl" aria-hidden="true"></canvas>
+      <span class="fx-depth__scan" aria-hidden="true"></span>
+      <span class="fx-depth__veil" aria-hidden="true"></span>
+      <div class="fx-depth__race" role="group" aria-label="Per-flow inference latency, lower is faster">
+        <p class="fx-depth__race-h"><span>Per-flow latency</span><span>log scale · lower is faster</span></p>
+        <ol class="fx-depth__lanes">
+          <li class="fx-depth__lane" style="--k:0;--a:.741;--b:1"><span class="fx-depth__who">DPI</span><span class="fx-depth__track"><i class="fx-depth__fill"></i><i class="fx-depth__ext"></i></span><span class="fx-depth__val">100–500 ms</span></li>
+          <li class="fx-depth__lane" style="--k:1;--a:.436;--b:.594"><span class="fx-depth__who">Deep learning · GPU</span><span class="fx-depth__track"><i class="fx-depth__fill"></i><i class="fx-depth__ext"></i></span><span class="fx-depth__val">15–40 ms</span></li>
+          <li class="fx-depth__lane" style="--k:2;--a:.215;--b:.215"><span class="fx-depth__who">Random Forest</span><span class="fx-depth__track"><i class="fx-depth__fill"></i></span><span class="fx-depth__val">3.8 ms</span></li>
+          <li class="fx-depth__lane" style="--k:3;--a:.187;--b:.187"><span class="fx-depth__who">XGBoost</span><span class="fx-depth__track"><i class="fx-depth__fill"></i></span><span class="fx-depth__val">3.2 ms</span></li>
+          <li class="fx-depth__lane is-me" style="--k:4;--a:.135;--b:.135"><span class="fx-depth__who">MetaFlow · LightGBM</span><span class="fx-depth__track"><i class="fx-depth__fill"></i></span><span class="fx-depth__val">2.31 ms</span></li>
+        </ol>
+        <div class="fx-depth__axis" aria-hidden="true"><span style="--x:0">1 ms</span><span style="--x:.3705">10</span><span style="--x:.741">100</span><span style="--x:1">500</span></div>
+      </div>
+    </div>
+    <div class="fx-depth__meta" aria-hidden="true"><span>Fig. 01 · Latency study</span><span class="fx-depth__n" data-depth-n>000</span></div>
+    <h2 class="fx-depth__title" id="fxd-speed-t"><span class="wd"><span class="wi" style="--i:0">Built</span></span> <span class="wd"><span class="wi" style="--i:1">for</span></span><br><span class="wd"><span class="wi" style="--i:2">speed.</span></span></h2>
+    <p class="fx-depth__cap"><span>2.31 ms per flow on CPU ·</span> <span>reports/metrics.json</span></p>
+  </div>
+  <div class="fx-depth__run" aria-hidden="true"></div>
+</section>

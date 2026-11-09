@@ -9,8 +9,9 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/fx.bundle.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -43,6 +44,7 @@
 </div></section><section class="sec" style="padding-top:50px"><div class="wrap"><div class="prose"><p>If you find a vulnerability in the code, please open a private security advisory on the <a href="https://github.com/Abhinavbvs/encrypted-traffic-classifier/security" target="_blank" rel="noopener">repository's security page</a> rather than a public issue.</p>
 <h2>Design notes</h2><ul><li>No decryption keys are required or stored.</li><li>Capture files are parsed defensively. Empty and corrupt captures are covered by tests.</li><li>Model artefacts are pickles. Only load <code>.pkl</code> files you trust.</li></ul></div></div></section></main>
 <footer class="ftr">
+  <div class="ftr-fx" aria-hidden="true"><canvas data-horizon></canvas></div>
   <div class="wrap">
     <div class="ftr-grid">
       <div>
@@ -80,5 +82,6 @@
   <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
 </div>
 <script src="js/main.js"></script>
+<script src="js/fx.bundle.js"></script>
 </body>
 </html>

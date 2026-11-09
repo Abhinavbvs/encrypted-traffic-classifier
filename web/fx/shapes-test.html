@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shapes test</title>
+<link rel="stylesheet" href="../css/fx/05-shapes.css">
+<style>
+  html, body { margin: 0; background: #030304; color: #f6f4fa; font: 12px "JetBrains Mono", monospace; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 32px; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: .06em; }
+  .big { width: 420px; }
+  .row { display: flex; gap: 40px; align-items: center; padding: 32px; }
+</style>
+</head>
+<body>
+<div class="grid" id="g"></div>
+<div class="row">
+  <canvas class="mf-shape big" data-shape="cube" data-tint="mag" data-drag data-spin="0.2"></canvas>
+  <canvas class="mf-shape" data-shape="capsule" data-size="240" data-tint="chrome" data-float data-drag></canvas>
+  <canvas class="mf-shape" data-shape="sphere" data-size="120" data-tint="violet" data-par="0.15"></canvas>
+</div>
+<script src="../js/fx/00-core.js"></script>
+<script src="../js/fx/05-shapes.js"></script>
+<script>
+  ["cube", "dish", "cone", "torus", "capsule", "sphere", "arch", "pyramid"].forEach(function (k, i) {
+    var d = document.createElement("div"); d.className = "cell";
+    d.innerHTML = '<canvas class="mf-shape" data-shape="' + k + '" data-size="200" data-drag data-float' + (i === 3 ? ' data-tint="mag"' : '') + '></canvas><span>' + k + '</span>';
+    setTimeout(function () { document.getElementById("g").appendChild(d); }, i * 40);   // exercises the MutationObserver mount
+  });
+</script>
+</body>
+</html>

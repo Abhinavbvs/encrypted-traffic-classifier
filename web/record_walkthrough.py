@@ -32,6 +32,7 @@ INIT = r"""
       background:rgba(255,45,138,.25);border:2px solid #ff2d8a;z-index:2147483647;pointer-events:none;
       transition:transform .75s cubic-bezier(.2,.7,.1,1), background .2s;transform:translate(960px,560px)}
     #mf-cursor.down{background:rgba(255,45,138,.7)}
+    html.has-cursor #mf-cursor{display:none!important}
     #mf-cap{position:fixed;left:24px;bottom:24px;z-index:2147483646;pointer-events:none;display:flex;gap:10px;align-items:center;
       font:500 14px/1 "JetBrains Mono",Consolas,monospace;letter-spacing:.04em;text-transform:uppercase;color:#fff;
       background:rgba(11,11,13,.86);padding:12px 16px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);
@@ -110,10 +111,19 @@ class Tour:
     def wait(self, ms):
         self.p.wait_for_timeout(ms)
 
+    def caption(self, text):
+        for _ in range(5):  # survive a navigation that is still settling
+            try:
+                self.p.wait_for_load_state("load")
+                self.p.evaluate("t => window.__mfCaption(t)", text)
+                return
+            except Exception:
+                self.wait(700)
+
     def go(self, path, caption):
         self.p.goto(self.site + "/" + path if not path.startswith("http") else path, wait_until="load")
         self.wait(400)
-        self.p.evaluate("t => window.__mfCaption(t)", caption)
+        self.caption(caption)
         self.wait(1600)
 
     def scroll(self, target="bottom", speed=SPEED, offset=90, pause=1200):
@@ -126,8 +136,10 @@ class Tour:
         loc.scroll_into_view_if_needed()
         box = loc.bounding_box()
         if box:
-            self.p.evaluate("([x, y]) => window.__mfMove(x, y)", [box["x"] + box["width"] / 2, box["y"] + box["height"] / 2])
-            self.wait(800)
+            cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+            self.p.evaluate("([x, y]) => window.__mfMove(x, y)", [cx, cy])
+            self.p.mouse.move(cx, cy, steps=24)   # drives the site's own cursor + magnetic buttons
+            self.wait(500)
             self.p.evaluate("() => window.__mfPress(true)")
         loc.click()
         self.p.evaluate("() => window.__mfPress(false)")
@@ -139,8 +151,10 @@ class Tour:
         lo = float(loc.get_attribute("min") or 0)
         hi = float(loc.get_attribute("max") or 1)
         if box:
-            self.p.evaluate("([x, y]) => window.__mfMove(x, y)", [box["x"] + box["width"] * (value - lo) / (hi - lo), box["y"] + box["height"] / 2])
-            self.wait(800)
+            sx, sy = box["x"] + box["width"] * (value - lo) / (hi - lo), box["y"] + box["height"] / 2
+            self.p.evaluate("([x, y]) => window.__mfMove(x, y)", [sx, sy])
+            self.p.mouse.move(sx, sy, steps=20)
+            self.wait(600)
         self.p.evaluate("""([s, v]) => { const r = document.querySelector(s); r.value = v;
             r.dispatchEvent(new Event('input', {bubbles: true})); r.dispatchEvent(new Event('change', {bubbles: true})); }""", [selector, str(value)])
         self.wait(pause)
@@ -150,15 +164,20 @@ def metaflow(t: Tour):
     p = t.p
     # ---- 01 Home
     p.goto(t.site + "/index.html", wait_until="load")
-    p.evaluate("""() => window.__mfTitle('<div><h1>Meta<b>Flow</b></h1><p>Website walkthrough · live model · data from the repository</p></div>')""")
-    t.wait(3200)
-    p.evaluate("() => window.__mfTitleOff()")
-    t.wait(1000)
-    p.evaluate("t => window.__mfCaption(t)", "01 · Home")
-    t.wait(2500)
-    t.click('[data-slide="browsing"]', 2500)
-    t.click('[data-slide="file"]', 2500)
-    t.scroll("#analyzer", offset=60)
+    # the site's own loader plays first (once per session)
+    try:
+        p.wait_for_function("() => document.documentElement.classList.contains('mf-ld-done')", timeout=12000)
+    except Exception:
+        pass
+    t.wait(2600)
+    t.caption("01 · Home")
+    # sweep the pointer across the hero so the glow and the liquid-metal object react
+    for x, y in [(380, 420), (900, 300), (1300, 520), (1100, 760), (700, 560)]:
+        p.mouse.move(x, y, steps=30)
+        t.wait(350)
+    t.wait(1500)
+    # slow pass down the page: statement, flying shapes, pinned sections, services, marquee, reel, pulse, spiral...
+    t.scroll("#analyzer", offset=60, speed=SPEED)
     for name in ["voip_call.pcap", "browsing_https.pcap", "streaming_video.pcap", "file_transfer.pcap"]:
         t.click('[data-chat] [data-sample="%s"]' % name, 300)
         p.wait_for_function("() => !document.querySelector('[data-chat] [data-sample]').disabled && !document.querySelector('[data-chat] .typing')", timeout=30000)
@@ -166,15 +185,25 @@ def metaflow(t: Tour):
     t.slider("[data-chat] [data-threshold]", 0.6, 300)
     p.wait_for_function("() => !document.querySelector('[data-chat] .typing')", timeout=30000)
     t.wait(3200)
-    t.scroll("bottom", pause=2000)
+    # FAQ: open a couple of questions (counter changes)
+    try:
+        t.scroll(".faq", offset=160, pause=800)
+        sums = p.locator(".faq summary")
+        for i in (1, 2):
+            t.click(sums.nth(i), 1800)
+    except Exception:
+        pass
+    t.scroll("bottom", pause=2500)
     # menu overlay
     t.scroll(0, speed=2600, pause=600)
     t.click("[data-menu-open]", 2600)
-    t.click('.menu-main a[href="benchmarks.html"]', 600)
+    # the site fades out before navigating, so wait for the real navigation
+    with p.expect_navigation(wait_until="load", timeout=30000):
+        t.click('.menu-main a[href="benchmarks.html"]', 0)
+    t.wait(600)
 
     # ---- 02 Benchmarks
-    p.wait_for_load_state("load")
-    p.evaluate("t => window.__mfCaption(t)", "02 · Benchmarks")
+    t.caption("02 · Benchmarks")
     t.wait(1800)
     t.scroll("bottom")
 
@@ -251,7 +280,7 @@ def streamlit(t: Tour, app):
     p.wait_for_selector('[data-testid="stSidebar"]', timeout=90000)
     p.wait_for_selector("text=Raw PCAP / PCAPNG Network Traffic Analyzer", timeout=90000)
     t.wait(2500)
-    p.evaluate("t => window.__mfCaption(t)", "Streamlit app · Home · PCAP Traffic Analyzer")
+    t.caption("Streamlit app · Home · PCAP Traffic Analyzer")
     t.wait(2500)
     # pick a bundled sample capture in the app's own selectbox
     try:
@@ -277,7 +306,7 @@ def streamlit(t: Tour, app):
              ("📈 Model Benchmark & Reports", "Streamlit app · Model Benchmark & Reports")]
     for label, cap in pages:
         t.click(p.locator('[data-testid="stSidebar"]').get_by_text(label, exact=True), 3500)
-        p.evaluate("t => window.__mfCaption(t)", cap)
+        t.caption(cap)
         if "Batch" in label:
             try:
                 t.click(p.get_by_role("button", name="Load Bundled Sample Flows"), 4000)
@@ -297,7 +326,21 @@ def main():
 
     tmp = Path(tempfile.mkdtemp(prefix="mf-rec-"))
     with sync_playwright() as pw:
-        browser = pw.chromium.launch()
+        # GPU-backed WebGL: default headless Chrome renders WebGL in software (~2 fps on this site)
+        browser = pw.chromium.launch(args=["--use-angle=d3d11", "--enable-gpu", "--ignore-gpu-blocklist"])
+        # warm-up pass (not recorded): the GPU compiles and caches every WebGL scene once, so the recorded
+        # pass doesn't show the one-time 1-2 s driver hitch when the tunnel, pulse and terrain first appear
+        warm = browser.new_context(viewport={"width": W, "height": H})
+        wp = warm.new_page()
+        wp.add_init_script("try{sessionStorage.setItem('mf-ld','1');localStorage.setItem('mf-notice','1')}catch(e){}")
+        wp.goto(a.site + "/index.html", wait_until="load")
+        wp.wait_for_timeout(4000)
+        hh = wp.evaluate("document.documentElement.scrollHeight")
+        for y in range(0, hh, 500):
+            wp.evaluate("y => window.scrollTo(0, y)", y)
+            wp.wait_for_timeout(250)
+        wp.wait_for_timeout(1500)
+        warm.close()
         ctx = browser.new_context(viewport={"width": W, "height": H}, device_scale_factor=1,
                                   record_video_dir=str(tmp), record_video_size={"width": W, "height": H})
         ctx.add_init_script(INIT)
@@ -320,8 +363,18 @@ def main():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     ff = imageio_ffmpeg.get_ffmpeg_exe()
+    part = OUT.with_suffix(".new.mp4")
     subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(webm), "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-                    "-pix_fmt", "yuv420p", "-r", "30", "-movflags", "+faststart", str(OUT)], check=True)
+                    "-pix_fmt", "yuv420p", "-r", "30", "-movflags", "+faststart", str(part)], check=True)
+    import os, time
+    for _ in range(20):  # the old file may be briefly open by a browser streaming it
+        try:
+            os.replace(part, OUT)
+            break
+        except PermissionError:
+            time.sleep(1.5)
+    else:
+        print("Could not replace the old video (in use); new one saved as", part)
     shutil.rmtree(tmp, ignore_errors=True)
     print("Saved", OUT)
 

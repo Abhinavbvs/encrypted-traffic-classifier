@@ -1,0 +1,40 @@
+/* MetaFlow fx 99 — inner-page fixes on the black dozfx theme (reviewer-owned).
+   Scoped to inner-page structures only; the home sections own their own files. */
+
+/* demo.html — rhythm stage: the copy sat on top of the canvas "BWD server → client" lane label.
+   A soft scrim under the copy keeps it readable (dozfx frames its copy the same way). */
+.video-frame:has(#demoCanvas) .overlay > div:last-child { position: relative; isolation: isolate; max-width: 640px; }
+.video-frame:has(#demoCanvas) .overlay > div:last-child::before {
+  content: ""; position: absolute; z-index: -1; inset: -34px -60px -30px -40px; pointer-events: none;
+  background: radial-gradient(120% 100% at 18% 62%, rgba(9, 9, 12, .96) 0%, rgba(9, 9, 12, .82) 48%, rgba(9, 9, 12, 0) 78%);
+}
+
+/* demo.html — chapter tabs: the pressed tab turned white and its "Chapter 01" label (--mute) vanished on it.
+   Use the dozfx selected state instead: magenta edge + tint, label in magenta. */
+.chapter { color: var(--ink); transition: background .25s, border-color .25s, box-shadow .25s, color .25s; }
+.chapter:hover { background: linear-gradient(rgba(255, 255, 255, .05), rgba(255, 255, 255, .05)), var(--paper); color: var(--ink); border-color: rgba(255, 255, 255, .22); }
+.chapter[aria-pressed="true"] {
+  background: linear-gradient(rgba(255, 43, 214, .12), rgba(255, 43, 214, .12)), var(--paper); /* opaque: no streaks through it */ color: var(--ink); border-color: var(--mag);
+  box-shadow: 0 0 0 1px rgba(255, 43, 214, .35), 0 0 28px rgba(255, 43, 214, .22);
+}
+.chapter[aria-pressed="true"] .mono { color: var(--mag-2); }
+
+/* demo.html (phones) — the 16:9 stage is only ~220 px tall at 390 px, so the pill, lane labels, title and copy
+   piled on top of each other. Give the stage real height there; the canvas fills it. */
+@media (max-width: 640px) {
+  .video-frame:has(#demoCanvas) { aspect-ratio: auto; height: clamp(440px, 118vw, 560px); }
+  .video-frame:has(#demoCanvas) .overlay > div:last-child::before { inset: -26px -24px -20px -24px; }
+}
+
+/* grid columns with long code lines (demo "Run it yourself", get-started …) must shrink, not widen the page:
+   the <pre> min-content pushed the layout viewport to 448 px on phones and pushed fixed UI (notice card) off screen. */
+.split > *, .chat-split > *, .statement > *, .faq-grid > *, .cap-hero > * { min-width: 0; }
+
+/* reports.html (phones) — long file names (test_classification_report.txt) set the 1fr column's min-content and
+   widened the page to ~595 px. Let the column shrink and the names wrap. */
+.report > * { min-width: 0; }
+.report h3, .report p { overflow-wrap: anywhere; }
+
+/* inner pages (phones) — small decorative overhangs (the rotated FAQ "+" on get-started, hover shifts) widened the
+   layout viewport by a few px. overflow-x: clip trims them without creating a scroll container (sticky still works). */
+body:not(:has(.fx-hero)) main { overflow-x: clip; }

@@ -1,0 +1,330 @@
+/* ==========================================================================
+   10-hero — dozfx section.hero[data-glow] rebuilt for MetaFlow
+   Per-letter title intro (chIn / chGl / dotIn), soft claim, scanned outline,
+   CTA rise, foot line, raymarched liquid-metal morph, pointer glow, parallax.
+   Scoped to .fx-hero. States: .is-pre (hidden, waiting for loader) -> .is-go.
+   ========================================================================== */
+.fx-hero {
+  --fxh-expo: cubic-bezier(.16, 1, .3, 1);
+  --fxh-out: cubic-bezier(.22, 1, .36, 1);
+  --fxh-inout: cubic-bezier(.65, 0, .35, 1);
+  --fxh-nav: 96px;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-top: calc(var(--fxh-nav) + clamp(48px, 9vh, 112px));
+  padding-bottom: clamp(20px, 3.4vh, 36px);
+  background: transparent;           /* the starfield shows through */
+  color: var(--ink, #f6f4fa);
+  overflow: visible;
+  overflow-x: clip;               /* the orb and the floor glow may bleed below, never sideways */
+  isolation: isolate;
+}
+@supports not (overflow: clip) { .fx-hero { overflow: hidden; } }
+.fx-hero__wrap { position: relative; z-index: 2; }
+
+/* ---------- ambient orb (dozfx .orb--glow, drifting) ---------- */
+.fx-hero__orb {
+  position: absolute; left: 74%; top: 62%;
+  width: 86vmax; height: 86vmax; margin: -43vmax 0 0 -43vmax;
+  pointer-events: none; z-index: 0;
+  translate: 0 var(--oz, 0px);
+}
+.fx-hero__orb i {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 43, 214, .32), rgba(255, 43, 214, .12) 42%, rgba(255, 43, 214, .04) 70%, rgba(255, 43, 214, 0));
+  animation: fxhDrift 16s ease-in-out infinite alternate;
+}
+.fx-hero.is-pre .fx-hero__orb { opacity: 0; }
+.fx-hero.is-go .fx-hero__orb { opacity: 1; animation: fxhFade 2.6s ease .25s backwards; }
+
+/* ---------- pointer-following glow (dozfx .glow, 640px radial) ---------- */
+.fx-hero__glow {
+  position: absolute; left: 0; top: 0;
+  width: 640px; height: 640px; margin: -320px 0 0 -320px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 43, 214, .26), rgba(255, 43, 214, .08) 55%, rgba(255, 43, 214, 0));
+  pointer-events: none; z-index: 1;
+  opacity: 0; will-change: transform;
+  transition: opacity .8s var(--fxh-out), scale 1s var(--fxh-expo);
+  mix-blend-mode: screen;
+}
+.fx-hero.glow-on .fx-hero__glow { opacity: 1; }
+.fx-hero.glow-hot .fx-hero__glow { scale: 1.12; }
+
+/* ---------- morph stage (right 58%, full height) ---------- */
+.fx-hero__stage {
+  position: absolute; right: 0; top: 0;
+  width: 58%; height: 100vh; height: 100svh;
+  z-index: 1; pointer-events: none;
+  translate: 0 var(--mz, 0px);
+  scale: var(--ms, 1);
+  opacity: var(--mo, 1);
+  transform-origin: 50% 55%;
+}
+.fx-hero__morph {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  opacity: 0; transform: scale(.86);
+  transition: opacity 1.8s var(--fxh-out), transform 2.6s var(--fxh-expo);
+  /* magenta floor bounce under the object; --fl flares during the neon fault */
+  background: radial-gradient(ellipse 34% 14% at 50% 84%, rgba(255, 43, 214, calc(.2 + var(--fl, 0) * .55)), rgba(255, 43, 214, 0) 72%);
+}
+.fx-hero.morph-on .fx-hero__morph { opacity: 1; transform: none; }
+.fx-hero__lite { display: none; }
+.fx-hero.morph-fail .fx-hero__morph { display: none; }
+.fx-hero.morph-fail .fx-hero__lite {
+  display: block; position: absolute; left: 50%; top: 50%;
+  width: min(420px, 80%); height: auto; aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: auto;
+  filter: drop-shadow(0 30px 80px rgba(255, 43, 214, .35));
+}
+
+/* ---------- title: per-letter intro ---------- */
+.fx-hero__title {
+  margin: 0;
+  font-family: var(--display, "Inter Tight", system-ui, sans-serif);
+  font-weight: 800;
+  font-size: clamp(48px, calc(14.93px + 12.0188vw), 188px);
+  line-height: .86;
+  letter-spacing: -.045em;
+  color: #fff;
+  translate: 0 var(--pz, 0px);
+  max-width: 11ch;
+}
+.fx-hero__title .wd { display: inline-block; white-space: nowrap; overflow: visible; }
+.fx-hero__title .hc { display: inline-block; will-change: transform, opacity, filter; }
+.fx-hero__title .acc { color: var(--mag, #ff2bd6); }
+.fx-hero__title .acc .hc { color: var(--mag, #ff2bd6); }
+.fx-hero__title .acc {
+  text-shadow: 0 0 18px rgba(255, 43, 214, .72), 0 0 64px rgba(255, 43, 214, .38);
+}
+.fx-hero.is-go .fx-hero__title .acc { animation: fxhAccGlow 4.2s ease-in-out 3.2s infinite; }
+.fx-hero__title .dot { display: inline-block; }
+.fx-hero__title .dot .hc { transform-origin: 50% 80%; }
+
+.fx-hero.is-go .fx-hero__title .hc {
+  animation:
+    fxhChIn 1.7s var(--fxh-expo) calc(.26s + var(--c) * 42ms) backwards,
+    fxhChGl 1.2s ease-in-out calc(2.15s + var(--c) * 55ms) 1;
+}
+.fx-hero.is-go .fx-hero__title .acc .hc {
+  animation: fxhChInA 1.7s var(--fxh-expo) calc(.26s + var(--c) * 42ms) backwards;
+}
+.fx-hero.is-go .fx-hero__title .dot .hc {
+  animation:
+    fxhDotIn 1s cubic-bezier(.34, 1.56, .64, 1) 1.05s backwards,
+    fxhDotGl 2.2s ease-out 1.12s 1;
+}
+
+/* ---------- claim: solid line soft-in, outlined/striped line scanned in ---------- */
+.fx-hero__claim {
+  margin: clamp(16px, 2.2vw, 28px) 0 0;
+  font-family: var(--display, "Inter Tight", system-ui, sans-serif);
+  font-weight: 800;
+  font-size: clamp(40px, calc(28.732px + 3.0047vw), 72px);
+  line-height: .98;
+  letter-spacing: -.03em;
+  color: #fff;
+  translate: 0 var(--pz, 0px);
+}
+.fx-hero__claim .wd { display: inline-block; white-space: nowrap; }
+.fx-hero__claim .wi { display: inline-block; }
+.fx-hero__claim .o {
+  position: relative; display: inline-block;
+  color: transparent;
+  -webkit-text-stroke: 1.2px var(--ink, #f6f4fa);
+  /* the stripes: fine horizontal scan lines inside the outline */
+  background: repeating-linear-gradient(180deg, rgba(255, 139, 240, .34) 0 1px, rgba(255, 139, 240, 0) 1px 5px);
+  -webkit-background-clip: text; background-clip: text;
+  padding-right: .02em;
+}
+.fx-hero__claim .o::after {
+  content: ""; position: absolute; inset: 4% 0 6%; pointer-events: none;
+  background: linear-gradient(90deg, rgba(255, 43, 214, 0) 55%, rgba(255, 43, 214, .22) 88%, #ff8bf0 calc(100% - 3px), #fff);
+  opacity: 0;
+}
+.fx-hero.is-go .fx-hero__claim .wi { animation: fxhSoftIn 1.5s var(--fxh-out) calc(.95s + var(--i) * .12s) backwards; }
+.fx-hero.is-go .fx-hero__claim .wi:has(.o) { animation: none; }
+.fx-hero.is-go .fx-hero__claim .o {
+  clip-path: inset(-20% -6% -20% 0);
+  animation:
+    fxhScanIn .5s cubic-bezier(.76, 0, .24, 1) calc(1.25s + (var(--i) - 2) * .44s) backwards,
+    fxhStrokeIn 1.6s ease-out calc(1.7s + (var(--i) - 2) * .44s) backwards;
+}
+.fx-hero.is-go .fx-hero__claim .o::after {
+  animation: fxhScanBar .5s cubic-bezier(.76, 0, .24, 1) calc(1.25s + (var(--i) - 2) * .44s) both;
+}
+
+/* ---------- CTAs ---------- */
+.fx-hero__cta {
+  margin-top: clamp(24px, 3.4vw, 44px);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px;
+  translate: 0 var(--pz, 0px);
+}
+.fx-hero__btn, .fx-hero__link {
+  position: relative; display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--sans, "Space Grotesk", system-ui, sans-serif);
+  font-weight: 600; font-size: 15px; letter-spacing: -.01em;
+  text-decoration: none; white-space: nowrap;
+  translate: var(--gx, 0px) var(--gy, 0px);
+  transition: translate .5s var(--fxh-expo), box-shadow .35s, background .35s, color .35s;
+}
+.fx-hero__btn {
+  padding: 15px 16px 15px 24px; border-radius: 999px;
+  background: var(--mag, #ff2bd6); color: #fff;
+  box-shadow: 0 0 0 rgba(255, 43, 214, 0);
+}
+.fx-hero__btn:hover, .fx-hero__btn:focus-visible {
+  box-shadow: 0 0 24px rgba(255, 43, 214, .6), 0 0 80px rgba(255, 43, 214, .28);
+  background: #ff45dc;
+}
+.fx-hero__ico {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255, 255, 255, .22); overflow: hidden;
+}
+.fx-hero__ico svg { width: 10px; height: 10px; transition: transform .5s var(--fxh-expo); }
+.fx-hero__btn:hover .fx-hero__ico svg { transform: translate(2px, -2px); }
+.fx-hero__link { color: var(--ink, #f6f4fa); padding: 15px 0; }
+.fx-hero__link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 10px; height: 1px;
+  background: currentColor; opacity: .35; transform-origin: 100% 50%;
+  transition: transform .6s var(--fxh-expo), opacity .3s, background .3s;
+}
+.fx-hero__link:hover { color: var(--mag-2, #ff8bf0); }
+.fx-hero__link:hover::after { opacity: 1; background: var(--mag, #ff2bd6); animation: fxhLine .6s var(--fxh-expo); }
+/* text roll on hover (dozfx .roll) */
+.fx-hero .roll { position: relative; display: inline-block; overflow: hidden; line-height: 1.25; height: 1.25em; }
+.fx-hero .roll > span { display: block; transition: transform .55s var(--fxh-expo); }
+.fx-hero a:hover .roll > span, .fx-hero a:focus-visible .roll > span { transform: translateY(-100%); }
+.fx-hero__btn:focus-visible, .fx-hero__link:focus-visible { outline: 2px solid var(--mag-2, #ff8bf0); outline-offset: 4px; }
+
+.fx-hero.is-go .fx-hero__cta > * { animation: fxhCtaIn 1.1s var(--fxh-expo) backwards; }
+.fx-hero.is-go .fx-hero__cta > :nth-child(1) { animation-delay: 1.75s; }
+.fx-hero.is-go .fx-hero__cta > :nth-child(2) { animation-delay: 1.87s; }
+
+/* ---------- foot: gradient rule, scroll cue, meta ---------- */
+.fx-hero__foot {
+  position: relative;
+  margin-top: clamp(32px, 6vh, 72px);
+  padding-top: 18px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap;
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--mute, rgba(246, 244, 250, .48));
+  translate: 0 var(--pz, 0px);
+}
+.fx-hero__foot::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px;
+  background: linear-gradient(90deg, var(--line, rgba(255, 255, 255, .1)), rgba(255, 43, 214, .55) 50%, var(--line, rgba(255, 255, 255, .1)));
+  transform-origin: 0 50%;
+}
+.fx-hero__cue { display: inline-flex; align-items: center; gap: 12px; }
+.fx-hero__cue i { position: relative; width: 1px; height: 32px; background: var(--line, rgba(255, 255, 255, .1)); overflow: hidden; }
+.fx-hero__cue i::after {
+  content: ""; position: absolute; left: 0; top: 0; width: 1px; height: 12px;
+  background: var(--mag, #ff2bd6); box-shadow: 0 0 6px var(--mag, #ff2bd6);
+  animation: fxhCue 1.8s var(--fxh-inout) infinite;
+}
+.fx-hero__meta { color: var(--ink-2, rgba(246, 244, 250, .74)); font-size: 10.5px; letter-spacing: .08em; }
+.fx-hero.is-go .fx-hero__foot::before { animation: fxhLineIn 1.8s var(--fxh-expo) 2s backwards; }
+.fx-hero.is-go .fx-hero__foot > * { animation: fxhFxIn 1s var(--fxh-expo) 2.2s backwards; }
+.fx-hero.is-go .fx-hero__foot > :nth-child(2) { animation-delay: 2.32s; }
+
+/* ---------- waiting for the loader: everything that will animate is hidden ---------- */
+.fx-hero.is-pre:not(.is-go) .fx-hero__title .hc,
+.fx-hero.is-pre:not(.is-go) .fx-hero__claim .wi,
+.fx-hero.is-pre:not(.is-go) .fx-hero__cta > *,
+.fx-hero.is-pre:not(.is-go) .fx-hero__foot > *,
+.fx-hero.is-pre:not(.is-go) .fx-hero__foot::before { opacity: 0; }
+
+/* ---------- keyframes (dozfx timing, MetaFlow magenta) ---------- */
+@keyframes fxhChIn {
+  0%   { opacity: 0; transform: translate3d(var(--dx), .22em, 0) scale(1.24); filter: blur(18px); color: #ff2bd6; }
+  40%  { opacity: 1; color: #ff8bf0; filter: blur(2px); }
+  100% { opacity: 1; transform: none; filter: blur(0); color: #fff; }
+}
+@keyframes fxhChInA {
+  0%   { opacity: 0; transform: translate3d(var(--dx), .22em, 0) scale(1.24); filter: blur(18px); color: #fff; }
+  40%  { opacity: 1; color: #ffd6f6; filter: blur(2px); }
+  100% { opacity: 1; transform: none; filter: blur(0); color: #ff2bd6; }
+}
+@keyframes fxhChGl {
+  0%, 100% { text-shadow: 0 0 0 rgba(255, 43, 214, 0); }
+  35% { color: #ffd6f6; text-shadow: 0 0 22px rgba(255, 43, 214, .85), 0 0 60px rgba(255, 43, 214, .35); }
+}
+@keyframes fxhDotIn { 0% { opacity: 0; transform: translate3d(0, -.5em, 0) scale(0); } 100% { opacity: 1; transform: none; } }
+@keyframes fxhDotGl {
+  0%   { text-shadow: 0 0 30px rgba(255, 43, 214, 1), 0 0 90px rgba(255, 43, 214, .7); }
+  100% { text-shadow: 0 0 18px rgba(255, 43, 214, .72), 0 0 64px rgba(255, 43, 214, .38); }
+}
+@keyframes fxhAccGlow {
+  0%, 100% { text-shadow: 0 0 18px rgba(255, 43, 214, .72), 0 0 64px rgba(255, 43, 214, .38); }
+  50% { text-shadow: 0 0 26px rgba(255, 43, 214, .9), 0 0 96px rgba(255, 43, 214, .5); }
+}
+@keyframes fxhSoftIn { 0% { opacity: 0; transform: translate3d(0, .14em, 0); filter: blur(14px); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes fxhScanIn { 0% { clip-path: inset(-20% 100% -20% 0); } 100% { clip-path: inset(-20% -6% -20% 0); } }
+@keyframes fxhStrokeIn { 0% { -webkit-text-stroke-color: #ff2bd6; } 100% { -webkit-text-stroke-color: #f6f4fa; } }
+@keyframes fxhScanBar { 0% { opacity: 1; transform: translate3d(-100%, 0, 0); } 88% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
+@keyframes fxhCtaIn { 0% { opacity: 0; transform: translate3d(0, 22px, 0) scale(.94); filter: blur(6px); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes fxhLineIn { 0% { transform: scaleX(0); } }
+@keyframes fxhFxIn { 0% { opacity: .01; transform: translate3d(0, 24px, 0); } 100% { opacity: 1; transform: none; } }
+@keyframes fxhFade { 0% { opacity: 0; } }
+@keyframes fxhCue { 0% { transform: translateY(-12px); } 100% { transform: translateY(32px); } }
+@keyframes fxhLine { 0% { transform: scaleX(0); transform-origin: 0 50%; } 100% { transform: scaleX(1); transform-origin: 0 50%; } }
+@keyframes fxhDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-3%, 2%, 0) scale(1.06); }
+  100% { transform: translate3d(2%, -3%, 0) scale(.96); }
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 1023px) {
+  .fx-hero__stage { width: 84%; top: 38svh; height: 62svh; }
+}
+
+/* ---------- phone: no blur, simpler intro, object under the copy ---------- */
+@media (max-width: 767px) {
+  .fx-hero { justify-content: flex-start; padding-top: calc(var(--fxh-nav) + 28px); }
+  .fx-hero__stage { left: 0; right: 0; width: 100%; top: 50svh; height: 50svh; opacity: calc(var(--mo, 1) * .9); }
+  .fx-hero__title { max-width: none; }
+  .fx-hero__claim .o { -webkit-text-stroke-width: 1px; }
+  .fx-hero__wrap { display: flex; flex-direction: column; min-height: calc(100svh - var(--fxh-nav) - 28px - 24px); }
+  .fx-hero__foot { margin-top: auto; padding-top: 24px; }
+  .fx-hero__foot::before { display: none; }
+  .fx-hero__glow { display: none; }
+  .fx-hero.is-go .fx-hero__title .hc { animation: fxhChInM 1.2s var(--fxh-expo) calc(.12s + var(--c) * 34ms) backwards; }
+  .fx-hero.is-go .fx-hero__title .acc .hc { animation: fxhChInAM 1.2s var(--fxh-expo) calc(.12s + var(--c) * 34ms) backwards; }
+  .fx-hero.is-go .fx-hero__claim .wi { animation-name: fxhSoftInM; }
+  .fx-hero.is-go .fx-hero__cta > * { animation-name: fxhCtaInM; }
+}
+@keyframes fxhChInM { 0% { opacity: 0; transform: translate3d(var(--dx), .22em, 0) scale(1.2); color: #ff2bd6; } 40% { opacity: 1; color: #ff8bf0; } 100% { opacity: 1; transform: none; color: #fff; } }
+@keyframes fxhChInAM { 0% { opacity: 0; transform: translate3d(var(--dx), .22em, 0) scale(1.2); color: #fff; } 100% { opacity: 1; transform: none; color: #ff2bd6; } }
+@keyframes fxhSoftInM { 0% { opacity: 0; transform: translate3d(0, .14em, 0); } 100% { opacity: 1; transform: none; } }
+@keyframes fxhCtaInM { 0% { opacity: 0; transform: translate3d(0, 22px, 0) scale(.94); } 100% { opacity: 1; transform: none; } }
+
+@media (max-width: 400px) {
+  .fx-hero__cta { gap: 10px 20px; }
+  .fx-hero__btn { padding: 13px 14px 13px 20px; font-size: 14px; }
+}
+
+/* ---------- reduced motion: final state, no loops ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .fx-hero .fx-hero__title .hc,
+  .fx-hero .fx-hero__title .acc,
+  .fx-hero .fx-hero__claim .wi,
+  .fx-hero .fx-hero__claim .o,
+  .fx-hero .fx-hero__claim .o::after,
+  .fx-hero .fx-hero__cta > *,
+  .fx-hero .fx-hero__foot::before,
+  .fx-hero .fx-hero__foot > *,
+  .fx-hero .fx-hero__orb,
+  .fx-hero .fx-hero__orb i,
+  .fx-hero .fx-hero__cue i::after { animation: none !important; opacity: 1; }
+  .fx-hero .fx-hero__claim .o { clip-path: none; }
+  .fx-hero .fx-hero__claim .o::after { opacity: 0; }
+  .fx-hero__morph { transform: none; transition: opacity .4s; }
+  .fx-hero .roll > span { transition: none; }
+}

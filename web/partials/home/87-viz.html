@@ -1,0 +1,54 @@
+<!-- VIZ (owner: studio agent) - dozfx "Orchestrated, not relayed." figure.viz[data-viz]: relay chain vs one layer, travelling pulses, 4 → 1 -->
+<section class="fx-vz" aria-labelledby="fx-vz-t">
+  <div class="wrap fx-vz__wrap">
+    <div class="fx-vz__t">
+      <p class="fx8-lbl"><span data-scramble>Why timing</span></p>
+      <h2 class="fx-vz__lead" id="fx-vz-t" data-rv>Measured, not decrypted.</h2>
+      <p class="fx-vz__dim" data-rv>Deep packet inspection hands every packet down a chain: keys, decryption, payload inspection, signature rules. MetaFlow puts one timing layer between the encrypted packet and the answer, and never opens the payload.</p>
+    </div>
+    <div class="fx-vz__g">
+      <figure class="fx-viz" data-viz>
+        <div class="fx-viz__bar"><span>Measurement, not decryption</span><span class="fx8-acc">Pipeline</span></div>
+        <div class="fx-viz__body" aria-hidden="true">
+          <div class="fx-hand">
+            <div class="fx-hand__lane fx-hand__lane--a">
+              <p class="fx-hand__t">Typical DPI chain</p>
+              <ol>
+                <li><i></i><span>Encrypted packet</span></li>
+                <li><i></i><span>TLS keys &amp; decryption</span></li>
+                <li><i></i><span>Payload inspection</span></li>
+                <li><i></i><span>Signature rules</span></li>
+                <li class="fx-hand__end"><i></i><span>Verdict<small>100–500 ms</small></span></li>
+                <li class="fx-hand__pulse"></li>
+              </ol>
+            </div>
+            <div class="fx-hand__lane fx-hand__lane--b">
+              <p class="fx-hand__t">MetaFlow · one timing layer</p>
+              <ol>
+                <li><i></i><span>Encrypted packet</span></li>
+                <li class="fx-hand__lead"><i></i><span>Timing layer<small>23 features · LightGBM</small></span></li>
+                <li class="fx-hand__team"><i></i><i></i><i></i><span>Verdict and reason<small class="fx8-acc">~2.3 ms</small></span></li>
+                <li class="fx-hand__pulse"></li>
+                <li class="fx-hand__pulse fx-hand__pulse--2"></li>
+                <li class="fx-hand__pulse fx-hand__pulse--3"></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="fx-viz__foot">
+          <span class="fx-viz__big" aria-hidden="true"><b><span class="od" data-count="4" data-count-delay="200" data-done="1">4</span></b><span class="fx-viz__arr">→</span><b class="fx8-acc"><span class="od" data-count="1" data-count-delay="520" data-done="1">1</span></b></span>
+          <span class="fx-viz__note">Handoffs between the encrypted packet and its verdict</span>
+        </div>
+        <table class="fx8-sr">
+          <caption>Handoffs between the encrypted packet and the verdict</caption>
+          <thead><tr><th scope="col">Approach</th><th scope="col">Chain</th><th scope="col">Handoffs</th><th scope="col">Latency</th></tr></thead>
+          <tbody>
+            <tr><td>Deep packet inspection</td><td>Encrypted packet → TLS keys and decryption → Payload inspection → Signature rules → Verdict</td><td>4</td><td>100 to 500 ms</td></tr>
+            <tr><td>MetaFlow</td><td>Encrypted packet → Timing layer (23 features, LightGBM) → Verdict and reason</td><td>1</td><td>about 2.3 ms</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p class="fx-vz__cap"><span>Illustration</span><span>No keys. No payload. No decryption.</span></p>
+    </div>
+  </div>
+</section>

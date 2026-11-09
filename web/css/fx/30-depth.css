@@ -1,0 +1,169 @@
+/* 30-depth — the two pinned "depth" showcases (Built for speed. / Every app has a pulse.)
+   Port of dozfx section.depth.depth--seq.depth--fade: a sticky 100svh stage inside a tall section.
+   JS (js/fx/30-depth.js) drives these custom properties on .fx-depth__stage:
+   --e  build 0→1 (inset rounded card → full bleed, title settles)   --sc/--so  scan line position/opacity
+   --tt/--tto  title lift / opacity      --fo  fade-out at the end     --rv  race / readout reveal  --hud  rail */
+
+.fx-depth {
+  position: relative; pointer-events: none;
+  --cxm: 30%; --cym: 20%;
+  --dm: clamp(24px, 4.444vw, 64px);
+  --ease-x: cubic-bezier(.16, 1, .3, 1); --ease-o: cubic-bezier(.22, 1, .36, 1);
+  background: transparent; color: #fff;
+}
+/* the next section slides up over the faded stage, as on dozfx (.depth--fade + * { margin-top: -155svh }) */
+.fx-depth.fx-depth--fade { margin-bottom: -155vh; margin-bottom: -155svh; }
+.fx-depth__run { height: 300vh; }
+.fx-depth--pulse .fx-depth__run { height: 420vh; }
+
+.fx-depth__stage {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  display: grid; place-items: center;
+  --e: 1; --tt: 0px; --tto: 1; --fo: 0; --sc: 0; --so: 0; --rv: 0; --hud: 0;
+  --ci: calc((1 - var(--e)) * var(--cym)); --cx: calc((1 - var(--e)) * var(--cxm));
+}
+.fx-depth__stage.is-gone { visibility: hidden; }
+
+/* ---- media: inset rounded card that opens to full bleed ---- */
+.fx-depth__media {
+  position: absolute; inset: 0; background: #000;
+  clip-path: inset(var(--ci) var(--cx) round calc((1 - var(--e)) * 22px));
+  opacity: calc(1 - var(--fo));
+  background-image: radial-gradient(ellipse 60% 40% at 50% var(--fy, 50%), rgba(255, 43, 214, .22), transparent 70%);
+}
+.fx-depth__gl {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block; max-width: none;
+  transform: scale(calc(1 + var(--fo) * .07)); transform-origin: 50% var(--fy, 50%); will-change: transform;
+}
+.fx-depth__scan {
+  position: absolute; left: 0; right: 0; top: calc(var(--sc) * 100%); height: 1px; margin-top: -1px; z-index: 2;
+  background: linear-gradient(90deg, transparent, #ff2bd6 18%, #fff 50%, #ff2bd6 82%, transparent);
+  box-shadow: 0 0 30px 6px rgba(255, 43, 214, .65); opacity: var(--so);
+}
+.fx-depth__veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, .52)),
+              radial-gradient(ellipse at 50% 55%, rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .6));
+}
+
+/* ---- meta row (Fig. + counter) and caption ---- */
+.fx-depth__meta, .fx-depth__cap {
+  position: absolute; z-index: 3; left: var(--dm); right: var(--dm);
+  font-family: var(--mono, "JetBrains Mono", ui-monospace, monospace); font-size: 11px; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; font-weight: 500;
+  opacity: calc(1 - var(--fo));
+}
+.fx-depth__meta { top: 104px; display: flex; justify-content: space-between; color: rgba(255, 255, 255, .8); }
+.fx-depth__n { font-variant-numeric: tabular-nums; }
+.fx-depth__cap { bottom: 32px; margin: 0; text-align: center; color: rgba(255, 255, 255, .72); }
+.fx-depth__cap span { white-space: nowrap; }
+
+/* ---- headline: settles in from 12vh lower at 82% scale, blur → sharp per word ---- */
+.fx-depth__title {
+  position: relative; z-index: 3; margin: 0; align-self: end; margin-bottom: max(11svh, 102px);
+  padding-inline: var(--dm); text-align: center; color: #fff;
+  font-family: var(--display, "Inter Tight", sans-serif); font-weight: 900;
+  font-size: min(188px, 13vh, 9vw); line-height: .86; letter-spacing: -.055em;
+  transform: translate3d(0, calc((1 - var(--e)) * 12vh + var(--tt)), 0) scale(calc(.82 + var(--e) * .18));
+  opacity: var(--tto); will-change: transform, opacity;
+}
+.fx-depth__title::before {
+  content: ""; position: absolute; left: 50%; top: 50%; z-index: -1; width: min(140%, 1700px); height: 170%;
+  transform: translate(-50%, -50%); pointer-events: none;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .46), rgba(0, 0, 0, .4) 22%, rgba(0, 0, 0, .28) 45%, rgba(0, 0, 0, .14) 66%, rgba(0, 0, 0, .05) 84%, transparent);
+}
+.fx-depth .wd { display: inline-block; overflow: hidden; vertical-align: top; padding: .18em .1em .24em; margin: -.18em -.1em -.24em; }
+.fx-depth .wi {
+  display: inline-block; transform-origin: 0 100%;
+  transition: transform 1.05s var(--ease-x), opacity .8s var(--ease-o), filter .9s var(--ease-o), color 1.5s var(--ease-o);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.fx-depth.is-armed .fx-depth__title:not(.in) .wi { transform: translate3d(0, 140%, 0) rotate(7deg); opacity: 0; filter: blur(8px); color: #ff2bd6; }
+
+/* ---- Fig. 01: latency race (appears inside the visual once the title has lifted away) ---- */
+.fx-depth__race {
+  position: absolute; z-index: 3; left: 50%; top: 50%; width: min(920px, calc(100% - 2 * var(--dm)));
+  transform: translate(-50%, calc(-50% + (1 - var(--rv)) * 40px)); opacity: var(--rv);
+  font-family: var(--mono, "JetBrains Mono", monospace); color: #fff;
+}
+.fx-depth__race::before, .fx-depth__read::before, .fx-depth__rail::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: 150%; height: 190%; transform: translate(-50%, -50%); pointer-events: none;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .78), rgba(0, 0, 0, .62) 40%, rgba(0, 0, 0, .3) 72%, transparent);
+}
+.fx-depth__rail::before { width: 200%; height: 160%; }
+.fx-depth__race-h { display: flex; justify-content: space-between; gap: 16px; margin: 0 0 22px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .72); }
+.fx-depth__lanes { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.fx-depth__lane {
+  --r: 0; display: grid; grid-template-columns: 190px 1fr 96px; align-items: center; gap: 18px;
+  font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: rgba(255, 255, 255, .78);
+  opacity: calc(.25 + var(--r) * .75);
+}
+.fx-depth__who { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fx-depth__val { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fx-depth__track { position: relative; height: 10px; border-radius: 99px; background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.fx-depth__fill, .fx-depth__ext { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 99px; transform-origin: 0 50%; }
+.fx-depth__fill { width: calc(var(--a) * 100%); transform: scaleX(var(--r)); background: linear-gradient(90deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .78)); }
+.fx-depth__ext {
+  width: calc(var(--b) * 100%); transform: scaleX(var(--r)); opacity: .55;
+  background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .34) 0 3px, transparent 3px 7px);
+}
+.fx-depth__lane.is-me { color: #fff; font-weight: 600; }
+.fx-depth__lane.is-me .fx-depth__fill { background: linear-gradient(90deg, #ff8bf0, #ff2bd6); box-shadow: 0 0 14px rgba(255, 43, 214, .9), 0 0 42px rgba(255, 43, 214, .5); }
+.fx-depth__lane.is-me .fx-depth__val { color: #ff8bf0; text-shadow: 0 0 18px rgba(255, 43, 214, .8); }
+.fx-depth__axis { position: relative; height: 14px; margin: 12px 114px 0 208px; font-size: 10px; letter-spacing: .1em; color: rgba(255, 255, 255, .5); }
+.fx-depth__axis span { position: absolute; left: calc(var(--x) * 100%); transform: translateX(-50%); white-space: nowrap; }
+.fx-depth__axis span:first-child { transform: none; }
+.fx-depth__axis span:last-child { transform: translateX(-100%); }
+
+/* ---- Fig. 02: class readout + rail ---- */
+.fx-depth__read {
+  position: absolute; z-index: 3; left: 50%; top: 46%; width: calc(100% - 2 * var(--dm)); text-align: center;
+  transform: translate(-50%, calc(-50% + (1 - var(--rv)) * 40px)); opacity: var(--rv);
+}
+.fx-depth__read p { margin: 0; }
+.fx-depth__read-k, .fx-depth__read-f { font-family: var(--mono, "JetBrains Mono", monospace); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .78); }
+.fx-depth__read-c {
+  font-family: var(--display, "Inter Tight", sans-serif); font-weight: 900; letter-spacing: -.055em; line-height: .9;
+  font-size: min(176px, 15vh, 11vw); margin: 18px 0 14px !important; color: #fff;
+  text-shadow: 0 0 40px rgba(255, 43, 214, .45);
+}
+.fx-depth__read-c.is-swap { animation: fxdSwap .55s var(--ease-x) both; }
+@keyframes fxdSwap { from { opacity: 0; filter: blur(10px); transform: translateY(18%); color: #ff2bd6; } to { opacity: 1; filter: none; transform: none; } }
+.fx-depth__read-f b { color: #ff8bf0; font-weight: 600; text-shadow: 0 0 16px rgba(255, 43, 214, .85); font-variant-numeric: tabular-nums; }
+
+.fx-depth__rail {
+  position: absolute; z-index: 3; left: var(--dm); top: 50%; transform: translateY(-50%); list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 9px; opacity: calc(var(--hud) * (1 - var(--fo)));
+  font-family: var(--mono, "JetBrains Mono", monospace); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+}
+.fx-depth__rail li { display: grid; grid-template-columns: 14px 104px auto; align-items: center; gap: 8px; color: rgba(255, 255, 255, .55); transition: color .35s; }
+.fx-depth__rail li::before { content: ""; height: 1px; background: currentColor; transform: scaleX(.45); transform-origin: 0 50%; transition: transform .45s var(--ease-x), background .35s, box-shadow .35s; }
+.fx-depth__rail b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.fx-depth__rail li.is-on { color: #fff; }
+.fx-depth__rail li.is-on::before { transform: scaleX(1); background: #ff2bd6; box-shadow: 0 0 10px #ff2bd6; }
+.fx-depth__rail li.is-on b { color: #ff8bf0; }
+
+/* ---- reduced motion: no pin, final state ---- */
+.fx-depth.is-static .fx-depth__run { display: none; }
+.fx-depth.is-static { margin-bottom: 0; }
+.fx-depth.is-static .fx-depth__stage { position: relative; }
+.fx-depth.is-static .fx-depth__race, .fx-depth.is-static .fx-depth__read { display: none; }
+
+/* ---- tablet / phone ---- */
+@media (max-width: 767px) {
+  .fx-depth { --cxm: 7%; --cym: 26%; }
+  .fx-depth__meta { top: 84px; font-size: 10px; }
+  .fx-depth__cap { font-size: 10px; bottom: 24px; }
+  .fx-depth__cap span { white-space: normal; }
+  .fx-depth__title { font-size: clamp(44px, 14.5vw, 112px); margin-bottom: max(14svh, 96px); }
+  .fx-depth__lane { grid-template-columns: 1fr 74px; grid-template-areas: "who val" "track track"; gap: 6px 10px; font-size: 10px; }
+  .fx-depth__who { grid-area: who; } .fx-depth__val { grid-area: val; } .fx-depth__track { grid-area: track; height: 8px; }
+  .fx-depth__axis { margin: 10px 0 0; }
+  .fx-depth__race-h { flex-direction: column; gap: 6px; font-size: 10px; }
+  .fx-depth__rail { left: auto; right: var(--dm); top: 132px; transform: none; gap: 4px; font-size: 9px; }
+  .fx-depth__rail li { grid-template-columns: 10px 86px auto; }
+  .fx-depth__read { top: 50%; }
+}
+@media (max-width: 560px) {
+  .fx-depth__rail li:not(.is-on) { display: none; }
+}

@@ -1,0 +1,201 @@
+/* ==========================================================================
+   50-reel  ·  (A) demo teaser with 3D device mockups  ·  (B) "Charts take shape." spiral
+   Ports dozfx .reel (scroll unfold, rotateX 66deg -> 0) and .spiral[data-spiral] (pinned 3D vortex).
+   ========================================================================== */
+
+/* ---------- (A) Reel / demo teaser ---------- */
+.fx-reel { position: relative; padding-block: clamp(96px, 13vw, 176px) clamp(80px, 10vw, 140px); overflow: hidden; }
+.fx-reel__wrap { position: relative; }
+.fx-reel__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.fx-reel__label { margin: 0; font-family: var(--mono); font-size: 11px; font-weight: 500; line-height: 1.2; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2, rgba(246,244,250,.62)); }
+.fx-reel__link, .fx-spiral__link {
+  position: relative; display: inline-flex; align-items: center; gap: 8px; padding-bottom: 3px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.2; color: var(--ink); text-decoration: none; white-space: nowrap;
+}
+.fx-reel__link::after, .fx-spiral__link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor;
+  opacity: .35; transform-origin: left; transition: opacity .3s cubic-bezier(.22,1,.36,1), background-color .3s;
+}
+.fx-reel__link:hover::after, .fx-spiral__link:hover::after { opacity: 1; background: var(--mag); }
+.fx-reel__link svg, .fx-spiral__link svg { width: 10px; height: 10px; flex: none; transition: transform .3s cubic-bezier(.22,1,.36,1); }
+.fx-reel__link:hover svg, .fx-spiral__link:hover svg { transform: translate(2px, -2px); }
+.fx-reel__link:focus-visible, .fx-spiral__link:focus-visible, .fx-reel__stage:focus-visible { outline: 2px solid var(--mag); outline-offset: 6px; border-radius: 6px; }
+
+.fx-reel__title {
+  margin: 0 0 clamp(36px, 5vw, 72px); max-width: 15ch;
+  font-family: var(--display); font-weight: 800; font-size: clamp(40px, calc(8px + 6.4vw), 104px);
+  line-height: .9; letter-spacing: -.055em; color: var(--ink);
+}
+.fx-reel__title span { display: block; }
+.fx-reel__title span + span { color: var(--ink-2, rgba(246,244,250,.62)); }
+
+/* the stage is the dozfx .reel__frame: a link with cursor label "Play", unfolding from rotateX(66deg) */
+.fx-reel__stage {
+  position: relative; display: block; width: min(100%, 1180px); margin-inline: auto; aspect-ratio: 16 / 9;
+  perspective: min(1300px, 170vw); perspective-origin: 50% 115%;
+  color: inherit; text-decoration: none; cursor: pointer;
+}
+.fx-reel__rig {
+  position: absolute; inset: 0; display: block; transform-style: preserve-3d; transform-origin: 50% 100%;
+  transform: rotateX(calc((1 - var(--u, 1)) * 66deg + var(--rx, 0deg))) rotateY(var(--ry, 0deg)) scale(calc(.9 + var(--u, 1) * .1));
+  will-change: transform;
+}
+.fx-reel__glow {
+  position: absolute; left: 14%; right: 14%; top: 8%; bottom: 4%; display: block; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,43,214,.42), rgba(138,61,255,.16) 55%, transparent 80%);
+  filter: blur(40px); transform: translateZ(-260px) scale(1.25); pointer-events: none;
+  animation: fxReelPulse 6s ease-in-out infinite;
+}
+@keyframes fxReelPulse { 0%,100% { opacity: .75; } 50% { opacity: 1; } }
+
+/* devices: placement in transform, floating in the individual `translate` property so both compose */
+.fx-dev { position: absolute; display: block; transform-style: preserve-3d; animation: fxReelFloat var(--fd, 8s) ease-in-out var(--fo, 0s) infinite; }
+@keyframes fxReelFloat { 0%,100% { translate: 0 0 0; } 50% { translate: 0 -14px 0; } }
+.fx-dev__screen { position: relative; display: block; overflow: hidden; background: #fff; }
+.fx-dev__screen img, .fx-dev__screen video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fx-dev__screen::after {
+  content: ""; position: absolute; inset: 0; display: block; pointer-events: none;
+  background: linear-gradient(118deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.04) 28%, transparent 46%);
+}
+.fx-dev__cam { position: absolute; display: block; width: 5px; height: 5px; border-radius: 50%; background: #1d1b24; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+
+/* laptop */
+.fx-dev--laptop { left: 21%; top: 4%; width: 60%; transform: translateZ(0); z-index: 2; }
+.fx-dev__lid {
+  position: relative; display: block; padding: 2.1% 2.1% 2.6%; border-radius: 18px 18px 6px 6px;
+  background: linear-gradient(180deg, #17161d, #0b0a0f);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.13), 0 0 0 1px #000, 0 40px 90px -30px rgba(0,0,0,.95), 0 0 70px -20px rgba(255,43,214,.35);
+}
+.fx-dev--laptop .fx-dev__screen { aspect-ratio: 16 / 10; border-radius: 6px; background: #000; }
+.fx-dev--laptop .fx-dev__cam { left: 50%; top: .9%; margin-left: -2.5px; }
+.fx-dev__base {
+  position: relative; display: block; width: 116%; margin-left: -8%; height: clamp(9px, 1.5vw, 19px);
+  border-radius: 2px 2px 22px 22px / 2px 2px 100% 100%;
+  background: linear-gradient(180deg, #ecebf1 0%, #b7b4c0 30%, #6d6a76 70%, #2a2830 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 18px 30px -12px rgba(0,0,0,.9);
+}
+.fx-dev__base i { position: absolute; left: 42%; right: 42%; top: 0; height: 42%; border-radius: 0 0 8px 8px; background: rgba(20,18,26,.45); }
+.fx-dev__shadow { position: absolute; left: 0; right: 0; bottom: -34px; height: 40px; display: block; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.85), transparent); filter: blur(6px); }
+
+/* tablet */
+.fx-dev--tablet { left: -2%; top: 24%; width: 30%; transform: translateZ(-140px) rotateY(26deg) rotateZ(-3deg); z-index: 1; }
+.fx-dev--tablet .fx-dev__body, .fx-dev--phone .fx-dev__body {
+  position: relative; display: block; background: linear-gradient(160deg, #1b1a21, #0a090d);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), 0 0 0 1.5px #2b2933, 0 40px 80px -24px rgba(0,0,0,.95), 0 0 50px -18px rgba(255,43,214,.3);
+}
+.fx-dev--tablet .fx-dev__body { padding: 4.2%; border-radius: clamp(14px, 2vw, 26px); }
+.fx-dev--tablet .fx-dev__screen { aspect-ratio: 4 / 3; border-radius: clamp(6px, .9vw, 12px); }
+.fx-dev--tablet .fx-dev__cam { left: 1.6%; top: 50%; margin-top: -2.5px; }
+
+/* phone */
+.fx-dev--phone { right: 3%; top: 22%; width: 15%; transform: translateZ(150px) rotateY(-24deg) rotateZ(4deg); z-index: 3; }
+.fx-dev--phone .fx-dev__body { padding: 5.5%; border-radius: clamp(18px, 2.6vw, 36px); }
+.fx-dev--phone .fx-dev__screen { aspect-ratio: 9 / 19.5; border-radius: clamp(13px, 2vw, 28px); display: flex; flex-direction: column; justify-content: center; gap: 8%; padding: 0 5%; }
+.fx-dev--phone .fx-dev__screen img { height: auto; object-fit: contain; }
+.fx-dev__island { position: absolute; left: 50%; top: 4.6%; width: 30%; height: 3.6%; margin-left: -15%; display: block; border-radius: 99px; background: #050507; }
+.fx-dev__bar { display: flex; flex-direction: column; gap: 3px; font-family: var(--mono); font-size: clamp(6px, .62vw, 9px); letter-spacing: .08em; text-transform: uppercase; color: #6b6875; }
+.fx-dev__bar b { font-weight: 500; }
+.fx-dev__bar b:first-child { color: #050507; font-weight: 700; }
+.fx-dev__stat { display: flex; flex-direction: column; gap: 2px; color: #050507; }
+.fx-dev__stat em { font-style: normal; font-family: var(--display); font-weight: 800; font-size: clamp(16px, 2.2vw, 30px); letter-spacing: -.05em; line-height: 1; color: #c3009f; }
+.fx-dev__stat small { font-family: var(--mono); font-size: clamp(5px, .55vw, 8px); letter-spacing: .06em; text-transform: uppercase; color: #6b6875; }
+
+/* big round play button over the laptop screen */
+.fx-reel__play {
+  /* sits low on the laptop screen so it never covers the walkthrough's centred title card */
+  position: absolute; left: 50%; top: 63%; z-index: 5; display: grid; place-items: center; align-content: center; gap: 2px;
+  width: clamp(64px, 6.6vw, 100px); aspect-ratio: 1; margin-left: calc(clamp(64px, 6.6vw, 100px) / -2); margin-top: calc(clamp(64px, 6.6vw, 100px) / -2);
+  border-radius: 50%; background: var(--mag); color: #050507;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.35) inset, 0 0 0 10px rgba(255,43,214,.16), 0 0 60px rgba(255,43,214,.65);
+  transform: translateZ(90px); transition: transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s;
+}
+.fx-reel__play svg { width: 34%; height: auto; margin-left: 6%; }
+.fx-reel__play span { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.fx-reel__play::before {
+  content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 1px solid rgba(255,43,214,.55);
+  animation: fxReelRing 2.4s cubic-bezier(.22,1,.36,1) infinite;
+}
+@keyframes fxReelRing { 0% { transform: scale(.9); opacity: .9; } 100% { transform: scale(1.45); opacity: 0; } }
+.fx-reel__stage:hover .fx-reel__play { transform: translateZ(90px) scale(1.08); box-shadow: 0 0 0 1px rgba(255,255,255,.5) inset, 0 0 0 14px rgba(255,43,214,.2), 0 0 90px rgba(255,43,214,.85); }
+
+.fx-reel__foot { display: flex; justify-content: space-between; gap: 16px; margin-top: clamp(40px, 5vw, 64px); font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute, rgba(246,244,250,.45)); }
+
+@media (max-width: 560px) {
+  .fx-reel__head { flex-wrap: wrap; }
+  .fx-reel__stage { aspect-ratio: 4 / 5; }
+  .fx-dev--laptop { left: 2%; top: 6%; width: 96%; }
+  .fx-dev--tablet { left: -4%; top: 50%; width: 58%; transform: translateZ(-60px) rotateY(18deg) rotateZ(-3deg); }
+  .fx-dev--phone { right: 2%; top: 42%; width: 30%; transform: translateZ(80px) rotateY(-16deg) rotateZ(4deg); }
+  .fx-reel__play { top: 44%; left: 17%; width: 52px; margin-left: -26px; margin-top: -26px; transform: translateZ(24px); }
+  .fx-reel__stage:hover .fx-reel__play { transform: translateZ(24px) scale(1.06); }
+  .fx-reel__play span { display: none; }
+  .fx-reel__play svg { width: 40%; }
+  .fx-reel__glow { filter: blur(28px); }
+  .fx-reel__foot { flex-direction: column; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-dev, .fx-reel__glow, .fx-reel__play::before { animation: none; }
+  .fx-reel__rig { transform: none; }
+}
+
+/* ---------- (B) Spiral: "Charts take shape." ---------- */
+.fx-spiral { position: relative; z-index: 2; height: 220vh; --cw: clamp(150px, 17vw, 290px); }
+.fx-spiral__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; perspective: 820px; perspective-origin: 50% 50%; }
+.fx-spiral__stage.is-early { position: fixed; top: 0; left: 0; right: 0; width: 100%; pointer-events: none; }
+.fx-spiral__fog {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: var(--sbg, 1);
+  background: radial-gradient(circle at 50% 50%, rgba(255,43,214,.22), rgba(255,43,214,0) 26%), radial-gradient(circle at 50% 50%, transparent 34%, rgba(3,3,4,.92) 90%);
+}
+.fx-spiral__space { position: absolute; inset: 0; z-index: 1; transform-style: preserve-3d; }
+.fx-spiral__space--front { z-index: 4; pointer-events: none; }
+.fx-spiral__space--front .fx-spiral__card { pointer-events: auto; }
+.fx-spiral__card {
+  position: absolute; left: 50%; top: 50%; width: var(--cw); margin: calc(var(--cw) * -.38) 0 0 calc(var(--cw) / -2);
+  padding: 6px 6px 0; border-radius: 14px; overflow: hidden; isolation: isolate;
+  background: var(--paper, #111016); border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 18px 34px -18px rgba(0,0,0,.9);   /* small blur radius: 11 moving 3D layers stay cheap */
+  will-change: transform, opacity; backface-visibility: hidden;
+  transition: box-shadow .45s cubic-bezier(.22,1,.36,1), border-color .45s;
+}
+.fx-spiral:not(.is-live):not(.is-static) .fx-spiral__card { visibility: hidden; }
+.fx-spiral__card img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: contain; background: #fff; border-radius: 9px; }
+.fx-spiral__card figcaption {
+  padding: 8px 4px 9px; font-family: var(--mono); font-size: 10px; line-height: 1.2; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-2, rgba(246,244,250,.62)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .45s;
+}
+.fx-spiral__card.is-near { border-color: rgba(255,43,214,.75); box-shadow: 0 0 0 1px rgba(255,43,214,.5), 0 0 22px rgba(255,43,214,.55), 0 18px 34px -18px rgba(0,0,0,.9); }
+.fx-spiral__card.is-near figcaption { color: var(--mag-2, #ff8bf0); }
+
+.fx-spiral__title {
+  position: absolute; left: 0; right: 0; top: 50%; z-index: 3; margin: 0; text-align: center; pointer-events: none;
+  transform: translateY(-50%) scale(var(--ts, 1)); will-change: transform;
+  font-family: var(--display); font-weight: 800; font-size: clamp(40px, calc(10.197px + 9.0141vw), 148px);
+  line-height: .88; letter-spacing: -.055em; color: #fff; text-shadow: 0 0 60px rgba(255,43,214,.25);
+}
+.fx-spiral__title .wd { display: inline-block; }
+.fx-spiral__meta { position: absolute; left: 0; right: 0; z-index: 5; opacity: calc(var(--sx, 1) * var(--sbg, 1)); }
+.fx-spiral__meta--top { top: clamp(80px, 12vh, 112px); }
+.fx-spiral__meta--bot { bottom: 32px; }
+.fx-spiral__row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.fx-spiral__meta--top .fx-spiral__row { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2, rgba(246,244,250,.62)); }
+.fx-spiral__note { font-family: var(--sans); font-size: 14px; color: var(--ink-2, rgba(246,244,250,.62)); }
+.fx-spiral__meta--bot .fx-spiral__link { font-size: 14px; color: var(--ink-2, rgba(246,244,250,.62)); transition: color .3s; }
+.fx-spiral__meta--bot .fx-spiral__link:hover { color: var(--ink); }
+.fx-spiral__stage.is-early .fx-spiral__link { pointer-events: none; }
+
+/* reduced motion: a plain grid, no pin (dozfx .spiral.is-static) */
+.fx-spiral.is-static { height: auto; }
+.fx-spiral.is-static .fx-spiral__stage { position: relative; height: auto; perspective: none; overflow: visible; padding-block: clamp(96px, 12vw, 160px); }
+.fx-spiral.is-static .fx-spiral__space { position: relative; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding-inline: var(--gutter, 24px); margin-top: 48px; max-width: var(--max, 1320px); margin-inline: auto; }
+.fx-spiral.is-static .fx-spiral__space--front, .fx-spiral.is-static .fx-spiral__fog { display: none; }
+.fx-spiral.is-static .fx-spiral__card { position: relative; left: auto; top: auto; margin: 0; width: auto; }
+.fx-spiral.is-static .fx-spiral__title, .fx-spiral.is-static .fx-spiral__meta { position: relative; top: auto; bottom: auto; transform: none; opacity: 1; }
+.fx-spiral.is-static .fx-spiral__meta--top { margin-bottom: 40px; }
+.fx-spiral.is-static .fx-spiral__meta--bot { margin-top: 40px; }
+
+@media (max-width: 767px) { .fx-spiral { --cw: 44vw; } }
+@media (max-width: 560px) {
+  .fx-spiral__row { flex-direction: column; gap: 6px; }
+  .fx-spiral__meta--top .fx-spiral__row span + span { display: none; }
+  .fx-spiral__card figcaption { font-size: 9px; }
+}

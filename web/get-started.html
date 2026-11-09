@@ -9,8 +9,9 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/fx.bundle.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -78,6 +79,7 @@ docker-compose up -d</pre></div>
   <div class="faq rv rv-d1"><details open><summary>How can you classify traffic you cannot decrypt?</summary><div class="ans"><p>Encryption hides what a packet says, not when it moves. A voice call sends a small frame every 20 ms. A file transfer fills the pipe one way. A web page loads in bursts and then goes quiet while someone reads. MetaFlow measures 23 of these timing statistics per flow and lets a LightGBM model learn which rhythm belongs to which application.</p></div></details><details><summary>Does it ever look at payload?</summary><div class="ans"><p>No. The PCAP extractor parses IP and transport headers to build flows and drops payload bytes as it reads them. The model only ever sees timing statistics, so there is nothing personal to leak and no decryption keys to manage.</p></div></details><details><summary>How accurate is it, honestly?</summary><div class="ans"><p>96.9% accuracy and 0.950 macro F1 on 1,305 held-out flows that were never used for training or tuning. Five-fold cross-validation gives 95.61% ± 0.57%. The weakest class is Streaming (F1 0.874), because buffered video inside a 15 s window can look like page-load bursts. That trade-off is documented in the reports.</p></div></details><details><summary>What happens with traffic it has never seen?</summary><div class="ans"><p>You set a confidence threshold. Any flow whose top probability falls below it is labelled <em>Uncertain (Unknown Traffic)</em> instead of being forced into the nearest class, so new protocols end up in a triage queue rather than in your statistics.</p></div></details><details><summary>Does it need a GPU or the internet?</summary><div class="ans"><p>Neither. Inference is about 2.3 ms per flow on a CPU, more than 400 flows a second. Explanations fall back to a built-in rule engine when no local Ollama model or cloud key is available, so the whole thing runs offline.</p></div></details></div>
 </div></section></main>
 <footer class="ftr">
+  <div class="ftr-fx" aria-hidden="true"><canvas data-horizon></canvas></div>
   <div class="wrap">
     <div class="ftr-grid">
       <div>
@@ -115,5 +117,6 @@ docker-compose up -d</pre></div>
   <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
 </div>
 <script src="js/main.js"></script>
+<script src="js/fx.bundle.js"></script>
 </body>
 </html>

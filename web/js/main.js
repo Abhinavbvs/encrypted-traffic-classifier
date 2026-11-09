@@ -7,7 +7,12 @@
 
   /* ---------- header + clock ---------- */
   var hdr = $(".hdr");
-  function onScroll() { if (hdr) hdr.classList.toggle("scrolled", window.scrollY > 20); }
+  /* read scrollY at most once per frame, in rAF, so the read never forces a layout mid-frame */
+  var scrollQueued = false;
+  function onScroll() {
+    if (scrollQueued) return; scrollQueued = true;
+    requestAnimationFrame(function () { scrollQueued = false; if (hdr) hdr.classList.toggle("scrolled", window.scrollY > 20); });
+  }
   window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
   var clock = $("[data-clock]");

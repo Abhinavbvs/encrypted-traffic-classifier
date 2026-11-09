@@ -1,0 +1,26 @@
+<section class="fx-warp" data-fx-warp aria-labelledby="fx-warp-t">
+  <div class="fx-warp__stage">
+    <div class="fx-warp__shapes" aria-hidden="true">
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="cube" data-size="200" data-tint="chrome" data-spin="0.45" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="cone" data-size="200" data-tint="mag" data-spin="0.4" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="arch" data-size="200" data-tint="mag" data-spin="0.35" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="gem" data-size="200" data-tint="chrome" data-spin="0.5" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="spring" data-size="200" data-tint="chrome" data-spin="0.4" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="torus" data-size="200" data-tint="mag" data-spin="0.45" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="pyramid" data-size="200" data-tint="chrome" data-spin="0.38" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="capsule" data-size="200" data-tint="violet" data-spin="0.42" data-float data-par></canvas></span>
+    </div>
+    <div class="wrap fx-warp__wrap">
+      <div class="fx-warp__content">
+        <p class="fx-lbl"><span data-scramble>How the pipeline works</span></p>
+        <h2 class="fx-warp__h" id="fx-warp-t">Headers lead.<br>Payload never follows.</h2>
+        <ol class="fx-warp__steps">
+          <li class="fx-warp__step"><span class="fx-warp__n">01 / Capture</span><h3>Scapy · .pcap / .pcapng</h3><p>Parses IPv4/IPv6 headers and TCP/UDP ports; payload bytes discarded as read.</p></li>
+          <li class="fx-warp__step"><span class="fx-warp__n">02 / Extract</span><h3>5-tuple flows · 23 features</h3><p>Builds bidirectional flows and computes inter-arrival, rate, burst and idle statistics.</p></li>
+          <li class="fx-warp__step"><span class="fx-warp__n">03 / Classify</span><h3>Scaler · LightGBM</h3><p>Train-only scaler, then the top class and full probability spread.</p></li>
+          <li class="fx-warp__step"><span class="fx-warp__n">04 / Explain</span><h3>3-tier router · threshold</h3><p>A networking reason for every verdict; low confidence becomes Unknown.</p></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>

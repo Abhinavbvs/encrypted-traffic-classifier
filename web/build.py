@@ -116,8 +116,9 @@ def head(title, desc):
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/fx.bundle.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -159,6 +160,7 @@ def footer():
     caps = "".join('<li><a href="%s">%s</a></li>' % (c["slug"], c["name"]) for c in CAPS)
     pages = "".join('<li><a href="%s">%s</a></li>' % (h, l) for h, l in NAV[1:]) + '<li><a href="system.html">Design system</a></li>'
     return """<footer class="ftr">
+  <div class="ftr-fx" aria-hidden="true"><canvas data-horizon></canvas></div>
   <div class="wrap">
     <div class="ftr-grid">
       <div>
@@ -196,6 +198,7 @@ def footer():
   <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
 </div>
 <script src="js/main.js"></script>
+<script src="js/fx.bundle.js"></script>
 </body>
 </html>
 """ % (logo("f"), REPO, pages, caps, REPO, REPO + "/", REPO + "/", "", REPO)
@@ -450,6 +453,21 @@ def home():
   <div class="final-row rv rv-d1"><p class="hero-sub" style="max-width:none">Not the payload.</p><a class="btn" href="get-started.html">Run the quickstart <span class="arr">→</span></a></div>
 </div></section>
 """ % (tiles, ways, words, cards, cmp_table(), stat_html, analyzer(), faq_block(), closing("Classify without looking."))
+    # The dozfx-style home is assembled from web/partials/home/*.html (sorted by file name).
+    # Tokens let a partial embed sections that need live data.
+    parts_dir = os.path.join(ROOT, "partials", "home")
+    if os.path.isdir(parts_dir) and any(f.endswith(".html") for f in os.listdir(parts_dir)):
+        tokens = {"{{analyzer}}": analyzer(), "{{faq}}": faq_block(), "{{cmp_table}}": cmp_table(),
+                  "{{closing}}": closing("Classify without looking.")}
+        chunks = []
+        for f in sorted(os.listdir(parts_dir)):
+            if f.endswith(".html"):
+                with open(os.path.join(parts_dir, f), encoding="utf-8") as fh:
+                    t = fh.read()
+                for k, v in tokens.items():
+                    t = t.replace(k, v)
+                chunks.append("<!-- partials/home/%s -->\n%s" % (f, t))
+        body = "\n".join(chunks)
     write("index.html", "MetaFlow · Encrypted traffic, classified by timing",
           "MetaFlow classifies encrypted network traffic into seven application types from 23 timing features, with zero payload inspection.",
           "index.html", body, snapshot=True)
@@ -894,6 +912,43 @@ def not_found():
     write("404.html", "Not found · MetaFlow", "Page not found.", "", body)
 
 
+def bundle():
+    """Concatenate web/css/fx/*.css and web/js/fx/*.js (sorted) into fx.bundle.css / fx.bundle.js.
+    Each JS module is isolated so one failing effect never breaks the others."""
+    for kind in ("css", "js"):
+        d = os.path.join(ROOT, kind, "fx")
+        files = sorted(f for f in os.listdir(d) if f.endswith("." + kind)) if os.path.isdir(d) else []
+        out = []
+        for f in files:
+            with open(os.path.join(d, f), encoding="utf-8") as fh:
+                src = fh.read()
+            if kind == "js" and f != "00-core.js":
+                src = ";(function(){try{\n%s\n}catch(e){console.error('fx/%s', e)}})();" % (src, f)
+            out.append("/* ---- fx/%s ---- */\n%s" % (f, src))
+        with open(os.path.join(ROOT, kind, "fx.bundle." + kind), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("\n".join(out) + "\n")
+    print("wrote fx bundles")
+
+
+def thumbs():
+    """Card-sized copies of reports/plots/*.png in web/media/plots/ (720 px JPEG). The animated sections show
+    charts at ~300 px; uploading the 1200-2400 px originals to the GPU all at once froze integrated graphics."""
+    from PIL import Image
+    src = os.path.join(REPO_DIR, "reports", "plots")
+    dst = os.path.join(ROOT, "media", "plots")
+    os.makedirs(dst, exist_ok=True)
+    for f in sorted(os.listdir(src)):
+        if not f.endswith(".png"):
+            continue
+        out = os.path.join(dst, f[:-4] + ".jpg")
+        if os.path.exists(out) and os.path.getmtime(out) >= os.path.getmtime(os.path.join(src, f)):
+            continue
+        im = Image.open(os.path.join(src, f)).convert("RGB")
+        im.thumbnail((720, 720))
+        im.save(out, "JPEG", quality=86, optimize=True, progressive=True)
+    print("wrote chart thumbnails")
+
+
 def favicon():
     svg = logo_svg("fav").replace('class="logo-mark" ', 'xmlns="http://www.w3.org/2000/svg" ').replace(' aria-hidden="true"', "")
     with open(os.path.join(ROOT, "favicon.svg"), "w", encoding="utf-8") as f:
@@ -902,4 +957,4 @@ def favicon():
 
 
 if __name__ == "__main__":
-    favicon(); home(); benchmarks(); capabilities(); analyze(); project(); demo(); reports(); get_started(); system(); legal(); not_found()
+    thumbs(); bundle(); favicon(); home(); benchmarks(); capabilities(); analyze(); project(); demo(); reports(); get_started(); system(); legal(); not_found()

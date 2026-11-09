@@ -9,8 +9,9 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/fx.bundle.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -44,6 +45,7 @@
 <h2>The classifier</h2><p>MetaFlow is built so that privacy does not depend on policy. It reads packet headers to build flows, discards payload bytes as they are parsed, and computes timing statistics only. No content, credentials or personal data reach the model.</p>
 <p>When the optional cloud explanation tier is enabled, only the predicted class, its probabilities and the timing features are sent to the provider you configure. Leave the key unset to keep everything local.</p></div></div></section></main>
 <footer class="ftr">
+  <div class="ftr-fx" aria-hidden="true"><canvas data-horizon></canvas></div>
   <div class="wrap">
     <div class="ftr-grid">
       <div>
@@ -81,5 +83,6 @@
   <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
 </div>
 <script src="js/main.js"></script>
+<script src="js/fx.bundle.js"></script>
 </body>
 </html>

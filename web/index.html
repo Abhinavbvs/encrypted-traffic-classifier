@@ -9,8 +9,9 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/fx.bundle.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -35,121 +36,464 @@
     </div>
   </div>
 </nav>
-<main id="main">
-<section class="hero">
-  <div class="hero-stage"><canvas id="heroCanvas" data-rhythm="voip" data-theme="light"></canvas></div>
-  <div class="hero-orb" aria-hidden="true"></div>
-  <div class="hero-slides" role="group" aria-label="Traffic rhythm">
-    <button data-slide="voip" data-cap="<span>Fig. A · live rhythm</span><b>VoIP · 20 ms frames</b>">VoIP</button>
-    <button data-slide="browsing" data-cap="<span>Fig. B · live rhythm</span><b>Browsing · bursts and think time</b>">Browsing</button>
-    <button data-slide="file" data-cap="<span>Fig. C · live rhythm</span><b>File transfer · saturated uplink</b>">File transfer</button>
+<main id="main"><!-- partials/home/10-hero.html -->
+<!-- HERO (owner: hero agent) - dozfx section.hero[data-glow] rebuilt for MetaFlow -->
+<section class="fx-hero" data-glow aria-labelledby="fx-hero-t">
+  <div class="fx-hero__orb" aria-hidden="true"><i></i></div>
+  <div class="fx-hero__glow" aria-hidden="true"></div>
+  <div class="fx-hero__stage" aria-hidden="true">
+    <canvas class="fx-hero__morph" data-morph></canvas>
+    <canvas class="fx-hero__lite" data-shape="cube" data-drag data-tint="mag" data-size="420"></canvas>
   </div>
-  <div class="slide-cap" data-slide-cap></div>
-  <div class="hero-content">
-    <h1 class="rv">Read the<br><em>rhythm.</em></h1>
-    <div class="hero-row rv rv-d1">
-      <p class="hero-sub">Not the payload. Encrypted traffic, classified by timing alone.</p>
-      <div class="hero-ctas"><a class="btn" href="#analyzer">Classify a capture <span class="arr">→</span></a><a class="btn ghost" href="benchmarks.html">See the benchmarks</a></div>
-      <span class="hero-meta">MIT · Python 3.11 · Docker ready</span>
+  <div class="wrap fx-hero__wrap">
+    <h1 class="fx-hero__title" id="fx-hero-t" aria-label="Read the rhythm." data-hero><span aria-hidden="true"><span class="wd"><span class="hc" style="--c:0;--dx:-0.58em">R</span><span class="hc" style="--c:1;--dx:-0.49em">e</span><span class="hc" style="--c:2;--dx:-0.40em">a</span><span class="hc" style="--c:3;--dx:-0.31em">d</span></span> <span class="wd"><span class="hc" style="--c:4;--dx:-0.22em">t</span><span class="hc" style="--c:5;--dx:-0.13em">h</span><span class="hc" style="--c:6;--dx:-0.04em">e</span></span><br><span class="wd acc"><span class="hc" style="--c:7;--dx:0.04em">r</span><span class="hc" style="--c:8;--dx:0.13em">h</span><span class="hc" style="--c:9;--dx:0.22em">y</span><span class="hc" style="--c:10;--dx:0.31em">t</span><span class="hc" style="--c:11;--dx:0.40em">h</span><span class="hc" style="--c:12;--dx:0.49em">m</span><span class="dot"><span class="hc" style="--c:13;--dx:0.58em">.</span></span></span></span></h1>
+    <p class="fx-hero__claim" data-hero><span class="wd"><span class="wi" style="--i:0">Zero</span></span> <span class="wd"><span class="wi" style="--i:1">payload.</span></span><br><span class="wd"><span class="wi" style="--i:2"><span class="o" data-t="Pure">Pure</span></span></span> <span class="wd"><span class="wi" style="--i:3"><span class="o" data-t="timing.">timing.</span></span></span></p>
+    <div class="fx-hero__cta">
+      <a class="fx-hero__btn" href="analyze.html"><span class="roll"><span>Classify a capture</span><span aria-hidden="true">Classify a capture</span></span><span class="fx-hero__ico"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+      <a class="fx-hero__link" href="benchmarks.html"><span class="roll"><span>See the benchmarks &#8599;</span><span aria-hidden="true">See the benchmarks &#8599;</span></span></a>
+    </div>
+    <div class="fx-hero__foot">
+      <span class="fx-hero__cue" aria-hidden="true"><i></i>Scroll</span>
+      <span class="fx-hero__meta">MIT &middot; Python 3.11 &middot; 96.9% test accuracy</span>
     </div>
   </div>
 </section>
 
-<section class="sec-tight"><div class="wrap">
-  <div class="row-between" style="margin-bottom:26px"><div class="eyebrow" style="margin:0">Capabilities 01 to 05</div><a class="mono mute" href="capabilities.html">All capabilities →</a></div>
-  <div class="tiles"><a class="tile rv rv-d1" href="capability-pcap-ingestion.html"><span class="n">01</span><span class="go">→</span>
-  <div class="obj-slot"><div class="obj obj-dish" aria-hidden="true"></div></div><h3>PCAP ingestion</h3></a><a class="tile rv rv-d2" href="capability-timing-features.html"><span class="n">02</span><span class="go">→</span>
-  <div class="obj-slot"><div class="obj obj-rings" aria-hidden="true"><i></i><i></i><i></i></div></div><h3>Timing features</h3></a><a class="tile rv rv-d3" href="capability-lightgbm.html"><span class="n">03</span><span class="go">→</span>
-  <div class="obj-slot"><div class="obj obj-cube" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><h3>LightGBM classifier</h3></a><a class="tile rv rv-d4" href="capability-explainable-ai.html"><span class="n">04</span><span class="go">→</span>
-  <div class="obj-slot"><div class="obj obj-sphere" aria-hidden="true"></div></div><h3>Explainable AI</h3></a><a class="tile rv rv-d1" href="capability-unknown-detection.html"><span class="n">05</span><span class="go">→</span>
-  <div class="obj-slot"><div class="obj obj-cone" aria-hidden="true"></div></div><h3>Unknown detection</h3></a></div>
-</div></section>
-
-<section class="sec"><div class="wrap statement">
-  <div class="eyebrow rv">What it is</div>
-  <div>
-    <h2 class="h-l rv">The classifier takes the shape of your traffic.</h2>
-    <p class="lead mt-s rv rv-d1">TLS 1.3 and QUIC made payload inspection useless and port numbers meaningless. MetaFlow takes raw packet captures, builds bidirectional flows, measures how packets move in time and names the application in seven classes, with a plain-language reason for every call.</p>
-    <div class="trio rv rv-d2"><div><b>Zero payload</b><span>Headers in, payload discarded</span></div><div><b>23 features</b><span>Pure timing statistics</span></div><div><b>2.3 ms</b><span>Per flow, on a CPU</span></div></div>
+<!-- partials/home/20-statement.html -->
+<section class="fx-st" aria-label="What MetaFlow does" data-statement>
+  <div class="fx-st__stage">
+    <div class="fx-st__svs">
+      <div class="fx-sv fx-sv--a" data-sv="0.9"><span class="fx-sv__ico" aria-hidden="true"><canvas class="mf-shape" data-shape="dish" data-size="176" data-spin="0.35" data-tint="chrome"></canvas></span><a class="fx-sv__lab" href="capability-pcap-ingestion.html"><b>01</b>PCAP ingestion</a></div>
+      <div class="fx-sv fx-sv--b" data-sv="0.6"><span class="fx-sv__ico" aria-hidden="true"><canvas class="mf-shape" data-shape="torus" data-size="124" data-spin="0.45" data-tint="mag"></canvas></span><a class="fx-sv__lab" href="capability-timing-features.html"><b>02</b>Timing features</a></div>
+      <div class="fx-sv fx-sv--c" data-sv="0.5"><span class="fx-sv__ico" aria-hidden="true"><canvas class="mf-shape" data-shape="cube" data-size="112" data-spin="0.4" data-tint="chrome"></canvas></span><a class="fx-sv__lab" href="capability-lightgbm.html"><b>03</b>LightGBM</a></div>
+      <div class="fx-sv fx-sv--d" data-sv="0.8"><span class="fx-sv__ico" aria-hidden="true"><canvas class="mf-shape" data-shape="sphere" data-size="150" data-spin="0.3" data-tint="mag"></canvas></span><a class="fx-sv__lab" href="capability-explainable-ai.html"><b>04</b>Explainable AI</a></div>
+      <div class="fx-sv fx-sv--e" data-sv="0.35"><span class="fx-sv__ico" aria-hidden="true"><canvas class="mf-shape" data-shape="cone" data-size="84" data-spin="0.5" data-tint="chrome"></canvas></span><a class="fx-sv__lab" href="capability-unknown-detection.html"><b>05</b>Unknown detection</a></div>
+    </div>
+    <div class="wrap fx-st__grid">
+      <div class="fx-st__side"><p class="fx-st__label"><span data-scramble>A timing classifier</span></p></div>
+      <div class="fx-st__main">
+        <p class="fx-st__text" data-scrub><span class="fx-sw">The</span> <span class="fx-sw">classifier</span> <span class="fx-sw">takes</span> <span class="fx-sw">the</span> <span class="fx-sw">shape</span> <span class="fx-sw">of</span> <span class="fx-sw">your</span> <span class="fx-rot" data-rot><span class="fx-sr">traffic, VoIP call, web page, stream, download, chat, inbox.</span><span class="fx-rot__w" aria-hidden="true"><span class="fx-rot__i is-on">traffic.</span><span class="fx-rot__i">VoIP call.</span><span class="fx-rot__i">web page.</span><span class="fx-rot__i">stream.</span><span class="fx-rot__i">download.</span><span class="fx-rot__i">chat.</span><span class="fx-rot__i">inbox.</span></span></span></p>
+        <p class="fx-st__sub"><span>Zero payload</span><span>23 timing features</span><span>2.3 ms per flow</span></p>
+        <p class="fx-st__lead">One timing layer reads encrypted flows — handshake, bursts, idle gaps — and names the application without opening a single packet.</p>
+      </div>
+    </div>
   </div>
-</div></section>
+</section>
 
-<section class="sec-tight"><div class="wrap">
-  <div class="fig-head"><h2 class="h-xl rv">Built for speed.</h2><p class="lead rv rv-d1" style="margin:0">Inference latency per flow. Shorter bar is faster. Measured figures from the project's benchmarks.</p></div>
-  <div class="fig rv" data-fill><div class="race">
-    <div class="race-row"><span class="lbl">Deep packet inspection</span><span class="race-track"><span class="race-bar" data-w="100%"></span></span><span class="val">100–500 ms</span></div>
-    <div class="race-row"><span class="lbl">Deep learning (GPU)</span><span class="race-track"><span class="race-bar" data-w="34%"></span></span><span class="val">15–40 ms</span></div>
-    <div class="race-row"><span class="lbl">Random Forest</span><span class="race-track"><span class="race-bar" data-w="4.2%"></span></span><span class="val">3.8 ms</span></div>
-    <div class="race-row"><span class="lbl">XGBoost</span><span class="race-track"><span class="race-bar" data-w="3.6%"></span></span><span class="val">3.2 ms</span></div>
-    <div class="race-row us"><span class="lbl">MetaFlow · LightGBM</span><span class="race-track"><span class="race-bar" data-w="2.6%"></span></span><span class="val">2.31 ms</span></div>
-    <div class="race-note">Bars scaled to a 90 ms axis, so DPI runs off the chart. 2.31 ms per flow is more than 400 flows a second on one CPU.</div>
+<!-- partials/home/30-speed.html -->
+<section class="fx-depth fx-depth--speed fx-depth--fade" data-fx-depth="speed" aria-labelledby="fxd-speed-t" style="--fy:55%">
+  <div class="fx-depth__stage">
+    <div class="fx-depth__media">
+      <canvas class="fx-depth__gl" aria-hidden="true"></canvas>
+      <span class="fx-depth__scan" aria-hidden="true"></span>
+      <span class="fx-depth__veil" aria-hidden="true"></span>
+      <div class="fx-depth__race" role="group" aria-label="Per-flow inference latency, lower is faster">
+        <p class="fx-depth__race-h"><span>Per-flow latency</span><span>log scale · lower is faster</span></p>
+        <ol class="fx-depth__lanes">
+          <li class="fx-depth__lane" style="--k:0;--a:.741;--b:1"><span class="fx-depth__who">DPI</span><span class="fx-depth__track"><i class="fx-depth__fill"></i><i class="fx-depth__ext"></i></span><span class="fx-depth__val">100–500 ms</span></li>
+          <li class="fx-depth__lane" style="--k:1;--a:.436;--b:.594"><span class="fx-depth__who">Deep learning · GPU</span><span class="fx-depth__track"><i class="fx-depth__fill"></i><i class="fx-depth__ext"></i></span><span class="fx-depth__val">15–40 ms</span></li>
+          <li class="fx-depth__lane" style="--k:2;--a:.215;--b:.215"><span class="fx-depth__who">Random Forest</span><span class="fx-depth__track"><i class="fx-depth__fill"></i></span><span class="fx-depth__val">3.8 ms</span></li>
+          <li class="fx-depth__lane" style="--k:3;--a:.187;--b:.187"><span class="fx-depth__who">XGBoost</span><span class="fx-depth__track"><i class="fx-depth__fill"></i></span><span class="fx-depth__val">3.2 ms</span></li>
+          <li class="fx-depth__lane is-me" style="--k:4;--a:.135;--b:.135"><span class="fx-depth__who">MetaFlow · LightGBM</span><span class="fx-depth__track"><i class="fx-depth__fill"></i></span><span class="fx-depth__val">2.31 ms</span></li>
+        </ol>
+        <div class="fx-depth__axis" aria-hidden="true"><span style="--x:0">1 ms</span><span style="--x:.3705">10</span><span style="--x:.741">100</span><span style="--x:1">500</span></div>
+      </div>
+    </div>
+    <div class="fx-depth__meta" aria-hidden="true"><span>Fig. 01 · Latency study</span><span class="fx-depth__n" data-depth-n>000</span></div>
+    <h2 class="fx-depth__title" id="fxd-speed-t"><span class="wd"><span class="wi" style="--i:0">Built</span></span> <span class="wd"><span class="wi" style="--i:1">for</span></span><br><span class="wd"><span class="wi" style="--i:2">speed.</span></span></h2>
+    <p class="fx-depth__cap"><span>2.31 ms per flow on CPU ·</span> <span>reports/metrics.json</span></p>
+  </div>
+  <div class="fx-depth__run" aria-hidden="true"></div>
+</section>
+
+<!-- partials/home/40-services.html -->
+<section class="fx-fv" id="services" aria-labelledby="fx-fv-t" data-fv>
+  <div class="fx-fv__stage"><div class="wrap fx-fv__grid">
+    <div class="fx-fv__head">
+      <p class="fx-fv__label"><span data-scramble>Capabilities</span></p>
+      <h2 class="fx-fv__h" id="fx-fv-t">Five parts.<br>One pipeline.</h2>
+    </div>
+    <div class="fx-fv__list">
+      <a class="fx-srow" href="capability-pcap-ingestion.html" data-srow data-fv-i="0"><span class="fx-srow__n">01</span><span class="fx-srow__t">PCAP ingestion</span><span class="fx-srow__d">Raw .pcap and .pcapng in, bidirectional flows out.</span><span class="fx-srow__go" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+      <a class="fx-srow" href="capability-timing-features.html" data-srow data-fv-i="1"><span class="fx-srow__n">02</span><span class="fx-srow__t">Timing features</span><span class="fx-srow__d">23 statistics about when packets move, nothing about what they carry.</span><span class="fx-srow__go" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+      <a class="fx-srow" href="capability-lightgbm.html" data-srow data-fv-i="2"><span class="fx-srow__n">03</span><span class="fx-srow__t">LightGBM</span><span class="fx-srow__d">96.9% test accuracy at about 2.3 ms per flow on a CPU.</span><span class="fx-srow__go" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+      <a class="fx-srow" href="capability-explainable-ai.html" data-srow data-fv-i="3"><span class="fx-srow__n">04</span><span class="fx-srow__t">Explainable AI</span><span class="fx-srow__d">Every verdict comes with a networking reason a person can read.</span><span class="fx-srow__go" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+      <a class="fx-srow" href="capability-unknown-detection.html" data-srow data-fv-i="4"><span class="fx-srow__n">05</span><span class="fx-srow__t">Unknown detection</span><span class="fx-srow__d">Low-confidence flows are flagged, not forced into a class.</span><span class="fx-srow__go" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+    </div>
+    <div class="fx-fv__show" aria-hidden="true">
+      <div class="fx-fv__icos">
+        <span class="fx-fv__ico is-on" data-k="0"><canvas class="mf-shape" data-shape="dish" data-size="300" data-spin="0.35" data-drag data-tint="chrome"></canvas></span>
+        <span class="fx-fv__ico" data-k="1"><canvas class="mf-shape" data-shape="torus" data-size="300" data-spin="0.45" data-drag data-tint="mag"></canvas></span>
+        <span class="fx-fv__ico" data-k="2"><canvas class="mf-shape" data-shape="cube" data-size="300" data-spin="0.4" data-drag data-tint="chrome"></canvas></span>
+        <span class="fx-fv__ico" data-k="3"><canvas class="mf-shape" data-shape="sphere" data-size="300" data-spin="0.3" data-drag data-tint="mag"></canvas></span>
+        <span class="fx-fv__ico" data-k="4"><canvas class="mf-shape" data-shape="cone" data-size="300" data-spin="0.5" data-drag data-tint="chrome"></canvas></span>
+      </div>
+      <div class="fx-fv__p on" data-ico-gate><span class="fx-fv__n">01</span><p class="fx-fv__name">PCAP ingestion</p><p class="fx-fv__d">Raw .pcap and .pcapng in, bidirectional flows out.</p></div>
+      <div class="fx-fv__p" data-ico-gate><span class="fx-fv__n">02</span><p class="fx-fv__name">Timing features</p><p class="fx-fv__d">23 statistics about when packets move, nothing about what they carry.</p></div>
+      <div class="fx-fv__p" data-ico-gate><span class="fx-fv__n">03</span><p class="fx-fv__name">LightGBM</p><p class="fx-fv__d">96.9% test accuracy at about 2.3 ms per flow on a CPU.</p></div>
+      <div class="fx-fv__p" data-ico-gate><span class="fx-fv__n">04</span><p class="fx-fv__name">Explainable AI</p><p class="fx-fv__d">Every verdict comes with a networking reason a person can read.</p></div>
+      <div class="fx-fv__p" data-ico-gate><span class="fx-fv__n">05</span><p class="fx-fv__name">Unknown detection</p><p class="fx-fv__d">Low-confidence flows are flagged, not forced into a class.</p></div>
+    </div>
+    <div class="fx-fv__foot">
+      <span class="fx-fv__dots"><i role="button" tabindex="-1" aria-label="PCAP ingestion"></i><i role="button" tabindex="-1" aria-label="Timing features"></i><i role="button" tabindex="-1" aria-label="LightGBM"></i><i role="button" tabindex="-1" aria-label="Explainable AI"></i><i role="button" tabindex="-1" aria-label="Unknown detection"></i></span>
+      <a class="fx-fv__all" href="capabilities.html">All capabilities <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a>
+    </div>
   </div></div>
-  <div class="fig-cap"><span>Fig. 01 · Latency study</span><span>Source: reports/metrics.json</span></div>
-</div></section>
+</section>
 
-<section class="sec"><div class="wrap">
-  <div class="row-between" style="margin-bottom:40px"><h2 class="h-l rv">Five things it does well.</h2><a class="btn ghost rv" href="capabilities.html">All capabilities <span class="arr">→</span></a></div>
-  <div class="ways"><a class="way rv" href="capability-pcap-ingestion.html"><span class="n">01</span><h3>PCAP ingestion</h3><p>Raw .pcap and .pcapng in, bidirectional flows out.</p><span class="go">→</span></a><a class="way rv" href="capability-timing-features.html"><span class="n">02</span><h3>Timing features</h3><p>23 statistics about when packets move, nothing about what they carry.</p><span class="go">→</span></a><a class="way rv" href="capability-lightgbm.html"><span class="n">03</span><h3>LightGBM classifier</h3><p>96.9% test accuracy at about 2.3 ms per flow on a CPU.</p><span class="go">→</span></a><a class="way rv" href="capability-explainable-ai.html"><span class="n">04</span><h3>Explainable AI</h3><p>Every verdict comes with a networking reason a person can read.</p><span class="go">→</span></a><a class="way rv" href="capability-unknown-detection.html"><span class="n">05</span><h3>Unknown detection</h3><p>Low-confidence flows are flagged, not forced into a class.</p><span class="go">→</span></a></div>
-</div></section>
+<!-- partials/home/45-marquee.html -->
+<div class="fx-mq" data-marquee data-cursor="Drag" aria-hidden="true">
+  <div class="fx-mq__track">
+    <span>Zero payload</span><i class="fx-mq__dot"></i><span>Zero decryption</span><i class="fx-mq__dot"></i><span>Zero leakage</span><i class="fx-mq__dot"></i><span>2.3 ms a flow</span><i class="fx-mq__dot"></i><span>Runs on CPU</span><i class="fx-mq__dot"></i><span>Explains itself</span><i class="fx-mq__dot"></i>
+    <span>Zero payload</span><i class="fx-mq__dot"></i><span>Zero decryption</span><i class="fx-mq__dot"></i><span>Zero leakage</span><i class="fx-mq__dot"></i><span>2.3 ms a flow</span><i class="fx-mq__dot"></i><span>Runs on CPU</span><i class="fx-mq__dot"></i><span>Explains itself</span><i class="fx-mq__dot"></i>
+  </div>
+</div>
 
-<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Zero payload</span><span>Zero decryption</span><span>Zero leakage</span><span>2.3 ms a flow</span><span>Runs on CPU</span><span>Explains itself</span><span>Zero payload</span><span>Zero decryption</span><span>Zero leakage</span><span>2.3 ms a flow</span><span>Runs on CPU</span><span>Explains itself</span></div></div>
+<!-- partials/home/50-reel.html -->
+<section class="fx-reel" aria-labelledby="fx-reel-t" data-fx-reel>
+  <div class="wrap fx-reel__wrap">
+    <div class="fx-reel__head">
+      <p class="fx-reel__label"><span data-scramble>Demo · selected moments</span></p>
+      <a class="fx-reel__link" href="demo.html">Watch the full demo <svg class="fx-reel__arrow" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a>
+    </div>
+    <h2 class="fx-reel__title" id="fx-reel-t"><span>From a raw capture</span> <span>to an explained verdict.</span></h2>
 
-<section class="sec"><div class="wrap reel">
-  <div><div class="eyebrow">Demo · selected moments</div><h2 class="h-m rv">From a raw capture to an explained verdict.</h2><p class="lead rv rv-d1" style="font-size:18px">Ingestion, batch inference, the live parameter simulator and the benchmark reports in one walk-through.</p><a class="btn ghost mt-s rv rv-d2" href="demo.html">Watch the full demo <span class="arr">→</span></a></div>
-  <a class="reel-thumb rv rv-d1" href="demo.html" aria-label="Open the demo"><canvas data-rhythm="streaming" data-speed="1.4"></canvas><span class="play">▶</span><span class="reel-badge">1080p · reports/encrypted_traffic_classifier_demo.mp4</span></a>
-</div></section>
+    <a class="fx-reel__stage" href="demo.html" data-cursor="Play" data-fx-reel-stage aria-label="Play the full MetaFlow demo">
+      <span class="fx-reel__rig" data-fx-reel-rig>
+        <span class="fx-reel__glow" aria-hidden="true"></span>
 
-<section class="sec" style="padding-top:0"><div class="wrap">
-  <div class="fig-head"><div><div class="eyebrow">From the dataset · 7 classes</div><h2 class="h-xl rv">Every app has a pulse.</h2></div>
-  <p class="lead rv rv-d1" style="margin:0">Magenta rises are client to server, grey drops are server to client. These are the rhythms the model learns to tell apart.</p></div>
-  <div class="archive"><article class="card rv rv-d1"><div class="card-vis"><canvas data-rhythm="voip" data-speed="0.6" data-nogrid></canvas><span class="tag">Class 01</span></div>
-  <div class="card-body"><h3>VoIP</h3><p>Fixed 20 ms frames in both directions. The steadiest heartbeat on the network.</p><div class="card-stats"><span>F1 <b>0.999</b></span><span>test flows <b>424</b></span></div></div></article><article class="card rv rv-d2"><div class="card-vis"><canvas data-rhythm="browsing" data-speed="1" data-nogrid></canvas><span class="tag">Class 02</span></div>
-  <div class="card-body"><h3>Browsing</h3><p>A handshake, a burst of assets, then a person reading. Repeat.</p><div class="card-stats"><span>F1 <b>0.968</b></span><span>test flows <b>375</b></span></div></div></article><article class="card rv rv-d3"><div class="card-vis"><canvas data-rhythm="p2p" data-speed="1" data-nogrid></canvas><span class="tag">Class 03</span></div>
-  <div class="card-body"><h3>P2P</h3><p>Many peers, both directions, irregular sizes and gaps.</p><div class="card-stats"><span>F1 <b>0.979</b></span><span>test flows <b>141</b></span></div></div></article><article class="card rv rv-d4"><div class="card-vis"><canvas data-rhythm="file" data-speed="0.6" data-nogrid></canvas><span class="tag">Class 04</span></div>
-  <div class="card-body"><h3>File transfer</h3><p>Full-MTU packets one way, small ACKs the other, almost no idle time.</p><div class="card-stats"><span>F1 <b>0.941</b></span><span>test flows <b>129</b></span></div></div></article><article class="card rv rv-d1"><div class="card-vis"><canvas data-rhythm="chat" data-speed="1" data-nogrid></canvas><span class="tag">Class 05</span></div>
-  <div class="card-body"><h3>Chat</h3><p>Small, sparse messages with long silences and keep-alives.</p><div class="card-stats"><span>F1 <b>0.943</b></span><span>test flows <b>133</b></span></div></div></article><article class="card rv rv-d2"><div class="card-vis"><canvas data-rhythm="mail" data-speed="1" data-nogrid></canvas><span class="tag">Class 06</span></div>
-  <div class="card-body"><h3>Mail</h3><p>A short protocol exchange, then a bulk send, then quiet.</p><div class="card-stats"><span>F1 <b>0.944</b></span><span>test flows <b>36</b></span></div></div></article><article class="card rv rv-d3"><div class="card-vis"><canvas data-rhythm="streaming" data-speed="1" data-nogrid></canvas><span class="tag">Class 07</span></div>
-  <div class="card-body"><h3>Streaming</h3><p>Large chunks every few seconds as the player buffers ahead.</p><div class="card-stats"><span>F1 <b>0.874</b></span><span>test flows <b>67</b></span></div></div></article><article class="card rv rv-d4"><div class="card-vis" style="background:linear-gradient(135deg,#2a0418,#0b0b0d)"><canvas data-rhythm="p2p" data-speed="2.5" data-nogrid style="opacity:.35;filter:blur(1px)"></canvas><span class="tag">Fallback</span></div>
-  <div class="card-body"><h3>Unknown</h3><p>Anything below your confidence threshold is flagged for a person to look at.</p><div class="card-stats"><span>threshold <b>adjustable</b></span></div></div></article></div>
-  <div class="fig-cap"><span>Fig. 02 · Rhythm studies, simulated from each class's timing profile</span><a href="benchmarks.html#per-class">Per-class results →</a></div>
-</div></section>
+        <span class="fx-dev fx-dev--tablet" style="--fd:7.4s;--fo:-1.8s">
+          <span class="fx-dev__body">
+            <span class="fx-dev__screen">
+              <img src="media/plots/results_dashboard.jpg" alt="Results dashboard: accuracy, confusion matrix and per-class scores" width="2250" height="1650" loading="lazy" decoding="async">
+            </span>
+            <span class="fx-dev__cam" aria-hidden="true"></span>
+          </span>
+        </span>
 
-<section class="sec" style="padding-top:0"><div class="wrap">
-  <div class="fig-head"><div><div class="eyebrow">Compared</div><h2 class="h-l rv">In good company, ahead of it.</h2></div><p class="lead rv rv-d1" style="margin:0">How timing-based LightGBM stacks up against the approaches network teams use today.</p></div>
-  <div class="compare-wrap rv"><table class="cmp">
+        <span class="fx-dev fx-dev--laptop" style="--fd:8.6s;--fo:0s">
+          <span class="fx-dev__lid">
+            <span class="fx-dev__screen">
+              <video data-fx-reel-video muted autoplay loop playsinline preload="metadata" aria-hidden="true" src="media/metaflow_walkthrough.mp4"></video>            </span>
+            <span class="fx-dev__cam" aria-hidden="true"></span>
+          </span>
+          <span class="fx-dev__base" aria-hidden="true"><i></i></span>
+          <span class="fx-dev__shadow" aria-hidden="true"></span>
+        </span>
+
+        <span class="fx-dev fx-dev--phone" style="--fd:6.2s;--fo:-3.1s">
+          <span class="fx-dev__body">
+            <span class="fx-dev__screen">
+              <span class="fx-dev__bar" aria-hidden="true"><b>MetaFlow</b><b>F1 · per class</b></span>
+              <img src="../reports/plots/per_class_f1.png" alt="Per-class F1 scores of the LightGBM model on the test set" width="1200" height="750" loading="lazy" decoding="async">
+              <span class="fx-dev__stat" aria-hidden="true"><em>0.950</em><small>macro F1 · 1,305 unseen flows</small></span>
+            </span>
+            <span class="fx-dev__island" aria-hidden="true"></span>
+          </span>
+        </span>
+
+        <span class="fx-reel__play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><span>Play</span></span>
+      </span>
+    </a>
+
+    <div class="fx-reel__foot">
+      <span>Laptop · site walkthrough</span>
+      <span>Tablet · results dashboard</span>
+      <span>Phone · per-class F1</span>
+    </div>
+  </div>
+</section>
+
+<!-- partials/home/60-pulse.html -->
+<section class="fx-depth fx-depth--pulse fx-depth--fade" data-fx-depth="pulse" aria-labelledby="fxd-pulse-t" style="--fy:40%">
+  <div class="fx-depth__stage">
+    <div class="fx-depth__media">
+      <canvas class="fx-depth__gl" aria-hidden="true"></canvas>
+      <span class="fx-depth__scan" aria-hidden="true"></span>
+      <span class="fx-depth__veil" aria-hidden="true"></span>
+      <div class="fx-depth__read" aria-hidden="true">
+        <p class="fx-depth__read-k"><span data-pulse-i>01</span> / 07 · <span data-pulse-rh>Strict 20 ms frames</span></p>
+        <p class="fx-depth__read-c" data-pulse-c>VoIP</p>
+        <p class="fx-depth__read-f">F1 <b data-pulse-f>0.999</b></p>
+      </div>
+    </div>
+    <ol class="fx-depth__rail" aria-label="Per-class F1 on 1,305 unseen test flows">
+      <li class="is-on"><span>VoIP</span><b>.999</b></li>
+      <li><span>Browsing</span><b>.968</b></li>
+      <li><span>Streaming</span><b>.874</b></li>
+      <li><span>FileTransfer</span><b>.941</b></li>
+      <li><span>P2P</span><b>.979</b></li>
+      <li><span>Chat</span><b>.943</b></li>
+      <li><span>Mail</span><b>.944</b></li>
+    </ol>
+    <div class="fx-depth__meta" aria-hidden="true"><span>Fig. 02 · Rhythm study</span><span class="fx-depth__n" data-depth-n>000</span></div>
+    <h2 class="fx-depth__title" id="fxd-pulse-t"><span class="wd"><span class="wi" style="--i:0">Every</span></span> <span class="wd"><span class="wi" style="--i:1">app</span></span><br><span class="wd"><span class="wi" style="--i:2">has</span></span> <span class="wd"><span class="wi" style="--i:3">a</span></span> <span class="wd"><span class="wi" style="--i:4">pulse.</span></span></h2>
+    <p class="fx-depth__cap"><span>Seven classes · 23 timing features ·</span> <span>zero payload inspection</span></p>
+  </div>
+  <div class="fx-depth__run" aria-hidden="true"></div>
+</section>
+
+<!-- partials/home/65-spiral.html -->
+<section class="fx-spiral" data-fx-spiral aria-labelledby="fx-spiral-t">
+  <div class="fx-spiral__stage">
+    <div class="fx-spiral__fog" aria-hidden="true"></div>
+    <div class="fx-spiral__meta fx-spiral__meta--top">
+      <div class="wrap fx-spiral__row"><span>(11) From the reports — every chart in the repo</span><span>11 charts · data, features, models, results</span></div>
+    </div>
+    <div class="fx-spiral__space">
+      <figure class="fx-spiral__card"><img src="media/plots/data_overview.jpg" alt="Data overview of the ISCX VPN-NonVPN flows" width="2400" height="900" loading="lazy" decoding="async"><figcaption>01 · Data overview</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/class_distribution.jpg" alt="Flow count per traffic class" width="1200" height="750" loading="lazy" decoding="async"><figcaption>02 · Class distribution</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/correlation_heatmap.jpg" alt="Correlation heatmap of the 23 timing features" width="1500" height="1350" loading="lazy" decoding="async"><figcaption>03 · Feature correlation</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/feature_importance.jpg" alt="LightGBM feature importance" width="1200" height="900" loading="lazy" decoding="async"><figcaption>04 · Feature importance</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/top_features_by_class.jpg" alt="Top timing features for each class" width="1500" height="750" loading="lazy" decoding="async"><figcaption>05 · Top features by class</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/streaming_vs_browsing.jpg" alt="Timing features compared for Streaming and Browsing" width="2100" height="900" loading="lazy" decoding="async"><figcaption>06 · Streaming vs browsing</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/cv_comparison.jpg" alt="5-fold cross-validation accuracy of LightGBM, XGBoost and Random Forest" width="1200" height="825" loading="lazy" decoding="async"><figcaption>07 · 5-fold CV comparison</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/model_comparison.jpg" alt="Model comparison on the held-out test set" width="1200" height="750" loading="lazy" decoding="async"><figcaption>08 · Model comparison</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/confusion_matrix.jpg" alt="Confusion matrix on 1,305 unseen test flows" width="1200" height="1050" loading="lazy" decoding="async"><figcaption>09 · Confusion matrix</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="../reports/plots/per_class_f1.png" alt="F1 score per class on the test set" width="1200" height="750" loading="lazy" decoding="async"><figcaption>10 · F1 per class</figcaption></figure>
+      <figure class="fx-spiral__card"><img src="media/plots/results_dashboard.jpg" alt="Results dashboard of the trained classifier" width="2250" height="1650" loading="lazy" decoding="async"><figcaption>11 · Results dashboard</figcaption></figure>
+    </div>
+    <h2 class="fx-spiral__title" id="fx-spiral-t" data-fx-spiral-title><span class="wd">Charts</span> <span class="wd">take</span><br><span class="wd">shape.</span></h2>
+    <div class="fx-spiral__space fx-spiral__space--front"></div>
+    <div class="fx-spiral__meta fx-spiral__meta--bot">
+      <div class="wrap fx-spiral__row"><span class="fx-spiral__note">Eleven charts, straight from reports/plots.</span><a class="fx-spiral__link" href="benchmarks.html">See the benchmarks <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a></div>
+    </div>
+  </div>
+</section>
+
+<!-- partials/home/70-clients.html -->
+<section class="fx-cl" aria-labelledby="fx-cl-t">
+  <div class="wrap fx-cl__wrap">
+    <div class="fx-cl__head">
+      <div class="fx-cl__lead">
+        <p class="fx-lbl"><span data-scramble>The stack</span></p>
+        <div class="fx-cl__hbox"><h2 class="fx-cl__h" id="fx-cl-t" data-fx-settle>Built on<br>good company.</h2></div>
+      </div>
+      <p class="fx-cl__sub">The open-source stack under the hood</p>
+    </div>
+    <ul class="fx-cl__logos" data-fx-logos aria-label="Open-source projects MetaFlow is built on">
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--py">Python</b><span>Language</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--mono">Scapy</b><span>Packets</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--disp">Light<i>GBM</i></b><span>Model</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--low">scikit<i>-</i>learn</b><span>ML</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--caps">XGBoost</b><span>Baseline</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--mono fx-cl__mk--bold">pandas</b><span>Data</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--disp">Num<i>Py</i></b><span>Arrays</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--py">Streamlit</b><span>Dashboard</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--round">ollama</b><span>Local LLM</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--round">docker</b><span>Deploy</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--mono">pytest</b><span>Tests</span></li>
+      <li class="fx-cl__cell"><b class="fx-cl__mk fx-cl__mk--stack">GitHub<i>Actions</i></b><span>CI</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- partials/home/75-compare.html -->
+<section class="fx-cmp" data-fx-cmp aria-labelledby="fx-cmp-t">
+  <div class="wrap fx-cmp__wrap">
+    <div class="fx-cmp__head">
+      <div class="fx-cmp__lead">
+        <p class="fx-lbl"><span data-scramble>Versus</span></p>
+        <h2 class="fx-cmp__h" id="fx-cmp-t" data-fx-words><span class="fx-cmp__wd"><span class="fx-cmp__wi" style="--i:0">Ahead</span></span> <span class="fx-cmp__wd"><span class="fx-cmp__wi" style="--i:1">of</span></span> <span class="fx-cmp__wd"><span class="fx-cmp__wi" style="--i:2">the</span></span><br><span class="fx-cmp__wd"><span class="fx-cmp__wi" style="--i:3">old</span></span> <span class="fx-cmp__wd"><span class="fx-cmp__wi" style="--i:4">ways.</span></span></h2>
+      </div>
+      <p class="fx-cmp__sub">Four approaches · seven things that matter</p>
+    </div>
+    <div class="fx-cmp__table">
+<div class="compare-wrap rv"><table class="cmp">
 <thead><tr><th>What matters</th><th>Deep packet inspection</th><th>IP / port rules</th><th>Deep learning (CNN / LSTM)</th><th class="us">MetaFlow</th></tr></thead>
 <tbody><tr><th scope="row">Encrypted traffic (TLS 1.3, QUIC)</th><td><span class="x">✕</span> Fails completely</td><td><span class="x">✕</span> Port 443 hides everything</td><td><span class="y">✓</span> Works</td><td class="us"><span class="y">✓</span> 96.9% test accuracy</td></tr><tr><th scope="row">Privacy and compliance</th><td><span class="x">✕</span> Conflicts with GDPR / HIPAA</td><td><span class="p">!</span> Privacy concerns</td><td><span class="y">✓</span> Preserved</td><td class="us"><span class="y">✓</span> No payload inspected, ever</td></tr><tr><th scope="row">Raw capture ingestion</th><td><span class="x">✕</span> Needs decryption keys</td><td><span class="p">!</span> Headers only</td><td><span class="p">!</span> Byte truncation</td><td class="us"><span class="y">✓</span> Native .pcap / .pcapng flows</td></tr><tr><th scope="row">Port and IP evasion</th><td><span class="x">✕</span> Vulnerable</td><td><span class="x">✕</span> Easily bypassed</td><td><span class="y">✓</span> High</td><td class="us"><span class="y">✓</span> Rhythm is hard to spoof</td></tr><tr><th scope="row">Inference latency</th><td><span class="x">✕</span> 100 to 500 ms</td><td><span class="y">✓</span> Under 1 ms</td><td><span class="x">✕</span> 15 to 40 ms on GPU</td><td class="us"><span class="y">✓</span> About 2.3 ms on CPU</td></tr><tr><th scope="row">Explainability</th><td><span class="p">!</span> Plain logs</td><td><span class="x">✕</span> None</td><td><span class="x">✕</span> Black box</td><td class="us"><span class="y">✓</span> Plain-language reasons</td></tr><tr><th scope="row">Deployment cost</th><td><span class="x">✕</span> Heavy hardware</td><td><span class="p">!</span> Cheap but inaccurate</td><td><span class="x">✕</span> GPU middleboxes</td><td class="us"><span class="y">✓</span> Lightweight CPU</td></tr></tbody></table></div>
-</div></section>
-
-<section class="sec dark"><div class="wrap">
-  <div class="eyebrow">How the pipeline works</div>
-  <h2 class="h-l rv" style="margin-bottom:60px">Headers lead. Payload never follows.</h2>
-  <div class="steps">
-    <div class="step rv"><span class="n">01</span><h3>Capture</h3><div class="who">Scapy · .pcap / .pcapng</div><p>Parses IPv4 and IPv6 headers and TCP and UDP ports. Payload bytes are discarded as they are read.</p></div>
-    <div class="step rv rv-d1"><span class="n">02</span><h3>Extract</h3><div class="who">5-tuple flows · 23 features</div><p>Builds bidirectional flows, tracks who started them, and computes inter-arrival, rate, burst and idle statistics.</p></div>
-    <div class="step rv rv-d2"><span class="n">03</span><h3>Classify</h3><div class="who">Scaler · LightGBM</div><p>Scales with the train-only <code>scaler.pkl</code>, then predicts the top class and the full probability spread.</p></div>
-    <div class="step rv rv-d3"><span class="n">04</span><h3>Explain</h3><div class="who">3-tier router · threshold</div><p>Turns the verdict into a networking reason and flags anything below your confidence threshold.</p></div>
+    </div>
   </div>
-</div></section>
+</section>
 
-<section class="band"><h2><span class="rv">Private.</span><span class="rv rv-d1">Precise.</span><span class="rv rv-d2">Instant.</span></h2></section>
-
-<section class="sec dark" style="padding-top:0"><div class="wrap">
-  <div class="row-between" style="margin-bottom:50px"><h2 class="h-l rv">Twenty-three numbers.<br>One verdict.</h2><p class="lead rv rv-d1" style="margin:0">Trained on the ISCX VPN-NonVPN 2016 benchmark, with 70/15/15 stratified splits and zero leakage.</p></div>
-  <div class="stats"><div class="stat hot rv"><b data-count="96.9" data-suf="%">0</b><span>Test accuracy on unseen flows</span></div><div class="stat rv"><b data-count="2.3" data-suf=" ms">0</b><span>Inference per flow, CPU only</span></div><div class="stat rv"><b data-count="23" data-suf="">0</b><span>Timing features, no payload</span></div><div class="stat rv"><b data-count="7" data-suf="">0</b><span>Application classes</span></div><div class="stat rv"><b data-count="8694" data-suf="">0</b><span>Cleaned flows from ISCX VPN-NonVPN</span></div><div class="stat rv"><b data-count="32" data-suf="">0</b><span>Tests passing in CI</span></div><div class="stat hot rv"><b data-count="0" data-suf="">0</b><span>Payload bytes ever read</span></div><div class="stat cta rv"><a class="btn light" href="benchmarks.html">All benchmarks <span class="arr">→</span></a></div></div>
-</div></section>
-
-<section class="sec"><div class="wrap">
-  <div class="fig-head"><div><div class="eyebrow">Why timing</div><h2 class="h-l rv">Measured, not decrypted.</h2></div><p class="ratio rv rv-d1">4<span>→</span>1</p></div>
-  <div class="chains">
-    <div class="chain rv"><h3>Deep packet inspection</h3><p class="mute">Four handoffs, and each one adds cost, latency and privacy risk.</p>
-      <div class="links"><div>Encrypted packet</div><span class="arrow">↓</span><div>TLS keys and decryption <small>key escrow</small></div><span class="arrow">↓</span><div>Payload inspection <small>personal data</small></div><span class="arrow">↓</span><div>Signature rules <small>brittle</small></div><span class="arrow">↓</span><div>Verdict <small>100–500 ms</small></div></div></div>
-    <div class="chain us rv rv-d1"><h3>MetaFlow</h3><p class="mute">One timing layer between the packet and the answer.</p>
-      <div class="links"><div>Encrypted packet</div><span class="arrow">↓</span><div class="core">Timing layer <small>23 features · LightGBM</small></div><span class="arrow">↓</span><div>Verdict and reason <small>~2.3 ms</small></div></div></div>
+<!-- partials/home/80-warp.html -->
+<section class="fx-warp" data-fx-warp aria-labelledby="fx-warp-t">
+  <div class="fx-warp__stage">
+    <div class="fx-warp__shapes" aria-hidden="true">
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="cube" data-size="200" data-tint="chrome" data-spin="0.45" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="cone" data-size="200" data-tint="mag" data-spin="0.4" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="arch" data-size="200" data-tint="mag" data-spin="0.35" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="gem" data-size="200" data-tint="chrome" data-spin="0.5" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="spring" data-size="200" data-tint="chrome" data-spin="0.4" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="torus" data-size="200" data-tint="mag" data-spin="0.45" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="pyramid" data-size="200" data-tint="chrome" data-spin="0.38" data-float data-par></canvas></span>
+      <span class="fx-warp__obj"><canvas class="mf-shape" data-shape="capsule" data-size="200" data-tint="violet" data-spin="0.42" data-float data-par></canvas></span>
+    </div>
+    <div class="wrap fx-warp__wrap">
+      <div class="fx-warp__content">
+        <p class="fx-lbl"><span data-scramble>How the pipeline works</span></p>
+        <h2 class="fx-warp__h" id="fx-warp-t">Headers lead.<br>Payload never follows.</h2>
+        <ol class="fx-warp__steps">
+          <li class="fx-warp__step"><span class="fx-warp__n">01 / Capture</span><h3>Scapy · .pcap / .pcapng</h3><p>Parses IPv4/IPv6 headers and TCP/UDP ports; payload bytes discarded as read.</p></li>
+          <li class="fx-warp__step"><span class="fx-warp__n">02 / Extract</span><h3>5-tuple flows · 23 features</h3><p>Builds bidirectional flows and computes inter-arrival, rate, burst and idle statistics.</p></li>
+          <li class="fx-warp__step"><span class="fx-warp__n">03 / Classify</span><h3>Scaler · LightGBM</h3><p>Train-only scaler, then the top class and full probability spread.</p></li>
+          <li class="fx-warp__step"><span class="fx-warp__n">04 / Explain</span><h3>3-tier router · threshold</h3><p>A networking reason for every verdict; low confidence becomes Unknown.</p></li>
+        </ol>
+      </div>
+    </div>
   </div>
-</div></section>
+</section>
 
-<section class="sec" id="analyzer" style="background:var(--bg-2)"><div class="wrap chat-split">
+<!-- partials/home/82-band.html -->
+<section class="fx-band" data-fx-band aria-labelledby="fx-band-t">
+  <h2 class="fx-band__sr" id="fx-band-t">Private. Precise. Instant.</h2>
+  <div class="fx-band__stage">
+    <div class="fx-band__objs" aria-hidden="true">
+      <span class="fx-band__obj fx-band__obj--torus"><canvas class="mf-shape" data-shape="torus" data-size="560" data-tint="mag" data-spin="0.28" data-float></canvas></span>
+      <span class="fx-band__obj fx-band__obj--cube"><canvas class="mf-shape" data-shape="cube" data-size="460" data-tint="chrome" data-spin="0.22" data-float></canvas></span>
+    </div>
+    <p class="fx-band__words" aria-hidden="true"><span class="fx-band__w" style="--w:0">Private.</span><span class="fx-band__w" style="--w:1">Precise.</span><span class="fx-band__w fx-band__w--acc" style="--w:2">Instant.</span></p>
+    <div class="fx-band__flash" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- partials/home/85-stats.html -->
+<!-- STATS (owner: studio agent) - dozfx "Almost three decades." figures grid with odometer numbers (span.od[data-count]) -->
+<section class="fx-ks" aria-labelledby="fx-ks-t">
+  <div class="wrap fx-ks__wrap">
+    <div class="fx-ks__head">
+      <div class="fx-ks__lead">
+        <p class="fx8-lbl"><span data-scramble>By the numbers</span></p>
+        <h2 class="fx8-h1" id="fx-ks-t" data-fx8-h>Twenty-three numbers.<br>One verdict.</h2>
+      </div>
+      <div class="fx-ks__aside" data-rv><a class="fx8-link" href="benchmarks.html">Every figure, measured <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a></div>
+    </div>
+    <ul class="fx-ks__kfs" aria-label="MetaFlow in figures">
+      <li class="fx-kf" style="--i:0">
+        <span class="fx-kf__n" aria-hidden="true">01</span>
+        <p class="fx-kf__v"><span class="od" data-count="96.9" data-count-delay="0" data-done="1" aria-hidden="true">96.9</span><span class="fx8-sr">96.9%</span><span class="fx-kf__u" aria-hidden="true">%</span></p>
+        <p class="fx-kf__t">held-out test accuracy on 1,305 flows the model never saw</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf" style="--i:1">
+        <span class="fx-kf__n" aria-hidden="true">02</span>
+        <p class="fx-kf__v"><span class="od" data-count="2.3" data-count-delay="140" data-done="1" aria-hidden="true">2.3</span><span class="fx8-sr">2.3 milliseconds</span><span class="fx-kf__u" aria-hidden="true">ms</span></p>
+        <p class="fx-kf__t">per flow on a CPU, more than 400 flows a second</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf" style="--i:2">
+        <span class="fx-kf__n" aria-hidden="true">03</span>
+        <p class="fx-kf__v"><span class="od" data-count="23" data-count-delay="280" data-done="1" aria-hidden="true">23</span><span class="fx8-sr">23</span></p>
+        <p class="fx-kf__t">timing features per flow: inter-arrival, rate, burst and idle</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf" style="--i:3">
+        <span class="fx-kf__n" aria-hidden="true">04</span>
+        <p class="fx-kf__v"><span class="od" data-count="7" data-count-delay="420" data-done="1" aria-hidden="true">7</span><span class="fx8-sr">7</span></p>
+        <p class="fx-kf__t">application classes, from VoIP and Streaming to P2P and Mail</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf" style="--i:4">
+        <span class="fx-kf__n" aria-hidden="true">05</span>
+        <p class="fx-kf__v"><span class="od" data-count="8,694" data-count-delay="0" data-done="1" aria-hidden="true">8,694</span><span class="fx8-sr">8,694</span></p>
+        <p class="fx-kf__t">clean flows from the ISCX VPN-NonVPN 2016 benchmark</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf" style="--i:5">
+        <span class="fx-kf__n" aria-hidden="true">06</span>
+        <p class="fx-kf__v"><span class="od" data-count="32" data-count-delay="140" data-done="1" aria-hidden="true">32</span><span class="fx8-sr">32</span></p>
+        <p class="fx-kf__t">tests passing in CI on every push</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf" style="--i:6">
+        <span class="fx-kf__n" aria-hidden="true">07</span>
+        <p class="fx-kf__v"><span class="od" data-count="0" data-count-delay="280" data-done="1" aria-hidden="true">0</span><span class="fx8-sr">0</span><span class="fx-kf__obj" aria-hidden="true"><canvas class="mf-shape" data-shape="sphere" data-size="64" data-tint="mag" data-spin="0.7" data-float></canvas></span></p>
+        <p class="fx-kf__t">payload bytes read. Headers in, payload discarded.</p>
+        <span class="fx-kf__bar" aria-hidden="true"></span>
+      </li>
+      <li class="fx-kf fx-kf--note" style="--i:7">
+        <span class="fx-kf__ico" aria-hidden="true"><canvas class="mf-shape" data-shape="torus" data-size="96" data-tint="chrome" data-spin="0.45" data-drag></canvas></span>
+        <p class="fx-kf__q">Read the rhythm.<br><span class="fx8-acc">Not the payload.</span></p>
+        <a class="fx8-link fx8-link--sm" href="benchmarks.html">All benchmarks <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- partials/home/87-viz.html -->
+<!-- VIZ (owner: studio agent) - dozfx "Orchestrated, not relayed." figure.viz[data-viz]: relay chain vs one layer, travelling pulses, 4 → 1 -->
+<section class="fx-vz" aria-labelledby="fx-vz-t">
+  <div class="wrap fx-vz__wrap">
+    <div class="fx-vz__t">
+      <p class="fx8-lbl"><span data-scramble>Why timing</span></p>
+      <h2 class="fx-vz__lead" id="fx-vz-t" data-rv>Measured, not decrypted.</h2>
+      <p class="fx-vz__dim" data-rv>Deep packet inspection hands every packet down a chain: keys, decryption, payload inspection, signature rules. MetaFlow puts one timing layer between the encrypted packet and the answer, and never opens the payload.</p>
+    </div>
+    <div class="fx-vz__g">
+      <figure class="fx-viz" data-viz>
+        <div class="fx-viz__bar"><span>Measurement, not decryption</span><span class="fx8-acc">Pipeline</span></div>
+        <div class="fx-viz__body" aria-hidden="true">
+          <div class="fx-hand">
+            <div class="fx-hand__lane fx-hand__lane--a">
+              <p class="fx-hand__t">Typical DPI chain</p>
+              <ol>
+                <li><i></i><span>Encrypted packet</span></li>
+                <li><i></i><span>TLS keys &amp; decryption</span></li>
+                <li><i></i><span>Payload inspection</span></li>
+                <li><i></i><span>Signature rules</span></li>
+                <li class="fx-hand__end"><i></i><span>Verdict<small>100–500 ms</small></span></li>
+                <li class="fx-hand__pulse"></li>
+              </ol>
+            </div>
+            <div class="fx-hand__lane fx-hand__lane--b">
+              <p class="fx-hand__t">MetaFlow · one timing layer</p>
+              <ol>
+                <li><i></i><span>Encrypted packet</span></li>
+                <li class="fx-hand__lead"><i></i><span>Timing layer<small>23 features · LightGBM</small></span></li>
+                <li class="fx-hand__team"><i></i><i></i><i></i><span>Verdict and reason<small class="fx8-acc">~2.3 ms</small></span></li>
+                <li class="fx-hand__pulse"></li>
+                <li class="fx-hand__pulse fx-hand__pulse--2"></li>
+                <li class="fx-hand__pulse fx-hand__pulse--3"></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="fx-viz__foot">
+          <span class="fx-viz__big" aria-hidden="true"><b><span class="od" data-count="4" data-count-delay="200" data-done="1">4</span></b><span class="fx-viz__arr">→</span><b class="fx8-acc"><span class="od" data-count="1" data-count-delay="520" data-done="1">1</span></b></span>
+          <span class="fx-viz__note">Handoffs between the encrypted packet and its verdict</span>
+        </div>
+        <table class="fx8-sr">
+          <caption>Handoffs between the encrypted packet and the verdict</caption>
+          <thead><tr><th scope="col">Approach</th><th scope="col">Chain</th><th scope="col">Handoffs</th><th scope="col">Latency</th></tr></thead>
+          <tbody>
+            <tr><td>Deep packet inspection</td><td>Encrypted packet → TLS keys and decryption → Payload inspection → Signature rules → Verdict</td><td>4</td><td>100 to 500 ms</td></tr>
+            <tr><td>MetaFlow</td><td>Encrypted packet → Timing layer (23 features, LightGBM) → Verdict and reason</td><td>1</td><td>about 2.3 ms</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p class="fx-vz__cap"><span>Illustration</span><span>No keys. No payload. No decryption.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- partials/home/90-platform.html -->
+<!-- PLATFORM (owner: studio agent) - dozfx section.platform: sticky intro + browser-window mock (.bw) holding the live analyzer -->
+<section class="fx-pl" aria-labelledby="fx-pl-t" data-fx-pl>
+  <div class="fx-pl__grad" aria-hidden="true"><i></i></div>
+  <div class="wrap fx-pl__wrap">
+    <div class="fx-pl__intro">
+      <p class="fx8-lbl"><span data-scramble>The analyzer</span></p>
+      <h2 class="fx8-h2" id="fx-pl-t" data-fx8-h>A verdict in milliseconds.</h2>
+      <p class="fx-pl__copy" data-rv>Capture in. Verdict out. Payload untouched. Pick one of the sample captures and MetaFlow builds the flows, runs the trained LightGBM model and explains the call in plain language. Raise the threshold and anything uncertain is flagged as Unknown.</p>
+      <div class="fx-pl__ctas" data-rv>
+        <a class="fx8-btn" href="analyze.html"><span class="fx8-roll"><span>Open the analyzer</span><span aria-hidden="true">Open the analyzer</span></span><span class="fx8-btn__ico"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+        <a class="fx8-btn fx8-btn--ghost" href="get-started.html#cli"><span class="fx8-roll"><span>Use the CLI</span><span aria-hidden="true">Use the CLI</span></span><span class="fx8-btn__ico"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+      </div>
+    </div>
+    <div class="fx-pl__win">
+      <div class="fx-bw">
+        <div class="fx-bw__bar" aria-hidden="true">
+          <span class="fx-bw__dots"><i></i><i></i><i></i></span>
+          <span class="fx-bw__tab"><img class="fx-bw__fav" src="favicon.svg" alt="" width="16" height="16">MetaFlow · Analyzer<span class="fx-bw__x">×</span></span>
+          <span class="fx-bw__plus">+</span>
+        </div>
+        <div class="fx-bw__url" aria-hidden="true">
+          <span class="fx-bw__nav"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2-4.9M19 4v4h-4"/></svg></span>
+          <span class="fx-bw__addr"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg>127.0.0.1:8600/analyze</span>
+        </div>
+        <div class="fx-bw__view">
+          <canvas class="fx-bw__flame" aria-hidden="true"></canvas>
+          <section class="sec" id="analyzer" style="background:var(--bg-2)"><div class="wrap chat-split">
   <div>
     <div class="eyebrow">Flow analyzer</div>
     <h2 class="h-l rv">A verdict in milliseconds.</h2>
@@ -168,24 +512,62 @@
     </div>
   </div>
 </div></section>
+          <span class="fx-bw__cursor" aria-hidden="true"></span>
+        </div>
+      </div>
+      <p class="fx-pl__cap"><span>127.0.0.1:8600</span><span>The real model on the repo's sample captures</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- partials/home/92-faq.html -->
+<!-- FAQ (owner: studio agent) - dozfx "Good to know." sticky title + big counter of the open question (.sk) + smooth accordion -->
+<div class="fx-faq" data-fx-faq>
 <section class="sec"><div class="wrap faq-grid">
   <div><div class="eyebrow">FAQ</div><h2 class="h-l rv">Good to know.</h2></div>
   <div class="faq rv rv-d1"><details open><summary>How can you classify traffic you cannot decrypt?</summary><div class="ans"><p>Encryption hides what a packet says, not when it moves. A voice call sends a small frame every 20 ms. A file transfer fills the pipe one way. A web page loads in bursts and then goes quiet while someone reads. MetaFlow measures 23 of these timing statistics per flow and lets a LightGBM model learn which rhythm belongs to which application.</p></div></details><details><summary>Does it ever look at payload?</summary><div class="ans"><p>No. The PCAP extractor parses IP and transport headers to build flows and drops payload bytes as it reads them. The model only ever sees timing statistics, so there is nothing personal to leak and no decryption keys to manage.</p></div></details><details><summary>How accurate is it, honestly?</summary><div class="ans"><p>96.9% accuracy and 0.950 macro F1 on 1,305 held-out flows that were never used for training or tuning. Five-fold cross-validation gives 95.61% ± 0.57%. The weakest class is Streaming (F1 0.874), because buffered video inside a 15 s window can look like page-load bursts. That trade-off is documented in the reports.</p></div></details><details><summary>What happens with traffic it has never seen?</summary><div class="ans"><p>You set a confidence threshold. Any flow whose top probability falls below it is labelled <em>Uncertain (Unknown Traffic)</em> instead of being forced into the nearest class, so new protocols end up in a triage queue rather than in your statistics.</p></div></details><details><summary>Does it need a GPU or the internet?</summary><div class="ans"><p>Neither. Inference is about 2.3 ms per flow on a CPU, more than 400 flows a second. Explanations fall back to a built-in rule engine when no local Ollama model or cloud key is available, so the whole thing runs offline.</p></div></details></div>
 </div></section>
-<section class="sec closing"><div class="wrap">
-  <div class="eyebrow" style="justify-content:center">Get started</div>
-  <h2 class="h-xl rv">Classify without looking.</h2>
-  <p class="lead rv rv-d1">Clone the repo, point it at a capture, and get a labelled, explained flow in about a minute. Everything runs on your machine.</p>
-  <div class="ctas rv rv-d2"><a class="btn" href="get-started.html">Run the quickstart <span class="arr">→</span></a><a class="btn ghost" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener">View on GitHub ↗</a></div>
-</div></section>
+</div>
 
-<section class="final"><div class="wrap">
-  <h2 class="rv">Read the<br>rhythm<span class="mag">.</span></h2>
-  <div class="final-row rv rv-d1"><p class="hero-sub" style="max-width:none">Not the payload.</p><a class="btn" href="get-started.html">Run the quickstart <span class="arr">→</span></a></div>
-</div></section>
+<!-- partials/home/95-closing.html -->
+<!-- CLOSING (owner: closing agent) - dozfx section.closing.closing--planet: pinned synthwave terrain stage, copy pinned over it, the footer slides over both -->
+<section class="fx-closing" data-closing aria-labelledby="fx-closing-t">
+  <div class="fx-closing__stage" aria-hidden="true">
+    <canvas class="fx-closing__terrain" data-terrain></canvas>
+    <div class="fx-closing__sun"></div>
+    <div class="fx-closing__veil"></div>
+  </div>
+  <div class="fx-closing__scroll">
+    <div class="wrap fx-closing__pin">
+      <div class="fx-closing__grid">
+        <div class="fx-closing__head">
+          <p class="fx-closing__label" data-cl-k="-110"><span class="fx-closing__rule" aria-hidden="true"></span><span data-scramble>Get started</span></p>
+          <h2 class="fx-closing__title" id="fx-closing-t" data-cl-k="-68"><span class="wd"><span class="wi" style="--i:0">Classify</span></span><br><span class="wd"><span class="wi" style="--i:1">without</span></span> <span class="wd"><span class="wi" style="--i:2">looking.</span></span></h2>
+        </div>
+        <div class="fx-closing__body" data-rv data-cl-k="-28">
+          <p class="fx-closing__lead">Clone the repo, point it at a capture, and get a labelled, explained flow in about a minute. Everything runs on your machine.</p>
+          <div class="fx-closing__row">
+            <a class="btn fx-cl-btn fx-cl-btn--primary" href="get-started.html" data-boost><span class="roll"><span>Run the quickstart</span><span aria-hidden="true">Run the quickstart</span></span><span class="fx-cl-btn__ico" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+            <a class="btn fx-cl-btn fx-cl-btn--ghost" href="https://github.com/Abhinavbvs/encrypted-traffic-classifier" target="_blank" rel="noopener"><span class="roll"><span>View on GitHub</span><span aria-hidden="true">View on GitHub</span></span><span class="fx-cl-btn__ico" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- partials/home/97-final.html -->
+<!-- FINAL TAGLINE (owner: closing agent) - dozfx .foot__top claim. js/fx/95-closing.js moves it to the top of the footer so it sits on the horizon -->
+<section class="fx-final" aria-label="MetaFlow in one line">
+  <div class="wrap fx-final__top">
+    <p class="fx-final__claim" data-rv>Read the rhythm.<br><span class="fx-final__dim">Not the payload.</span></p>
+    <div class="fx-final__cta" data-rv="120"><a class="btn fx-cl-btn fx-cl-btn--primary" href="analyze.html" data-boost><span class="roll"><span>Classify a capture</span><span aria-hidden="true">Classify a capture</span></span><span class="fx-cl-btn__ico" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 9 9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span></a></div>
+  </div>
+</section>
 </main>
-<script type="application/json" id="mf-snapshot">{"samples": {"voip_call.pcap": {"file": "voip_call.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 0.998716, "is_uncertain": false, "status": "Confident", "top3": [{"class": "VoIP", "probability": 0.998716}, {"class": "Chat", "probability": 0.001274}, {"class": "Browsing", "probability": 6e-06}], "probabilities": {"Browsing": 6e-06, "Streaming": 0.0, "VoIP": 0.998716, "FileTransfer": 0.0, "P2P": 0.0, "Chat": 0.001274, "Mail": 3e-06}, "explanation": "Classified as VoIP (99.9% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: 19930.0 us, BIAT: 19930.0 us) and continuous low-bandwidth streaming (18961 B/s). This steady bidirectional cadence differs sharply from bursty request-response traffic like Chat.", "explainer": "rule_based_fallback", "features": {"duration": 2974565.029144, "total_fiat": 2969563.961029, "total_biat": 2969564.914703, "min_fiat": 19005.060196, "min_biat": 19005.060196, "max_fiat": 20997.047424, "max_biat": 20996.809006, "mean_fiat": 19929.95947, "mean_biat": 19929.96587, "flowPktsPerSecond": 100.855082, "flowBytesPerSecond": 18960.755421, "min_flowiat": 4999.876022, "max_flowiat": 15996.932983, "mean_flowiat": 9948.378024, "std_flowiat": 4982.469057, "min_active": 2974565.029144, "mean_active": 2974565.029144, "max_active": 2974565.029144, "std_active": 0, "min_idle": 0, "mean_idle": 0, "max_idle": 0, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "52.114.128.5", "src_port": 50020, "dst_port": 50020, "protocol": "UDP", "packet_count": 300, "byte_count": 56400, "duration_sec": 2.975}], "latency_ms": 3.235, "elapsed_ms": 1945.6, "model": "LGBMClassifier"}, "browsing_https.pcap": {"file": "browsing_https.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "Chat", "top_class": "Chat", "confidence": 0.875, "is_uncertain": false, "status": "Confident", "top3": [{"class": "Chat", "probability": 0.875}, {"class": "Browsing", "probability": 0.121044}, {"class": "FileTransfer", "probability": 0.001524}], "probabilities": {"Browsing": 0.121044, "Streaming": 0.000931, "VoIP": 0.000156, "FileTransfer": 0.001524, "P2P": 0.001267, "Chat": 0.875, "Mail": 7.8e-05}, "explanation": "Classified as Chat (87.5% confidence) characterized by sporadic, low-volume packet bursts with long idle periods between human typing events and minimal packet rates (4.6 pkts/s). This distinguishes it from high-frequency or streaming sessions like Browsing.", "explainer": "rule_based_fallback", "features": {"duration": 6920080.900192, "total_fiat": 6852441.072464, "total_biat": 6895080.804825, "min_fiat": 6814.002991, "min_biat": 3044.843674, "max_fiat": 6640208.005905, "max_biat": 6602809.906006, "mean_fiat": 685244.107246, "mean_biat": 344754.040241, "flowPktsPerSecond": 4.624223, "flowBytesPerSecond": 4022.640833, "min_flowiat": 3044.843674, "max_flowiat": 6523411.989212, "mean_flowiat": 223228.416135, "std_flowiat": 1150282.066755, "min_active": 140677.928925, "mean_active": 198334.45549, "max_active": 255990.982056, "std_active": 57656.526566, "min_idle": 6523411.989212, "mean_idle": 6523411.989212, "max_idle": 6523411.989212, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "104.244.42.1", "src_port": 52410, "dst_port": 443, "protocol": "TCP", "packet_count": 32, "byte_count": 27837, "duration_sec": 6.92}], "latency_ms": 2.511, "elapsed_ms": 1630.0, "model": "LGBMClassifier"}, "file_transfer.pcap": {"file": "file_transfer.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "P2P", "top_class": "P2P", "confidence": 0.54724, "is_uncertain": false, "status": "Confident", "top3": [{"class": "P2P", "probability": 0.54724}, {"class": "Browsing", "probability": 0.364852}, {"class": "Streaming", "probability": 0.050087}], "probabilities": {"Browsing": 0.364852, "Streaming": 0.050087, "VoIP": 0.000803, "FileTransfer": 0.028031, "P2P": 0.54724, "Chat": 0.005055, "Mail": 0.003933}, "explanation": "Classified as P2P (54.7% confidence) due to distributed bidirectional timing signatures with rapid inter-arrival variations across multiple peers (mean FIAT: 936.4 us). The continuous background exchange differs from standard client-server protocols like Browsing.", "explainer": "rule_based_fallback", "features": {"duration": 83342.075348, "total_fiat": 83342.075348, "total_biat": 0, "min_fiat": 433.921814, "min_biat": 0, "max_fiat": 1483.917236, "max_biat": 0, "mean_fiat": 936.427813, "mean_biat": 0, "flowPktsPerSecond": 1079.886715, "flowBytesPerSecond": 1579874.264594, "min_flowiat": 433.921814, "max_flowiat": 1483.917236, "mean_flowiat": 936.427813, "std_flowiat": 294.598489, "min_active": 83342.075348, "mean_active": 83342.075348, "max_active": 83342.075348, "std_active": 0, "min_idle": 0, "mean_idle": 0, "max_idle": 0, "std_idle": 0}, "src_ip": "13.107.136.9", "dst_ip": "192.168.1.105", "src_port": 443, "dst_port": 51234, "protocol": "TCP", "packet_count": 90, "byte_count": 131670, "duration_sec": 0.083}], "latency_ms": 2.317, "elapsed_ms": 1628.1, "model": "LGBMClassifier"}, "streaming_video.pcap": {"file": "streaming_video.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 0.994763, "is_uncertain": false, "status": "Confident", "top3": [{"class": "Browsing", "probability": 0.994763}, {"class": "FileTransfer", "probability": 0.003293}, {"class": "P2P", "probability": 0.000813}], "probabilities": {"Browsing": 0.994763, "Streaming": 4e-06, "VoIP": 0.000202, "FileTransfer": 0.003293, "P2P": 0.000813, "Chat": 0.000525, "Mail": 0.000399}, "explanation": "Classified as Browsing (99.5% confidence) based on interactive, bursty timing profiles consisting of fast initial page component requests followed by extended idle intervals (mean idle: 5152081.0 us) reflecting user reading time. The low continuous throughput (20196 B/s) distinguishes it from continuous streaming applications.", "explainer": "rule_based_fallback", "features": {"duration": 5382369.995117, "total_fiat": 150000.095367, "total_biat": 5367369.890213, "min_fiat": 9999.990463, "min_biat": 822.067261, "max_fiat": 59999.94278, "max_biat": 5205398.082733, "mean_fiat": 15000.009537, "mean_biat": 71564.93187, "flowPktsPerSecond": 16.163883, "flowBytesPerSecond": 20196.493385, "min_flowiat": 126.838684, "max_flowiat": 5152081.012726, "mean_flowiat": 62585.697618, "std_flowiat": 552040.841576, "min_active": 80288.887024, "mean_active": 115144.491196, "max_active": 150000.095367, "std_active": 34855.604172, "min_idle": 5152081.012726, "mean_idle": 5152081.012726, "max_idle": 5152081.012726, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "142.250.190.46", "src_port": 49152, "dst_port": 443, "protocol": "TCP", "packet_count": 87, "byte_count": 108705, "duration_sec": 5.382}], "latency_ms": 1.814, "elapsed_ms": 1638.5, "model": "LGBMClassifier"}}, "health": {"status": "live", "model": "LGBMClassifier", "features": ["duration", "total_fiat", "total_biat", "min_fiat", "min_biat", "max_fiat", "max_biat", "mean_fiat", "mean_biat", "flowPktsPerSecond", "flowBytesPerSecond", "min_flowiat", "max_flowiat", "mean_flowiat", "std_flowiat", "min_active", "mean_active", "max_active", "std_active", "min_idle", "mean_idle", "max_idle", "std_idle"], "classes": ["Browsing", "Streaming", "VoIP", "FileTransfer", "P2P", "Chat", "Mail"], "explainer": "auto", "samples": [{"name": "browsing_https.pcap", "bytes": 28373}, {"name": "file_transfer.pcap", "bytes": 133134}, {"name": "streaming_video.pcap", "bytes": 110121}, {"name": "voip_call.pcap", "bytes": 61224}]}, "metrics": {"best_model": "LightGBM", "test_accuracy": 0.9686, "test_macro_f1": 0.9497, "latency_ms_per_flow": 2.312, "validation_comparison": [{"model": "RandomForest", "val_accuracy": 0.9371, "val_macro_f1": 0.8977, "train_seconds": 0.905}, {"model": "XGBoost", "val_accuracy": 0.9509, "val_macro_f1": 0.9105, "train_seconds": 1.4662}, {"model": "LightGBM", "val_accuracy": 0.9571, "val_macro_f1": 0.919, "train_seconds": 1.5653}], "cv_results": [{"model": "RandomForest", "accuracy_mean": 0.939, "accuracy_std": 0.0088, "macro_f1_mean": 0.9042, "macro_f1_std": 0.0141, "mean_fit_time_seconds": 1.08}, {"model": "XGBoost", "accuracy_mean": 0.9518, "accuracy_std": 0.0048, "macro_f1_mean": 0.9217, "macro_f1_std": 0.0103, "mean_fit_time_seconds": 5.76}, {"model": "LightGBM", "accuracy_mean": 0.9561, "accuracy_std": 0.0057, "macro_f1_mean": 0.9268, "macro_f1_std": 0.0128, "mean_fit_time_seconds": 3.01}]}, "batch": {"file": "data/processed/sample_raw_flows.csv", "threshold": 0.0, "rows": [{"id": 0, "predicted_class": "Streaming", "top_class": "Streaming", "confidence": 0.999623, "is_uncertain": false, "top3": [{"class": "Streaming", "probability": 0.999623}, {"class": "FileTransfer", "probability": 0.000263}, {"class": "Browsing", "probability": 0.000104}], "duration": 30079704, "flowBytesPerSecond": 8556.167973, "flowPktsPerSecond": 4.321851}, {"id": 1, "predicted_class": "P2P", "top_class": "P2P", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "P2P", "probability": 1.0}, {"class": "Streaming", "probability": 0.0}, {"class": "Chat", "probability": 0.0}], "duration": 96300, "flowBytesPerSecond": 4652.128764, "flowPktsPerSecond": 20.768432}, {"id": 2, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "Browsing", "probability": 0.0}, {"class": "FileTransfer", "probability": 0.0}], "duration": 14987685, "flowBytesPerSecond": 15499.258224, "flowPktsPerSecond": 113.693342}, {"id": 3, "predicted_class": "FileTransfer", "top_class": "FileTransfer", "confidence": 0.999806, "is_uncertain": false, "top3": [{"class": "FileTransfer", "probability": 0.999806}, {"class": "Browsing", "probability": 0.000193}, {"class": "Chat", "probability": 0.0}], "duration": 9619557, "flowBytesPerSecond": 353207.845226, "flowPktsPerSecond": 496.48856}, {"id": 4, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 1.0}, {"class": "Streaming", "probability": 0.0}, {"class": "Mail", "probability": 0.0}], "duration": 282691, "flowBytesPerSecond": 74484.154076, "flowPktsPerSecond": 180.408998}, {"id": 5, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "FileTransfer", "probability": 0.0}, {"class": "Chat", "probability": 0.0}], "duration": 14421830, "flowBytesPerSecond": 248.512151, "flowPktsPerSecond": 2.218858}, {"id": 6, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 0.999783, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 0.999783}, {"class": "Chat", "probability": 0.0002}, {"class": "P2P", "probability": 8e-06}], "duration": 8574291, "flowBytesPerSecond": 593.401833, "flowPktsPerSecond": 1.166277}, {"id": 7, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "FileTransfer", "probability": 0.0}, {"class": "Streaming", "probability": 0.0}], "duration": 14999067, "flowBytesPerSecond": 12279.63046, "flowPktsPerSecond": 104.539836}, {"id": 8, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 1.0}, {"class": "Chat", "probability": 0.0}, {"class": "VoIP", "probability": 0.0}], "duration": 256962, "flowBytesPerSecond": 17150.395778, "flowPktsPerSecond": 89.507398}, {"id": 9, "predicted_class": "Chat", "top_class": "Chat", "confidence": 0.979561, "is_uncertain": false, "top3": [{"class": "Chat", "probability": 0.979561}, {"class": "P2P", "probability": 0.018365}, {"class": "FileTransfer", "probability": 0.00135}], "duration": 134096, "flowBytesPerSecond": 2408.72211, "flowPktsPerSecond": 29.829376}], "counts": {"Browsing": 3, "VoIP": 3, "P2P": 1, "Streaming": 1, "FileTransfer": 1, "Chat": 1}, "latency_ms": 0.2487}}</script>
+<script type="application/json" id="mf-snapshot">{"samples": {"voip_call.pcap": {"file": "voip_call.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 0.998716, "is_uncertain": false, "status": "Confident", "top3": [{"class": "VoIP", "probability": 0.998716}, {"class": "Chat", "probability": 0.001274}, {"class": "Browsing", "probability": 6e-06}], "probabilities": {"Browsing": 6e-06, "Streaming": 0.0, "VoIP": 0.998716, "FileTransfer": 0.0, "P2P": 0.0, "Chat": 0.001274, "Mail": 3e-06}, "explanation": "Classified as VoIP (99.9% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: 19930.0 us, BIAT: 19930.0 us) and continuous low-bandwidth streaming (18961 B/s). This steady bidirectional cadence differs sharply from bursty request-response traffic like Chat.", "explainer": "rule_based_fallback", "features": {"duration": 2974565.029144, "total_fiat": 2969563.961029, "total_biat": 2969564.914703, "min_fiat": 19005.060196, "min_biat": 19005.060196, "max_fiat": 20997.047424, "max_biat": 20996.809006, "mean_fiat": 19929.95947, "mean_biat": 19929.96587, "flowPktsPerSecond": 100.855082, "flowBytesPerSecond": 18960.755421, "min_flowiat": 4999.876022, "max_flowiat": 15996.932983, "mean_flowiat": 9948.378024, "std_flowiat": 4982.469057, "min_active": 2974565.029144, "mean_active": 2974565.029144, "max_active": 2974565.029144, "std_active": 0, "min_idle": 0, "mean_idle": 0, "max_idle": 0, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "52.114.128.5", "src_port": 50020, "dst_port": 50020, "protocol": "UDP", "packet_count": 300, "byte_count": 56400, "duration_sec": 2.975}], "latency_ms": 5.986, "elapsed_ms": 2089.8, "model": "LGBMClassifier"}, "browsing_https.pcap": {"file": "browsing_https.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "Chat", "top_class": "Chat", "confidence": 0.875, "is_uncertain": false, "status": "Confident", "top3": [{"class": "Chat", "probability": 0.875}, {"class": "Browsing", "probability": 0.121044}, {"class": "FileTransfer", "probability": 0.001524}], "probabilities": {"Browsing": 0.121044, "Streaming": 0.000931, "VoIP": 0.000156, "FileTransfer": 0.001524, "P2P": 0.001267, "Chat": 0.875, "Mail": 7.8e-05}, "explanation": "Classified as Chat (87.5% confidence) characterized by sporadic, low-volume packet bursts with long idle periods between human typing events and minimal packet rates (4.6 pkts/s). This distinguishes it from high-frequency or streaming sessions like Browsing.", "explainer": "rule_based_fallback", "features": {"duration": 6920080.900192, "total_fiat": 6852441.072464, "total_biat": 6895080.804825, "min_fiat": 6814.002991, "min_biat": 3044.843674, "max_fiat": 6640208.005905, "max_biat": 6602809.906006, "mean_fiat": 685244.107246, "mean_biat": 344754.040241, "flowPktsPerSecond": 4.624223, "flowBytesPerSecond": 4022.640833, "min_flowiat": 3044.843674, "max_flowiat": 6523411.989212, "mean_flowiat": 223228.416135, "std_flowiat": 1150282.066755, "min_active": 140677.928925, "mean_active": 198334.45549, "max_active": 255990.982056, "std_active": 57656.526566, "min_idle": 6523411.989212, "mean_idle": 6523411.989212, "max_idle": 6523411.989212, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "104.244.42.1", "src_port": 52410, "dst_port": 443, "protocol": "TCP", "packet_count": 32, "byte_count": 27837, "duration_sec": 6.92}], "latency_ms": 2.259, "elapsed_ms": 1648.0, "model": "LGBMClassifier"}, "file_transfer.pcap": {"file": "file_transfer.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "P2P", "top_class": "P2P", "confidence": 0.54724, "is_uncertain": false, "status": "Confident", "top3": [{"class": "P2P", "probability": 0.54724}, {"class": "Browsing", "probability": 0.364852}, {"class": "Streaming", "probability": 0.050087}], "probabilities": {"Browsing": 0.364852, "Streaming": 0.050087, "VoIP": 0.000803, "FileTransfer": 0.028031, "P2P": 0.54724, "Chat": 0.005055, "Mail": 0.003933}, "explanation": "Classified as P2P (54.7% confidence) due to distributed bidirectional timing signatures with rapid inter-arrival variations across multiple peers (mean FIAT: 936.4 us). The continuous background exchange differs from standard client-server protocols like Browsing.", "explainer": "rule_based_fallback", "features": {"duration": 83342.075348, "total_fiat": 83342.075348, "total_biat": 0, "min_fiat": 433.921814, "min_biat": 0, "max_fiat": 1483.917236, "max_biat": 0, "mean_fiat": 936.427813, "mean_biat": 0, "flowPktsPerSecond": 1079.886715, "flowBytesPerSecond": 1579874.264594, "min_flowiat": 433.921814, "max_flowiat": 1483.917236, "mean_flowiat": 936.427813, "std_flowiat": 294.598489, "min_active": 83342.075348, "mean_active": 83342.075348, "max_active": 83342.075348, "std_active": 0, "min_idle": 0, "mean_idle": 0, "max_idle": 0, "std_idle": 0}, "src_ip": "13.107.136.9", "dst_ip": "192.168.1.105", "src_port": 443, "dst_port": 51234, "protocol": "TCP", "packet_count": 90, "byte_count": 131670, "duration_sec": 0.083}], "latency_ms": 1.972, "elapsed_ms": 1634.4, "model": "LGBMClassifier"}, "streaming_video.pcap": {"file": "streaming_video.pcap", "threshold": 0.0, "flows": [{"id": 0, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 0.994763, "is_uncertain": false, "status": "Confident", "top3": [{"class": "Browsing", "probability": 0.994763}, {"class": "FileTransfer", "probability": 0.003293}, {"class": "P2P", "probability": 0.000813}], "probabilities": {"Browsing": 0.994763, "Streaming": 4e-06, "VoIP": 0.000202, "FileTransfer": 0.003293, "P2P": 0.000813, "Chat": 0.000525, "Mail": 0.000399}, "explanation": "Classified as Browsing (99.5% confidence) based on interactive, bursty timing profiles consisting of fast initial page component requests followed by extended idle intervals (mean idle: 5152081.0 us) reflecting user reading time. The low continuous throughput (20196 B/s) distinguishes it from continuous streaming applications.", "explainer": "rule_based_fallback", "features": {"duration": 5382369.995117, "total_fiat": 150000.095367, "total_biat": 5367369.890213, "min_fiat": 9999.990463, "min_biat": 822.067261, "max_fiat": 59999.94278, "max_biat": 5205398.082733, "mean_fiat": 15000.009537, "mean_biat": 71564.93187, "flowPktsPerSecond": 16.163883, "flowBytesPerSecond": 20196.493385, "min_flowiat": 126.838684, "max_flowiat": 5152081.012726, "mean_flowiat": 62585.697618, "std_flowiat": 552040.841576, "min_active": 80288.887024, "mean_active": 115144.491196, "max_active": 150000.095367, "std_active": 34855.604172, "min_idle": 5152081.012726, "mean_idle": 5152081.012726, "max_idle": 5152081.012726, "std_idle": 0}, "src_ip": "192.168.1.105", "dst_ip": "142.250.190.46", "src_port": 49152, "dst_port": 443, "protocol": "TCP", "packet_count": 87, "byte_count": 108705, "duration_sec": 5.382}], "latency_ms": 2.134, "elapsed_ms": 1637.8, "model": "LGBMClassifier"}}, "health": {"status": "live", "model": "LGBMClassifier", "features": ["duration", "total_fiat", "total_biat", "min_fiat", "min_biat", "max_fiat", "max_biat", "mean_fiat", "mean_biat", "flowPktsPerSecond", "flowBytesPerSecond", "min_flowiat", "max_flowiat", "mean_flowiat", "std_flowiat", "min_active", "mean_active", "max_active", "std_active", "min_idle", "mean_idle", "max_idle", "std_idle"], "classes": ["Browsing", "Streaming", "VoIP", "FileTransfer", "P2P", "Chat", "Mail"], "explainer": "auto", "samples": [{"name": "browsing_https.pcap", "bytes": 28373}, {"name": "file_transfer.pcap", "bytes": 133134}, {"name": "streaming_video.pcap", "bytes": 110121}, {"name": "voip_call.pcap", "bytes": 61224}]}, "metrics": {"best_model": "LightGBM", "test_accuracy": 0.9686, "test_macro_f1": 0.9497, "latency_ms_per_flow": 2.312, "validation_comparison": [{"model": "RandomForest", "val_accuracy": 0.9371, "val_macro_f1": 0.8977, "train_seconds": 0.905}, {"model": "XGBoost", "val_accuracy": 0.9509, "val_macro_f1": 0.9105, "train_seconds": 1.4662}, {"model": "LightGBM", "val_accuracy": 0.9571, "val_macro_f1": 0.919, "train_seconds": 1.5653}], "cv_results": [{"model": "RandomForest", "accuracy_mean": 0.939, "accuracy_std": 0.0088, "macro_f1_mean": 0.9042, "macro_f1_std": 0.0141, "mean_fit_time_seconds": 1.08}, {"model": "XGBoost", "accuracy_mean": 0.9518, "accuracy_std": 0.0048, "macro_f1_mean": 0.9217, "macro_f1_std": 0.0103, "mean_fit_time_seconds": 5.76}, {"model": "LightGBM", "accuracy_mean": 0.9561, "accuracy_std": 0.0057, "macro_f1_mean": 0.9268, "macro_f1_std": 0.0128, "mean_fit_time_seconds": 3.01}]}, "batch": {"file": "data/processed/sample_raw_flows.csv", "threshold": 0.0, "rows": [{"id": 0, "predicted_class": "Streaming", "top_class": "Streaming", "confidence": 0.999623, "is_uncertain": false, "top3": [{"class": "Streaming", "probability": 0.999623}, {"class": "FileTransfer", "probability": 0.000263}, {"class": "Browsing", "probability": 0.000104}], "duration": 30079704, "flowBytesPerSecond": 8556.167973, "flowPktsPerSecond": 4.321851}, {"id": 1, "predicted_class": "P2P", "top_class": "P2P", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "P2P", "probability": 1.0}, {"class": "Streaming", "probability": 0.0}, {"class": "Chat", "probability": 0.0}], "duration": 96300, "flowBytesPerSecond": 4652.128764, "flowPktsPerSecond": 20.768432}, {"id": 2, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "Browsing", "probability": 0.0}, {"class": "FileTransfer", "probability": 0.0}], "duration": 14987685, "flowBytesPerSecond": 15499.258224, "flowPktsPerSecond": 113.693342}, {"id": 3, "predicted_class": "FileTransfer", "top_class": "FileTransfer", "confidence": 0.999806, "is_uncertain": false, "top3": [{"class": "FileTransfer", "probability": 0.999806}, {"class": "Browsing", "probability": 0.000193}, {"class": "Chat", "probability": 0.0}], "duration": 9619557, "flowBytesPerSecond": 353207.845226, "flowPktsPerSecond": 496.48856}, {"id": 4, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 1.0}, {"class": "Streaming", "probability": 0.0}, {"class": "Mail", "probability": 0.0}], "duration": 282691, "flowBytesPerSecond": 74484.154076, "flowPktsPerSecond": 180.408998}, {"id": 5, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "FileTransfer", "probability": 0.0}, {"class": "Chat", "probability": 0.0}], "duration": 14421830, "flowBytesPerSecond": 248.512151, "flowPktsPerSecond": 2.218858}, {"id": 6, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 0.999783, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 0.999783}, {"class": "Chat", "probability": 0.0002}, {"class": "P2P", "probability": 8e-06}], "duration": 8574291, "flowBytesPerSecond": 593.401833, "flowPktsPerSecond": 1.166277}, {"id": 7, "predicted_class": "VoIP", "top_class": "VoIP", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "VoIP", "probability": 1.0}, {"class": "FileTransfer", "probability": 0.0}, {"class": "Streaming", "probability": 0.0}], "duration": 14999067, "flowBytesPerSecond": 12279.63046, "flowPktsPerSecond": 104.539836}, {"id": 8, "predicted_class": "Browsing", "top_class": "Browsing", "confidence": 1.0, "is_uncertain": false, "top3": [{"class": "Browsing", "probability": 1.0}, {"class": "Chat", "probability": 0.0}, {"class": "VoIP", "probability": 0.0}], "duration": 256962, "flowBytesPerSecond": 17150.395778, "flowPktsPerSecond": 89.507398}, {"id": 9, "predicted_class": "Chat", "top_class": "Chat", "confidence": 0.979561, "is_uncertain": false, "top3": [{"class": "Chat", "probability": 0.979561}, {"class": "P2P", "probability": 0.018365}, {"class": "FileTransfer", "probability": 0.00135}], "duration": 134096, "flowBytesPerSecond": 2408.72211, "flowPktsPerSecond": 29.829376}], "counts": {"Browsing": 3, "VoIP": 3, "P2P": 1, "Streaming": 1, "FileTransfer": 1, "Chat": 1}, "latency_ms": 0.2969}}</script>
 <footer class="ftr">
+  <div class="ftr-fx" aria-hidden="true"><canvas data-horizon></canvas></div>
   <div class="wrap">
     <div class="ftr-grid">
       <div>
@@ -223,5 +605,6 @@
   <div class="row"><button class="btn sm" data-notice-close>Got it</button><a class="btn sm ghost" href="privacy.html">Read more</a></div>
 </div>
 <script src="js/main.js"></script>
+<script src="js/fx.bundle.js"></script>
 </body>
 </html>

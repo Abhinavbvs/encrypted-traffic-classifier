@@ -1,0 +1,198 @@
+/* MetaFlow fx 95 — closing CTA over a synthwave terrain, final tagline, and the global footer.
+   Port of dozfx section.closing--planet (sticky stage, pinned copy, footer sliding over it) and
+   footer.foot (rounded glowing top edge, horizon depth: glow, planet, moon, haze, perspective floor). */
+
+/* =====================================================================
+   1. CLOSING — sticky terrain stage, pinned copy
+   ===================================================================== */
+.fx-closing { position: relative; display: block; overflow-x: clip; }
+.fx-closing__stage {
+  position: sticky; top: 0; z-index: 0; height: 100vh; height: 100svh; overflow: hidden; clip-path: inset(0);
+  /* painted before the canvas goes live (and the whole look if WebGL is missing) */
+  background:
+    radial-gradient(38% 22% at 50% 60%, rgba(255, 60, 230, .55), rgba(255, 43, 214, .12) 60%, transparent 100%),
+    linear-gradient(180deg, #020103 0%, #0d010d 26%, #300530 46%, #7a1470 58.5%, #3a0636 61%, #1c0219 76%, #0b010a 100%);
+}
+.fx-closing__terrain { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; scale: 1.08;
+  transition: opacity 1.4s var(--mf-e-out, ease); will-change: translate; }
+.fx-closing__terrain.is-live { opacity: 1; }
+.fx-closing.is-gl .fx-closing__sun { opacity: 0; }
+.fx-closing__sun { position: absolute; left: 50%; top: 60%; width: 34vmax; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 220, 255, .9), rgba(255, 60, 230, .5) 12%, rgba(255, 43, 214, .14) 46%, transparent);
+  transition: opacity 1.4s var(--mf-e-out, ease); }
+.fx-closing__veil { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, #000 0, rgba(0, 0, 0, .55) 12%, transparent 34%), linear-gradient(0deg, rgba(0, 0, 0, .25) 0, transparent 16%); }
+
+.fx-closing__scroll { position: relative; z-index: 1; margin-top: -100vh; margin-top: -100svh; height: 160vh; height: 160svh; }
+.fx-closing__pin { position: sticky; top: 0; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center;
+  padding-top: 104px; padding-bottom: 48px; }
+/* the footer slides over the pinned stage (JS adds .is-over only when the footer follows directly) */
+.fx-closing.is-over::after { content: ""; display: block; height: 100vh; height: 100svh; pointer-events: none; }
+
+.fx-closing__grid { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 48px; }
+@media (min-width: 1024px) {
+  .fx-closing__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }
+  .fx-closing__head { grid-column: 1 / -1; grid-row: 1; }
+  .fx-closing__body { grid-column: 1 / 8; grid-row: 2; }
+}
+.fx-closing__head > *, .fx-closing__body { translate: 0 var(--pz, 0px); }
+.fx-closing__head { display: flex; flex-direction: column; gap: 48px; }
+
+/* label: magenta rule + mono caps (dozfx .label) */
+.fx-closing__label { margin: 0; display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 11px; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; font-weight: 500; color: var(--mf-dim, rgba(255, 255, 255, .64)); }
+.fx-closing__rule { flex: 0 0 32px; height: 1px; background: var(--mag); box-shadow: 0 0 8px rgba(255, 43, 214, .8);
+  transform-origin: left; transition: transform 1s var(--mf-e-expo, ease); }
+html.mf-js .fx-closing__head:not(.in) .fx-closing__rule { transform: scaleX(0); }
+
+/* mega title with per-word rise (dozfx [data-h] .wd/.wi) */
+.fx-closing__title { position: relative; z-index: 1; isolation: isolate; margin: 0; color: #fff;
+  font-family: var(--display); font-weight: 800; font-size: clamp(40px, 9.6vw, 150px); line-height: .86; letter-spacing: -.055em; word-spacing: .12em; }
+.fx-closing__title::before { content: ""; position: absolute; left: -10%; top: 50%; z-index: -1; width: 120%; height: 190%; transform: translateY(-50%); pointer-events: none;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .42), rgba(0, 0, 0, .32), rgba(0, 0, 0, .16) 60%, rgba(0, 0, 0, .05) 82%, transparent); }
+.fx-closing__title .wd { display: inline-block; overflow: hidden; vertical-align: top; padding: .18em .1em .24em; margin: -.18em -.1em -.24em; }
+.fx-closing__title .wi { display: inline-block; transform-origin: 0 100%;
+  transition: transform 1.05s var(--mf-e-expo, ease), opacity .8s var(--mf-e-out, ease), filter .9s var(--mf-e-out, ease);
+  transition-delay: calc(var(--i, 0) * 60ms); }
+html.mf-js .fx-closing__head:not(.in) .wi { transform: translate3d(0, 140%, 0) rotate(7deg); opacity: 0; filter: blur(8px); }
+
+.fx-closing__body { display: flex; flex-direction: column; gap: 32px; }
+.fx-closing__lead { margin: 0; max-width: 34em; font-size: clamp(18px, calc(16.6px + .376vw), 22px); line-height: 1.36; letter-spacing: -.005em;
+  color: rgba(255, 255, 255, .82); text-shadow: 0 2px 24px rgba(0, 0, 0, .5); }
+.fx-closing__row { display: flex; flex-wrap: wrap; gap: 16px; }
+
+/* =====================================================================
+   2. PILL BUTTONS (dozfx .btn--primary / .btn--ghost): pointer-origin fill, text roll, glow
+   ===================================================================== */
+a.btn.fx-cl-btn { --h: 48px; position: relative; display: inline-flex; align-items: center; gap: 12px; height: var(--h); padding: 0 16px 0 24px;
+  border: 0; border-radius: 999px; font-family: var(--sans); font-size: 14px; font-weight: 600; line-height: 1; letter-spacing: .01em; white-space: nowrap;
+  isolation: isolate; overflow: hidden; transform: none;
+  transition: color .32s var(--mf-e-out, ease), box-shadow .32s var(--mf-e-out, ease), background-color .32s, transform .16s var(--mf-e-out, ease); }
+a.btn.fx-cl-btn::before { content: ""; position: absolute; left: var(--fx, 50%); top: var(--fy, 50%); width: var(--fs, 320px); height: var(--fs, 320px);
+  margin: calc(var(--fs, 320px) / -2) 0 0 calc(var(--fs, 320px) / -2); border-radius: 50%; background: var(--fill, #fff); transform: scale(0);
+  transition: transform .6s var(--mf-e-expo, ease); z-index: -1; pointer-events: none; }
+a.btn.fx-cl-btn:hover::before, a.btn.fx-cl-btn:focus-visible::before { transform: scale(1); }
+a.btn.fx-cl-btn:active { transform: scale(.97); }
+a.btn.fx-cl-btn--primary { --fill: #fff; background: var(--mag); color: #fff; box-shadow: 0 0 22px rgba(255, 43, 214, .45), 0 0 70px rgba(255, 43, 214, .18); }
+a.btn.fx-cl-btn--primary:hover, a.btn.fx-cl-btn--primary:focus-visible { background: var(--mag); color: #050507;
+  box-shadow: 0 0 26px rgba(255, 43, 214, .75), 0 0 90px rgba(255, 43, 214, .35); }
+a.btn.fx-cl-btn--ghost { --fill: #fff; background: rgba(5, 4, 7, .35); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+a.btn.fx-cl-btn--ghost:hover, a.btn.fx-cl-btn--ghost:focus-visible { background: rgba(5, 4, 7, .35); color: #050507; box-shadow: inset 0 0 0 1px #fff, 0 0 30px rgba(255, 255, 255, .18); }
+.fx-cl-btn__ico { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 255, 255, .2); overflow: hidden; transition: background-color .32s; }
+.fx-cl-btn--ghost .fx-cl-btn__ico { background: rgba(255, 255, 255, .06); }
+a.btn.fx-cl-btn:hover .fx-cl-btn__ico, a.btn.fx-cl-btn:focus-visible .fx-cl-btn__ico { background: rgba(0, 0, 0, .12); }
+.fx-cl-btn__ico svg { width: 10px; height: 10px; transition: transform .32s var(--mf-e-out, ease); }
+a.btn.fx-cl-btn:hover .fx-cl-btn__ico svg { transform: translate(2px, -2px) rotate(45deg); }
+.fx-cl-btn .roll { display: inline-grid; overflow: hidden; height: 1.2em; line-height: 1.2em; }
+.fx-cl-btn .roll > span { grid-area: 1 / 1; transition: transform .32s var(--mf-e-out, ease); }
+.fx-cl-btn .roll > span + span { transform: translateY(110%); }
+a.btn.fx-cl-btn:hover .roll > span:first-child, a.btn.fx-cl-btn:focus-visible .roll > span:first-child { transform: translateY(-110%); }
+a.btn.fx-cl-btn:hover .roll > span + span, a.btn.fx-cl-btn:focus-visible .roll > span + span { transform: translateY(0); }
+a.btn.fx-cl-btn:focus-visible { outline: 1px solid #fff; outline-offset: 3px; }
+
+/* =====================================================================
+   3. FINAL TAGLINE (dozfx .foot__top / .foot__claim)
+   ===================================================================== */
+.fx-final { position: relative; z-index: 1; padding: clamp(72px, 8vw, 128px) 0 48px; }
+.ftr .fx-final { padding: 0 0 48px; margin-bottom: 48px; }
+.fx-final__top { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap; }
+.fx-final__claim { margin: 0; color: #fff; font-family: var(--display); font-weight: 800; font-size: clamp(40px, calc(28.7px + 3vw), 72px);
+  line-height: .95; letter-spacing: -.045em; text-shadow: 0 10px 60px rgba(0, 0, 0, .45); }
+.fx-final__dim { color: rgba(255, 255, 255, .6); }
+.fx-final__cta { flex: none; }
+
+/* =====================================================================
+   4. FOOTER (all pages) — rounded glowing top edge, horizon depth canvas, dozfx type
+   ===================================================================== */
+.ftr { position: relative; z-index: 2; isolation: isolate; overflow: hidden; color: #fff; background: #050407;
+  padding: clamp(96px, 8.9vw, 128px) 0 calc(32px + env(safe-area-inset-bottom, 0px));
+  border-radius: clamp(22px, 2.6vw, 40px) clamp(22px, 2.6vw, 40px) 0 0;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .16), 0 -1px rgba(255, 43, 214, .6), 0 -16px 60px -18px rgba(255, 43, 214, .45); }
+.ftr.ftr--over { margin-top: -100vh; margin-top: -100svh; z-index: 4; min-height: 100vh; min-height: 100svh; }
+.ftr > .wrap { position: relative; z-index: 1; }
+
+/* the depth layer: CSS paints a fallback, the canvas draws glow, planet, moon, haze and the moving floor */
+.ftr-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; border-radius: inherit;
+  background:
+    radial-gradient(closest-side at 80% 8%, rgba(255, 43, 214, .2), rgba(255, 43, 214, .07) 60%, transparent),
+    radial-gradient(46% 24% at 50% 62%, rgba(255, 43, 214, .14), transparent 74%),
+    #050407; }
+.ftr-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1s var(--mf-e-out, ease); }
+.ftr-fx canvas.is-live { opacity: 1; }
+
+/* columns (dozfx .foot__cols / .foot__h) */
+.ftr .ftr-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr)); column-gap: 24px; row-gap: 48px; }
+.ftr .ftr-grid > div:first-child { grid-column: auto; }
+.ftr h4 { margin: 0 0 16px; font-family: var(--sans); font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--mf-faint, rgba(255, 255, 255, .52)); }
+.ftr ul { list-style: none; margin: 0; padding: 0; display: block; }
+.ftr li { font-size: 13px; line-height: 1.5; }
+.ftr li + li { margin-top: 8px; }
+.ftr ul a { position: relative; display: inline-flex; align-items: center; color: #fff; font-size: 13px; font-weight: 500; transition: color .3s, text-shadow .3s; }
+.ftr ul a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right;
+  transition: transform .32s var(--mf-e-out, ease); }
+.ftr ul a:hover { color: var(--mag-2); text-shadow: 0 0 14px rgba(255, 43, 214, .55); }
+.ftr ul a:hover::after { transform: scaleX(1); transform-origin: left; }
+.ftr .logo { font-family: var(--display); font-size: 22px; font-weight: 800; letter-spacing: -.05em; gap: 11px; }
+.ftr .logo-word, .ftr .logo-word b { font-weight: 800; }
+.ftr .logo-word b { text-shadow: 0 0 18px rgba(255, 43, 214, .5); }
+.ftr .logo-mark { width: 34px; height: 34px; filter: drop-shadow(0 0 14px rgba(255, 43, 214, .45)); }
+.ftr .logo sup { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--mf-faint, rgba(255, 255, 255, .52)); align-self: flex-start; margin-top: 2px; }
+.ftr .addr { margin: 16px 0 0; max-width: 34ch; font-size: 13px; line-height: 1.6; color: var(--mf-dim, rgba(255, 255, 255, .64)); }
+
+/* "Star on GitHub": ghost pill with the pointer fill (dozfx .btn--ghost) */
+.ftr .ftr-grid .btn { position: relative; isolation: isolate; overflow: hidden; height: 44px; margin-top: 24px; padding: 0 18px 0 20px; gap: 10px; border: 0; border-radius: 999px;
+  background: rgba(5, 4, 7, .4); color: #fff; font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: .01em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); transform: none;
+  transition: color .32s var(--mf-e-out, ease), box-shadow .32s var(--mf-e-out, ease), transform .16s var(--mf-e-out, ease); }
+.ftr .ftr-grid .btn::before { content: ""; position: absolute; left: var(--fx, 50%); top: var(--fy, 50%); width: var(--fs, 320px); height: var(--fs, 320px);
+  margin: calc(var(--fs, 320px) / -2) 0 0 calc(var(--fs, 320px) / -2); border-radius: 50%; background: var(--mag); transform: scale(0);
+  transition: transform .6s var(--mf-e-expo, ease); z-index: -1; pointer-events: none; }
+.ftr .ftr-grid .btn:hover::before, .ftr .ftr-grid .btn:focus-visible::before { transform: scale(1); }
+.ftr .ftr-grid .btn:hover, .ftr .ftr-grid .btn:focus-visible { background: rgba(5, 4, 7, .4); color: #fff;
+  box-shadow: inset 0 0 0 1px var(--mag), 0 0 26px rgba(255, 43, 214, .6), 0 0 80px rgba(255, 43, 214, .25); }
+.ftr .ftr-grid .btn:active { transform: scale(.97); }
+.ftr .ftr-grid .btn .arr { transition: transform .32s var(--mf-e-out, ease); }
+.ftr .ftr-grid .btn:hover .arr { transform: translate(2px, -2px); }
+
+/* the giant wordmark, now lit: white → pink fill with a magenta bloom */
+.ftr .ftr-big { position: relative; margin: clamp(56px, 8vw, 110px) 0 24px; font-family: var(--display); font-weight: 900; font-size: clamp(64px, 17vw, 290px);
+  line-height: .8; letter-spacing: -.075em; white-space: nowrap; color: transparent;
+  background: linear-gradient(180deg, #fff 18%, #ffc6f6 42%, #ff5ce0 68%, rgba(255, 43, 214, .12) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(255, 43, 214, .55)) drop-shadow(0 0 70px rgba(255, 43, 214, .32));
+  translate: 0 var(--fbig, 0px); }
+
+/* legal line (dozfx .foot__base) */
+.ftr .ftr-legal { margin-top: 48px; padding-top: 0; border-top: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px 32px;
+  font-family: var(--sans); font-size: 10px; line-height: 1.2; letter-spacing: .14em; text-transform: uppercase; color: var(--mf-faint, rgba(255, 255, 255, .52)); }
+.ftr .ftr-legal nav { display: inline-flex; flex-wrap: wrap; gap: 2px 24px; }
+.ftr .ftr-legal a { display: inline-block; padding-block: 6px; transition: color .25s, text-shadow .25s; }
+.ftr .ftr-legal a:hover { color: #fff; text-shadow: 0 0 12px rgba(255, 43, 214, .7); }
+
+@media (max-width: 1023px) {
+  .ftr .ftr-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ftr .ftr-grid > div:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 767px) {
+  .fx-closing__scroll { height: 150vh; height: 150svh; }
+  .fx-closing__pin { padding-top: 96px; padding-bottom: 32px; }
+  .fx-closing__head { gap: 32px; }
+  .fx-closing__grid { row-gap: 32px; }
+  .ftr .ftr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; row-gap: 40px; }
+  .ftr .ftr-legal { flex-direction: column; align-items: flex-start; }
+  .fx-final__top { align-items: flex-start; }
+}
+@media (max-width: 560px) {
+  .fx-closing__row { flex-direction: column; align-items: flex-start; }
+  .ftr { padding-top: 88px; }
+}
+
+/* reduced motion: no pinning, no slide-over (dozfx does the same) */
+@media (prefers-reduced-motion: reduce) {
+  .fx-closing__scroll { height: auto; min-height: 100vh; min-height: 100svh; padding: 12vh 0; padding: 12svh 0; }
+  .fx-closing__pin { position: relative; min-height: 0; }
+  .fx-closing.is-over::after { display: none; }
+  .ftr.ftr--over { margin-top: 0; }
+  .fx-closing__title .wi, .fx-closing__rule { transition: none; }
+}
