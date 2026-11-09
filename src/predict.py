@@ -1,13 +1,15 @@
 """Inference module for encrypted traffic classification.
 
-This script loads the trained LightGBM model and StandardScaler, validates the
-23 timing-based flow feature columns, applies scaling, and produces predictions
-with class probabilities and top-3 ranked classes per flow.
+Loads the trained LightGBM model and StandardScaler, validates the 23 timing-based flow
+features, applies scaling, and produces predictions with class probabilities, top-3
+ranked classes per flow, and optional unknown/uncertain traffic thresholding.
+Supports both CSV flow input and raw PCAP/PCAPNG network packet captures.
 
 Abbreviations used in this module:
 - IAT: Inter-Arrival Time (time between successive packets in a flow).
 - FIAT: Forward Inter-Arrival Time (IAT between packets in forward direction).
 - BIAT: Backward Inter-Arrival Time (IAT between packets in backward direction).
+- PCAP: Packet Capture network file format.
 - CLI: Command-Line Interface.
 """
 
@@ -15,9 +17,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# Ensure repository root is on sys.path
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import joblib
 import numpy as np
@@ -108,6 +116,7 @@ def predict_flows(
     scaler: Any = None,
     feature_columns: List[str] | None = None,
     label_map: Dict[int, str] | None = None,
+    confidence_threshold: float = 0.0,
 ) -> Tuple[pd.DataFrame, float]:
     """Predict traffic classes and probabilities for a batch of flows.
 
@@ -117,10 +126,12 @@ def predict_flows(
         scaler: Optional pre-loaded StandardScaler. If None, loaded from DEFAULT_SCALER_PATH.
         feature_columns: Optional list of feature names. If None, loaded from DEFAULT_FEATURE_COLS_PATH.
         label_map: Optional class ID to class name mapping. If None, loaded from DEFAULT_LABEL_MAP_PATH.
+        confidence_threshold: Minimum confidence score (0.0 to 1.0). If confidence is below this
+            threshold, the flow is marked as 'Uncertain / Unknown Traffic'.
 
     Returns:
         A tuple of:
-            - results_df: DataFrame with predictions, class probabilities, and top-3 ranking.
+            - results_df: DataFrame with predictions, class probabilities, top-3 ranking, and uncertainty flags.
             - avg_latency_ms: Average inference latency per flow in milliseconds.
     """
     if model is None or scaler is None or feature_columns is None or label_map is None:
@@ -132,6 +143,13 @@ def predict_flows(
 
     # 1) Validate feature columns
     validate_features(df, feature_columns)
+
+    if len(df) == 0:
+        empty_cols = [
+            "predicted_class", "confidence", "is_uncertain", "status",
+            "top1_class", "top1_prob", "top2_class", "top2_prob", "top3_class", "top3_prob"
+        ] + [f"prob_{c}" for c in label_map.values()]
+        return pd.DataFrame(columns=empty_cols), 0.0
 
     # 2) Ensure data is aligned and numeric
     X_raw = df[feature_columns].apply(pd.to_numeric, errors="coerce")
@@ -156,8 +174,6 @@ def predict_flows(
 
     # 5) Format predictions and top-3 ranked classes
     num_classes = len(label_map)
-    class_names = [label_map[i] for i in range(num_classes)]
-
     pred_ids = np.argmax(probabilities, axis=1)
     pred_classes = [label_map[idx] for idx in pred_ids]
     pred_probs = np.max(probabilities, axis=1)
@@ -186,9 +202,19 @@ def predict_flows(
         for i in range(n_flows)
     ]
 
+    # Confidence Thresholding & Unknown Traffic Detection
+    is_uncertain = [float(p) < confidence_threshold for p in pred_probs]
+    statuses = ["Uncertain (Unknown Traffic)" if u else "Confident" for u in is_uncertain]
+    display_classes = [
+        f"Uncertain ({top1_names[i]})" if is_uncertain[i] else top1_names[i]
+        for i in range(n_flows)
+    ]
+
     results = {
-        "predicted_class": pred_classes,
+        "predicted_class": display_classes,
         "confidence": pred_probs,
+        "is_uncertain": is_uncertain,
+        "status": statuses,
         "top1_class": top1_names,
         "top1_prob": top1_probs,
         "top2_class": top2_names,
@@ -211,6 +237,7 @@ def predict_one(
     scaler: Any = None,
     feature_columns: List[str] | None = None,
     label_map: Dict[int, str] | None = None,
+    confidence_threshold: float = 0.0,
 ) -> Dict[str, Any]:
     """Predict traffic category for a single network flow.
 
@@ -220,6 +247,7 @@ def predict_one(
         scaler: Optional pre-loaded StandardScaler.
         feature_columns: Optional feature list.
         label_map: Optional label map.
+        confidence_threshold: Threshold below which prediction is marked uncertain.
 
     Returns:
         Dictionary containing predicted_class, confidence, top3 candidates, and
@@ -232,6 +260,7 @@ def predict_one(
         scaler=scaler,
         feature_columns=feature_columns,
         label_map=label_map,
+        confidence_threshold=confidence_threshold,
     )
 
     row = results_df.iloc[0]
@@ -250,23 +279,67 @@ def predict_one(
     return {
         "predicted_class": row["predicted_class"],
         "confidence": round(float(row["confidence"]), 4),
+        "is_uncertain": bool(row["is_uncertain"]),
+        "status": row["status"],
         "top3": top3,
         "probabilities": all_probs,
         "latency_ms": round(latency_ms, 3),
     }
 
 
-def main():
-    """Command-line interface entry point for flow prediction."""
-    parser = argparse.ArgumentParser(
-        description="Predict encrypted traffic category from 23 timing flow features."
+def predict_pcap(
+    pcap_path: Union[str, Path],
+    model: Any = None,
+    scaler: Any = None,
+    feature_columns: List[str] | None = None,
+    label_map: Dict[int, str] | None = None,
+    confidence_threshold: float = 0.0,
+) -> Tuple[pd.DataFrame, pd.DataFrame, float]:
+    """Extract flows directly from a raw PCAP/PCAPNG file and classify them.
+
+    Args:
+        pcap_path: Path to the raw .pcap or .pcapng packet capture.
+        confidence_threshold: Threshold to flag uncertain / unknown flows.
+
+    Returns:
+        Tuple of (combined_results_df, extracted_features_df, latency_ms)
+    """
+    from src.pcap_extractor import extract_flows_from_pcap
+
+    features_df, metadata_df = extract_flows_from_pcap(pcap_path)
+    if len(features_df) == 0:
+        return pd.DataFrame(), pd.DataFrame(), 0.0
+
+    predictions_df, latency_ms = predict_flows(
+        features_df,
+        model=model,
+        scaler=scaler,
+        feature_columns=feature_columns,
+        label_map=label_map,
+        confidence_threshold=confidence_threshold,
     )
-    parser.add_argument(
+
+    combined_df = pd.concat([metadata_df, predictions_df], axis=1)
+    return combined_df, features_df, latency_ms
+
+
+def main():
+    """Command-line interface entry point for flow prediction (CSV or raw PCAP)."""
+    parser = argparse.ArgumentParser(
+        description="Predict encrypted traffic category from 23 timing flow features or raw PCAP."
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "--input",
         "-i",
         type=str,
-        required=True,
-        help="Path to CSV containing flow features to classify.",
+        help="Path to CSV containing 23 timing flow features.",
+    )
+    group.add_argument(
+        "--pcap",
+        "-p",
+        type=str,
+        help="Path to raw .pcap or .pcapng network packet capture file.",
     )
     parser.add_argument(
         "--output",
@@ -274,6 +347,13 @@ def main():
         type=str,
         default="predictions.csv",
         help="Path where prediction output CSV will be saved (default: predictions.csv).",
+    )
+    parser.add_argument(
+        "--threshold",
+        "-t",
+        type=float,
+        default=0.0,
+        help="Confidence threshold (0.0 - 1.0) for Unknown Traffic detection (default: 0.0).",
     )
     parser.add_argument(
         "--model",
@@ -289,44 +369,67 @@ def main():
     )
 
     args = parser.parse_args()
-
-    input_path = Path(args.input)
     output_path = Path(args.output)
-
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_path}")
-
-    print(f"Loading input flows from: {input_path}")
-    df = pd.read_csv(input_path)
-    print(f"Read {len(df)} row(s).")
 
     model, scaler, feature_columns, label_map = load_artifacts(
         model_path=args.model,
         scaler_path=args.scaler,
     )
 
-    # If input CSV has extraneous label columns (like 'label' or 'label_id' from test sets),
-    # inform user if they exist and only pass the features, or let validate_features check.
-    # The requirement specifies: "accepts a pandas DataFrame containing the 23 feature columns,
-    # validates the columns (clear error listing any missing or extra columns)".
-    # If the user passed raw flows with labels, we strip them only if explicitly requested,
-    # otherwise we follow the strict validation rule.
-    predictions_df, latency_ms = predict_flows(
-        df,
-        model=model,
-        scaler=scaler,
-        feature_columns=feature_columns,
-        label_map=label_map,
-    )
+    if args.pcap:
+        pcap_path = Path(args.pcap)
+        if not pcap_path.exists():
+            raise FileNotFoundError(f"PCAP file not found: {pcap_path}")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    predictions_df.to_csv(output_path, index=False)
-    print(f"Saved predictions to: {output_path}")
-    print(f"Average latency per flow: {latency_ms:.3f} ms ({len(df)} flow(s) processed)")
+        print(f"Reading raw packets and extracting flows from PCAP: {pcap_path}")
+        combined_df, features_df, latency_ms = predict_pcap(
+            pcap_path,
+            model=model,
+            scaler=scaler,
+            feature_columns=feature_columns,
+            label_map=label_map,
+            confidence_threshold=args.threshold,
+        )
 
-    # Print summary of predicted classes
-    print("\nPredicted class breakdown:")
-    print(predictions_df["predicted_class"].value_counts().to_string())
+        if len(combined_df) == 0:
+            print("No IP network flows detected in PCAP.")
+            return
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        combined_df.to_csv(output_path, index=False)
+        print(f"Extracted and classified {len(combined_df)} network flow(s).")
+        print(f"Saved results to: {output_path}")
+        print(f"Average classification latency: {latency_ms:.3f} ms / flow")
+
+        print("\nFlows Classification Summary:")
+        summary_cols = ["src_ip", "dst_ip", "protocol", "packet_count", "predicted_class", "confidence", "status"]
+        print(combined_df[[c for c in summary_cols if c in combined_df.columns]].to_string(index=False))
+
+    else:
+        input_path = Path(args.input)
+        if not input_path.exists():
+            raise FileNotFoundError(f"Input file not found: {input_path}")
+
+        print(f"Loading input flows from: {input_path}")
+        df = pd.read_csv(input_path)
+        print(f"Read {len(df)} row(s).")
+
+        predictions_df, latency_ms = predict_flows(
+            df,
+            model=model,
+            scaler=scaler,
+            feature_columns=feature_columns,
+            label_map=label_map,
+            confidence_threshold=args.threshold,
+        )
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        predictions_df.to_csv(output_path, index=False)
+        print(f"Saved predictions to: {output_path}")
+        print(f"Average latency per flow: {latency_ms:.3f} ms ({len(df)} flow(s) processed)")
+
+        print("\nPredicted class breakdown:")
+        print(predictions_df["predicted_class"].value_counts().to_string())
 
 
 if __name__ == "__main__":
