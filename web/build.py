@@ -882,7 +882,7 @@ def analyze():
 
 <section class="sec-tight" style="padding-top:10px"><div class="wrap">
   <div class="row-between" style="margin-bottom:22px"><div><div class="eyebrow" style="margin-bottom:8px">data/sample_pcaps</div><h2 class="h-m">Sample captures</h2></div><button class="btn ghost sm" data-run-all>Classify all four <span class="arr">→</span></button></div>
-  <div class="samples">%s</div>
+  <div class="samples">""" + cards + """</div>
 
   <label class="drop mt-m" data-drop>
     <input type="file" accept=".pcap,.pcapng,.cap" data-upload>
@@ -897,12 +897,163 @@ def analyze():
   <div class="results" data-results aria-live="polite"><p class="mute empty">Pick a capture above. Each flow shows its 5-tuple, the verdict, all seven class probabilities, the explanation and the 23 timing features it was judged on.</p></div>
 </div></section>
 
+<section class="sec" id="simulator" style="border-top:1px solid var(--line)"><div class="wrap">
+  <div class="row-between" style="margin-bottom:14px">
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">Single-Flow Simulator · What-If Analysis</div>
+      <h2 class="h-m">Interactive Feature Sliders</h2>
+      <p class="lead" style="font-size:18px;margin-top:10px">Tune key timing characteristics or pick a traffic archetype preset to observe real-time classification changes and network rationale.</p>
+    </div>
+  </div>
+
+  <div class="sim-box">
+    <div class="sim-presets" data-sim-presets>
+      <span class="sim-preset-label">Traffic Presets:</span>
+      <button class="sim-preset-btn active" data-preset="voip"><span>📞</span> VoIP Call</button>
+      <button class="sim-preset-btn" data-preset="browsing"><span>🌐</span> HTTPS Browsing</button>
+      <button class="sim-preset-btn" data-preset="file"><span>📁</span> File Transfer</button>
+      <button class="sim-preset-btn" data-preset="streaming"><span>🎬</span> Video Streaming</button>
+      <button class="sim-preset-btn" data-preset="chat"><span>💬</span> Chat / Messaging</button>
+      <button class="sim-preset-btn reset" data-preset="reset"><span>↺</span> Reset Baseline</button>
+    </div>
+
+    <div class="sim-layout">
+      <div class="sim-groups" data-sim-inputs>
+        <!-- Group 1: Flow Rates & Duration -->
+        <div class="sim-group">
+          <div class="sim-group-head">
+            <h4><span>📊</span> Flow Rates & Duration</h4>
+            <span class="badge">Throughput & Pacing</span>
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-bytes">Bytes / Second <code>flowBytesPerSecond</code></label>
+            <span class="sim-slider-val" id="val-flowBytesPerSecond">18,961 B/s</span>
+            <input class="sim-slider-input" id="sim-bytes" type="range" min="0" max="500000" step="500" value="18961" data-feat="flowBytesPerSecond">
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-pkts">Packets / Second <code>flowPktsPerSecond</code></label>
+            <span class="sim-slider-val" id="val-flowPktsPerSecond">100.9 pkts/s</span>
+            <input class="sim-slider-input" id="sim-pkts" type="range" min="0" max="500" step="1" value="101" data-feat="flowPktsPerSecond">
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-duration">Duration (microseconds) <code>duration</code></label>
+            <span class="sim-slider-val" id="val-duration">2,974,565 µs</span>
+            <input class="sim-slider-input" id="sim-duration" type="range" min="50000" max="30000000" step="50000" value="2974565" data-feat="duration">
+          </div>
+        </div>
+
+        <!-- Group 2: Inter-Arrival Times -->
+        <div class="sim-group">
+          <div class="sim-group-head">
+            <h4><span>⏱️</span> Packet Inter-Arrival Times</h4>
+            <span class="badge">IAT Cadence & Jitter</span>
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-fiat">Mean Forward IAT <code>mean_fiat</code></label>
+            <span class="sim-slider-val" id="val-mean_fiat">19,930 µs</span>
+            <input class="sim-slider-input" id="sim-fiat" type="range" min="0" max="2000000" step="1000" value="19930" data-feat="mean_fiat">
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-biat">Mean Backward IAT <code>mean_biat</code></label>
+            <span class="sim-slider-val" id="val-mean_biat">19,930 µs</span>
+            <input class="sim-slider-input" id="sim-biat" type="range" min="0" max="2000000" step="1000" value="19930" data-feat="mean_biat">
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-minflowiat">Min Flow IAT <code>min_flowiat</code></label>
+            <span class="sim-slider-val" id="val-min_flowiat">5,000 µs</span>
+            <input class="sim-slider-input" id="sim-minflowiat" type="range" min="0" max="50000" step="50" value="5000" data-feat="min_flowiat">
+          </div>
+        </div>
+
+        <!-- Group 3: Active & Idle Periods -->
+        <div class="sim-group">
+          <div class="sim-group-head">
+            <h4><span>⏸️</span> Active Bursts & Idle Gaps</h4>
+            <span class="badge">Burstiness & Think Time</span>
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-active">Mean Active Time <code>mean_active</code></label>
+            <span class="sim-slider-val" id="val-mean_active">2,974,565 µs</span>
+            <input class="sim-slider-input" id="sim-active" type="range" min="0" max="15000000" step="50000" value="2974565" data-feat="mean_active">
+          </div>
+          <div class="sim-slider-row">
+            <label class="sim-slider-label" for="sim-idle">Mean Idle Time <code>mean_idle</code></label>
+            <span class="sim-slider-val" id="val-mean_idle">0 µs</span>
+            <input class="sim-slider-input" id="sim-idle" type="range" min="0" max="15000000" step="50000" value="0" data-feat="mean_idle">
+          </div>
+        </div>
+
+        <!-- Advanced fine tuner for remaining features -->
+        <details class="sim-group" style="padding:14px 18px">
+          <summary style="cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em">🎛️ Advanced: Fine-tune remaining 15 features</summary>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px">
+            <div class="sim-slider-row">
+              <label class="sim-slider-label"><code>std_flowiat</code></label>
+              <span class="sim-slider-val" id="val-std_flowiat">4,982 µs</span>
+              <input class="sim-slider-input" type="range" min="0" max="1000000" step="500" value="4982" data-feat="std_flowiat">
+            </div>
+            <div class="sim-slider-row">
+              <label class="sim-slider-label"><code>mean_flowiat</code></label>
+              <span class="sim-slider-val" id="val-mean_flowiat">9,948 µs</span>
+              <input class="sim-slider-input" type="range" min="0" max="1000000" step="500" value="9948" data-feat="mean_flowiat">
+            </div>
+            <div class="sim-slider-row">
+              <label class="sim-slider-label"><code>total_fiat</code></label>
+              <span class="sim-slider-val" id="val-total_fiat">2,969,564 µs</span>
+              <input class="sim-slider-input" type="range" min="0" max="30000000" step="100000" value="2969564" data-feat="total_fiat">
+            </div>
+            <div class="sim-slider-row">
+              <label class="sim-slider-label"><code>total_biat</code></label>
+              <span class="sim-slider-val" id="val-total_biat">2,969,565 µs</span>
+              <input class="sim-slider-input" type="range" min="0" max="30000000" step="100000" value="2969565" data-feat="total_biat">
+            </div>
+            <div class="sim-slider-row">
+              <label class="sim-slider-label"><code>max_flowiat</code></label>
+              <span class="sim-slider-val" id="val-max_flowiat">15,997 µs</span>
+              <input class="sim-slider-input" type="range" min="0" max="5000000" step="1000" value="15997" data-feat="max_flowiat">
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Right: Real-time Verdict & XAI Output -->
+      <div class="sim-verdict-card" data-sim-verdict>
+        <div class="sim-verdict-head">
+          <div>
+            <small>Simulated Verdict</small>
+            <h3 class="sim-verdict-title" data-sim-class>VoIP</h3>
+          </div>
+          <span class="sim-latency-badge" data-sim-latency>⚡ 2.3 ms</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:8px 0 14px">
+          <span class="pill ok" data-sim-status>Confident</span>
+          <span class="mono mute" style="font-size:13px" data-sim-conf-text>99.9% confidence</span>
+        </div>
+
+        <div class="sim-top3">
+          <div class="sim-top3-title">Top-3 Ranked Candidates</div>
+          <div data-sim-top3>
+            <div class="pbar top"><span>VoIP</span><span class="t"><i style="width:99.87%"></i></span><span class="v">99.9%</span></div>
+            <div class="pbar"><span>Chat</span><span class="t"><i style="width:0.13%"></i></span><span class="v">0.1%</span></div>
+            <div class="pbar"><span>Browsing</span><span class="t"><i style="width:0.01%"></i></span><span class="v">0.0%</span></div>
+          </div>
+        </div>
+
+        <div class="sim-why">
+          <small><span>Computer Networks Technical Explanation</span><span class="sim-provider-tag" data-sim-provider>rule based</span></small>
+          <p data-sim-explanation>Classified as VoIP (99.9% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: 19930.0 us, BIAT: 19930.0 us) and continuous low-bandwidth streaming (18961 B/s). This steady bidirectional cadence differs sharply from bursty request-response traffic like Chat.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
 <section class="sec" id="batch" style="background:var(--bg-2)"><div class="wrap">
   <div class="row-between" style="margin-bottom:24px"><div><div class="eyebrow" style="margin-bottom:8px">data/processed/sample_raw_flows.csv</div><h2 class="h-m">Batch inference</h2><p class="lead" style="font-size:18px;margin-top:10px">Ten pre-extracted flows, scored in one call to <code>predict_flows()</code>.</p></div>
   <button class="btn" data-batch>Classify the CSV <span class="arr">→</span></button></div>
   <div data-batch-out></div>
 </div></section>
-""" % cards
+"""
     write("analyze.html", "Analyze · MetaFlow", "Run MetaFlow's real model on the repository's sample captures, your own PCAP, or the bundled flow CSV.", "analyze.html", body, snapshot=True)
 
 

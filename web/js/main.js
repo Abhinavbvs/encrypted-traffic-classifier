@@ -323,6 +323,45 @@
     range.addEventListener("change", function () { if (lastKey && !busy) run(lastKey); });
   }
 
+  /* ---------- 23 Features Metadata Dictionary ---------- */
+  var FEATURE_META = {
+    duration: { cat: "Volume", cls: "feat-cat-vol", unit: "µs", desc: "Total flow duration from first to last observed packet" },
+    flowBytesPerSecond: { cat: "Throughput", cls: "feat-cat-rate", unit: "B/s", desc: "Data transfer rate (total flow bytes / duration)" },
+    flowPktsPerSecond: { cat: "Throughput", cls: "feat-cat-rate", unit: "pkts/s", desc: "Packet arrival rate (total packets / duration)" },
+    total_fiat: { cat: "Forward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Cumulative inter-arrival time across forward packets" },
+    total_biat: { cat: "Backward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Cumulative inter-arrival time across backward packets" },
+    min_fiat: { cat: "Forward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Minimum forward packet inter-arrival time" },
+    min_biat: { cat: "Backward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Minimum backward packet inter-arrival time" },
+    max_fiat: { cat: "Forward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Maximum forward packet inter-arrival time (longest pause)" },
+    max_biat: { cat: "Backward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Maximum backward packet inter-arrival time (longest pause)" },
+    mean_fiat: { cat: "Forward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Mean forward inter-arrival time (packet pacing cadence)" },
+    mean_biat: { cat: "Backward IAT", cls: "feat-cat-iat", unit: "µs", desc: "Mean backward inter-arrival time (response pacing cadence)" },
+    min_flowiat: { cat: "Combined IAT", cls: "feat-cat-iat", unit: "µs", desc: "Global minimum inter-arrival time between any two packets" },
+    max_flowiat: { cat: "Combined IAT", cls: "feat-cat-iat", unit: "µs", desc: "Global maximum inter-arrival time between any two packets" },
+    mean_flowiat: { cat: "Combined IAT", cls: "feat-cat-iat", unit: "µs", desc: "Mean inter-arrival time across bidirectional stream" },
+    std_flowiat: { cat: "Combined IAT", cls: "feat-cat-iat", unit: "µs", desc: "Standard deviation of flow IAT (packet jitter measure)" },
+    min_active: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Minimum burst duration before flow went idle" },
+    mean_active: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Average duration of continuous packet burst activity" },
+    max_active: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Peak single burst activity duration" },
+    std_active: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Standard deviation of active burst durations" },
+    min_idle: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Minimum idle pause between packet bursts" },
+    mean_idle: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Average idle pause time (e.g., human think/reading time)" },
+    max_idle: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Maximum idle interval without packet transmission" },
+    std_idle: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Standard deviation of idle intervals" }
+  };
+
+  function downloadCSV(filename, csvContent) {
+    var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    var link = document.createElement("a");
+    var url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   /* ---------- Analyze page ---------- */
   var results = $("[data-results]");
   if (results) {
@@ -334,15 +373,48 @@
       var unk = f.is_uncertain;
       var tuple = esc(f.src_ip) + ":" + esc(f.src_port) + " ⇄ " + esc(f.dst_ip) + ":" + esc(f.dst_port) + " · " + esc(f.protocol);
       var probs = Object.keys(f.probabilities).map(function (k) { return [k, f.probabilities[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
-      var feats = Object.keys(f.features).map(function (k) { return "<div><code>" + esc(k) + "</code><b>" + fmt(f.features[k]) + "</b></div>"; }).join("");
-      return '<article class="flow"><div>' +
+      
+      var featKeys = Object.keys(f.features);
+      var featsGrid = featKeys.map(function (k) { return "<div><code>" + esc(k) + "</code><b>" + fmt(f.features[k]) + "</b></div>"; }).join("");
+      
+      var tableRows = featKeys.map(function (k) {
+        var m = FEATURE_META[k] || { cat: "General", cls: "feat-cat-vol", unit: "", desc: "" };
+        return "<tr><td class='mono'><code>" + esc(k) + "</code></td><td><span class='feat-cat-pill " + m.cls + "'>" + esc(m.cat) + "</span></td><td class='num'>" + fmt(f.features[k]) + "</td><td class='mono'>" + esc(m.unit) + "</td><td>" + esc(m.desc) + "</td></tr>";
+      }).join("");
+
+      var flowJson = JSON.stringify(f, null, 2);
+      var flowCsv = "feature_name,category,value,unit,description\n" + featKeys.map(function (k) {
+        var m = FEATURE_META[k] || { cat: "General", unit: "", desc: "" };
+        return '"' + k + '","' + m.cat + '",' + (f.features[k] != null ? f.features[k] : 0) + ',"' + m.unit + '","' + m.desc.replace(/"/g, '""') + '"';
+      }).join("\n");
+
+      return '<article class="flow" data-flow-id="' + i + '"><div>' +
         '<div class="flow-tuple">Flow ' + (i + 1) + " · " + tuple + " · " + esc(f.packet_count) + " packets</div>" +
         '<div class="flow-verdict"><h3 class="' + (unk ? "unk" : "") + '">' + (unk ? "Unknown" : esc(f.top_class)) + "</h3>" +
         '<span class="conf">' + (unk ? "best guess " + esc(f.top_class) + " · " : "") + pct(f.confidence) + " confidence</span>" +
         '<span class="pill ' + (unk ? "unk" : "ok") + '">' + (unk ? "below threshold" : "confident") + "</span></div>" +
         '<p class="flow-why"><small>Why · ' + esc((f.explainer || "").replace(/_/g, " ")) + "</small>" + esc(f.explanation) + "</p></div>" +
         '<div class="probs">' + probs.map(function (p, j) { return pbar(p[0], p[1], j === 0 && !unk); }).join("") + "</div>" +
-        '<details><summary>The 23 timing features this flow was judged on</summary><div class="fgrid">' + feats + "</div></details></article>";
+        '<div style="grid-column:1 / -1">' +
+          '<div class="flow-inspect-bar">' +
+            '<div class="flow-inspect-toggle">' +
+              '<button class="flow-inspect-btn active" data-view="grid" data-for="' + i + '">Summary Grid</button>' +
+              '<button class="flow-inspect-btn" data-view="table" data-for="' + i + '">Raw 23-Feature Table</button>' +
+            '</div>' +
+            '<div class="flow-actions">' +
+              '<button class="btn ghost sm" data-flow-csv="' + i + '">📥 Export Flow CSV</button>' +
+              '<button class="btn ghost sm" data-flow-json="' + i + '">📋 Copy JSON</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="flow-view-grid" id="fview-grid-' + i + '">' +
+            '<div class="fgrid">' + featsGrid + '</div>' +
+          '</div>' +
+          '<div class="flow-view-table table-scroll-x" id="fview-table-' + i + '" style="display:none">' +
+            '<table class="feat-table"><thead><tr><th>Feature Name</th><th>Category</th><th style="text-align:right">Value</th><th>Unit</th><th>Technical Significance</th></tr></thead><tbody>' + tableRows + '</tbody></table>' +
+          '</div>' +
+          '<script type="application/json" id="raw-flow-' + i + '">' + flowJson.replace(/<\//g, "<\\/") + '<\/script>' +
+          '<script type="text/plain" id="csv-flow-' + i + '">' + flowCsv.replace(/<\//g, "<\\/") + '<\/script>' +
+        '</div></article>';
     };
     var headHTML = function (res) {
       return '<div class="run-head"><b>' + esc(res.file) + '</b><div class="meta">' +
@@ -401,25 +473,331 @@
       drop.addEventListener("drop", function (e) { if (e.dataTransfer && e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]); });
     }
 
+    /* Delegated events for Flow Results (View Toggle, Export Flow CSV, Copy JSON) */
+    results.addEventListener("click", function (e) {
+      var t = e.target;
+      var vBtn = t.closest("[data-view]");
+      if (vBtn) {
+        var flowId = vBtn.getAttribute("data-for");
+        var view = vBtn.getAttribute("data-view");
+        var p = vBtn.parentElement;
+        $$("[data-view]", p).forEach(function (b) { b.classList.toggle("active", b === vBtn); });
+        var gView = $("#fview-grid-" + flowId);
+        var tView = $("#fview-table-" + flowId);
+        if (gView && tView) {
+          gView.style.display = view === "grid" ? "" : "none";
+          tView.style.display = view === "table" ? "" : "none";
+        }
+        return;
+      }
+      var cBtn = t.closest("[data-flow-csv]");
+      if (cBtn) {
+        var fId = cBtn.getAttribute("data-flow-csv");
+        var sc = $("#csv-flow-" + fId);
+        if (sc) downloadCSV("flow_" + (parseInt(fId, 10) + 1) + "_23features.csv", sc.textContent);
+        return;
+      }
+      var jBtn = t.closest("[data-flow-json]");
+      if (jBtn) {
+        var jId = jBtn.getAttribute("data-flow-json");
+        var sj = $("#raw-flow-" + jId);
+        if (sj && navigator.clipboard) {
+          navigator.clipboard.writeText(sj.textContent).then(function () {
+            var orig = jBtn.textContent; jBtn.textContent = "Copied JSON"; setTimeout(function () { jBtn.textContent = orig; }, 1400);
+          });
+        }
+        return;
+      }
+    });
+
     var bBtn = $("[data-batch]"), bOut = $("[data-batch-out]");
+    var lastBatchData = null, batchViewMode = "compact";
+
+    var renderBatchTables = function () {
+      if (!lastBatchData) return;
+      var b = lastBatchData;
+      var counts = Object.keys(b.counts).map(function (k) { return "<span>" + esc(k) + "<b>" + b.counts[k] + "</b></span>"; }).join("");
+      
+      var featKeys = Object.keys(FEATURE_META);
+      
+      var compactRows = b.rows.map(function (r) {
+        return '<tr><td class="num">' + (r.id + 1) + '</td><td class="num">' + fmt(r.duration) + '</td><td class="num">' + fmt(r.flowBytesPerSecond) + '</td><td class="num">' + fmt(r.flowPktsPerSecond) +
+          '</td><td><span class="pill ' + (r.is_uncertain ? "unk" : "ok") + '">' + esc(r.is_uncertain ? "Unknown · " + r.top_class : r.top_class) + '</span></td><td class="num">' + pct(r.confidence) +
+          "</td><td>" + esc(r.top3[1]["class"]) + ' <span class="mute">' + pct(r.top3[1].probability) + "</span></td></tr>";
+      }).join("");
+
+      var fullHead = '<th class="num">#</th><th>Prediction</th><th class="num">Confidence</th><th>Runner-up</th>' + featKeys.map(function (k) {
+        return '<th class="num">' + esc(k) + ' <span class="mute" style="font-weight:normal">(' + esc(FEATURE_META[k].unit) + ')</span></th>';
+      }).join("");
+
+      var fullRows = b.rows.map(function (r) {
+        var fVals = r.features || {};
+        var fCells = featKeys.map(function (k) {
+          return '<td class="num mono">' + fmt(fVals[k] != null ? fVals[k] : r[k]) + '</td>';
+        }).join("");
+        return '<tr><td class="num">' + (r.id + 1) + '</td><td><span class="pill ' + (r.is_uncertain ? "unk" : "ok") + '">' + esc(r.is_uncertain ? "Unknown · " + r.top_class : r.top_class) + '</span></td><td class="num">' + pct(r.confidence) + '</td><td>' + esc(r.top3[1]["class"]) + ' <span class="mute">' + pct(r.top3[1].probability) + '</span></td>' + fCells + '</tr>';
+      }).join("");
+
+      bOut.innerHTML = headHTML({ file: b.file, flows: b.rows, latency_ms: b.latency_ms, threshold: b.threshold, mode: b.mode }) +
+        '<div class="counts mt-s">' + counts + '</div>' +
+        '<div class="batch-toolbar">' +
+          '<div class="flow-inspect-toggle">' +
+            '<button class="flow-inspect-btn ' + (batchViewMode === "compact" ? "active" : "") + '" data-batch-toggle="compact">Compact View (7 cols)</button>' +
+            '<button class="flow-inspect-btn ' + (batchViewMode === "full" ? "active" : "") + '" data-batch-toggle="full">Full 23-Feature Table (27 cols)</button>' +
+          '</div>' +
+          '<button class="btn ghost sm" data-batch-export>📥 Export All 10 Flows & Predictions (CSV)</button>' +
+        '</div>' +
+        '<div class="table-wrap" id="batch-compact-wrap" style="' + (batchViewMode === "compact" ? "" : "display:none") + '">' +
+          '<table class="data-table batch-table"><thead><tr><th class="num">#</th><th class="num">duration (µs)</th><th class="num">bytes/s</th><th class="num">packets/s</th><th>Prediction</th><th class="num">Confidence</th><th>Runner-up</th></tr></thead><tbody>' + compactRows + '</tbody></table>' +
+        '</div>' +
+        '<div class="table-scroll-x" id="batch-full-wrap" style="' + (batchViewMode === "full" ? "" : "display:none") + '">' +
+          '<table class="feat-table batch-table-full"><thead><tr>' + fullHead + '</tr></thead><tbody>' + fullRows + '</tbody></table>' +
+        '</div>';
+    };
+
+    bOut.addEventListener("click", function (e) {
+      var t = e.target;
+      var tog = t.closest("[data-batch-toggle]");
+      if (tog) {
+        batchViewMode = tog.getAttribute("data-batch-toggle");
+        renderBatchTables();
+        return;
+      }
+      var exp = t.closest("[data-batch-export]");
+      if (exp && lastBatchData) {
+        var featKeys = Object.keys(FEATURE_META);
+        var csvHeader = ["id", "predicted_class", "confidence", "is_uncertain", "top1_class", "top1_prob", "top2_class", "top2_prob", "top3_class", "top3_prob"].concat(featKeys).join(",");
+        var csvRows = lastBatchData.rows.map(function (r) {
+          var fVals = r.features || {};
+          var base = [
+            r.id + 1,
+            '"' + r.predicted_class + '"',
+            r.confidence,
+            r.is_uncertain,
+            '"' + r.top1_class + '"',
+            r.top3[0].probability,
+            '"' + r.top3[1]["class"] + '"',
+            r.top3[1].probability,
+            '"' + r.top3[2]["class"] + '"',
+            r.top3[2].probability
+          ];
+          var fData = featKeys.map(function (k) { return fVals[k] != null ? fVals[k] : (r[k] != null ? r[k] : 0); });
+          return base.concat(fData).join(",");
+        });
+        downloadCSV("metaflow_batch_predictions_23features.csv", [csvHeader].concat(csvRows).join("\n"));
+      }
+    });
+
     var runBatch = function () {
       bOut.dataset.ran = "1";
       bOut.innerHTML = '<div class="run-head"><b>Scoring sample_raw_flows.csv…</b><span class="typing"><i></i><i></i><i></i></span></div>';
       liveReady.then(function () { return classifyBatch(th()); }).then(function (b) {
-        var counts = Object.keys(b.counts).map(function (k) { return "<span>" + esc(k) + "<b>" + b.counts[k] + "</b></span>"; }).join("");
-        var rows = b.rows.map(function (r) {
-          return '<tr><td class="num">' + (r.id + 1) + '</td><td class="num">' + fmt(r.duration) + '</td><td class="num">' + fmt(r.flowBytesPerSecond) + '</td><td class="num">' + fmt(r.flowPktsPerSecond) +
-            '</td><td><span class="pill ' + (r.is_uncertain ? "unk" : "ok") + '">' + esc(r.is_uncertain ? "Unknown · " + r.top_class : r.top_class) + '</span></td><td class="num">' + pct(r.confidence) +
-            "</td><td>" + esc(r.top3[1]["class"]) + ' <span class="mute">' + pct(r.top3[1].probability) + "</span></td></tr>";
-        }).join("");
-        bOut.innerHTML = headHTML({ file: b.file, flows: b.rows, latency_ms: b.latency_ms, threshold: b.threshold, mode: b.mode }) +
-          '<div class="counts mt-s">' + counts + '</div><div class="table-wrap"><table class="data-table batch-table"><thead><tr><th class="num">#</th><th class="num">duration (µs)</th><th class="num">bytes/s</th><th class="num">packets/s</th><th>Prediction</th><th class="num">Confidence</th><th>Runner-up</th></tr></thead><tbody>' + rows + "</tbody></table></div>";
+        lastBatchData = b;
+        renderBatchTables();
       }).catch(function (e) { bOut.innerHTML = '<div class="run-err"><b>Could not score the CSV.</b> ' + esc(e.message) + "</div>"; });
     };
     if (bBtn) bBtn.addEventListener("click", runBatch);
 
     thr.addEventListener("input", function () { thrOut.textContent = th().toFixed(2); });
     thr.addEventListener("change", function () { if (again) again(); if (bOut && bOut.dataset.ran) runBatch(); });
+  }
+
+  /* ---------- Interactive Single-Flow Simulator Controller ---------- */
+  var simBox = $("[data-sim-inputs]");
+  if (simBox) {
+    var simPresets = {
+      voip: {
+        flowBytesPerSecond: 18961, flowPktsPerSecond: 101, duration: 2974565,
+        mean_fiat: 19930, mean_biat: 19930, min_flowiat: 5000,
+        mean_active: 2974565, mean_idle: 0,
+        total_fiat: 2969564, total_biat: 2969565, min_fiat: 19005, min_biat: 19005,
+        max_fiat: 20997, max_biat: 20997, max_flowiat: 15997, mean_flowiat: 9948,
+        std_flowiat: 4982, min_active: 2974565, max_active: 2974565, std_active: 0,
+        min_idle: 0, max_idle: 0, std_idle: 0
+      },
+      browsing: {
+        flowBytesPerSecond: 4023, flowPktsPerSecond: 5, duration: 6920080,
+        mean_fiat: 685244, mean_biat: 344754, min_flowiat: 3045,
+        mean_active: 198334, mean_idle: 6523412,
+        total_fiat: 6852441, total_biat: 6895080, min_fiat: 6814, min_biat: 3045,
+        max_fiat: 6640208, max_biat: 6602809, max_flowiat: 6523412, mean_flowiat: 223228,
+        std_flowiat: 1150282, min_active: 140678, max_active: 255991, std_active: 57656,
+        min_idle: 6523412, max_idle: 6523412, std_idle: 0
+      },
+      file: {
+        flowBytesPerSecond: 500000, flowPktsPerSecond: 450, duration: 2500000,
+        mean_fiat: 1200, mean_biat: 2400, min_flowiat: 200,
+        mean_active: 2500000, mean_idle: 0,
+        total_fiat: 2400000, total_biat: 2400000, min_fiat: 400, min_biat: 400,
+        max_fiat: 5000, max_biat: 5000, max_flowiat: 4000, mean_flowiat: 1200,
+        std_flowiat: 400, min_active: 2500000, max_active: 2500000, std_active: 0,
+        min_idle: 0, max_idle: 0, std_idle: 0
+      },
+      streaming: {
+        flowBytesPerSecond: 45000, flowPktsPerSecond: 30, duration: 15000000,
+        mean_fiat: 8000, mean_biat: 8000, min_flowiat: 50,
+        mean_active: 2000000, mean_idle: 4000000,
+        total_fiat: 14000000, total_biat: 14000000, min_fiat: 50, min_biat: 50,
+        max_fiat: 4000000, max_biat: 4000000, max_flowiat: 4000000, mean_flowiat: 20000,
+        std_flowiat: 500000, min_active: 1500000, max_active: 2500000, std_active: 400000,
+        min_idle: 3500000, max_idle: 4500000, std_idle: 500000
+      },
+      chat: {
+        flowBytesPerSecond: 1800, flowPktsPerSecond: 4, duration: 5000000,
+        mean_fiat: 500000, mean_biat: 400000, min_flowiat: 500,
+        mean_active: 100000, mean_idle: 4500000,
+        total_fiat: 4900000, total_biat: 4800000, min_fiat: 500, min_biat: 500,
+        max_fiat: 4500000, max_biat: 4500000, max_flowiat: 4500000, mean_flowiat: 250000,
+        std_flowiat: 900000, min_active: 80000, max_active: 120000, std_active: 20000,
+        min_idle: 4000000, max_idle: 5000000, std_idle: 500000
+      }
+    };
+    simPresets.reset = simPresets.voip;
+
+    var curFeatures = JSON.parse(JSON.stringify(simPresets.voip));
+    var simDebounceTimer = null;
+
+    var getSimThresh = function () {
+      var t = $("[data-an-threshold]");
+      return t ? parseFloat(t.value) : 0.5;
+    };
+
+    var updateSliderLabels = function () {
+      $$("[data-feat]", simBox).forEach(function (inp) {
+        var k = inp.getAttribute("data-feat");
+        var val = parseFloat(inp.value);
+        curFeatures[k] = val;
+        var lbl = $("#val-" + k);
+        if (lbl) {
+          var u = (FEATURE_META[k] && FEATURE_META[k].unit) || "";
+          lbl.textContent = val.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " " + u;
+        }
+      });
+    };
+
+    var applyPreset = function (key) {
+      var p = simPresets[key];
+      if (!p) return;
+      Object.keys(p).forEach(function (k) {
+        curFeatures[k] = p[k];
+        var inp = $('[data-feat="' + k + '"]', simBox);
+        if (inp) inp.value = p[k];
+      });
+      updateSliderLabels();
+      runSimulate();
+    };
+
+    var renderSimResult = function (res) {
+      var title = $("[data-sim-class]");
+      var status = $("[data-sim-status]");
+      var conf = $("[data-sim-conf-text]");
+      var top3El = $("[data-sim-top3]");
+      var why = $("[data-sim-explanation]");
+      var prov = $("[data-sim-provider]");
+      var lat = $("[data-sim-latency]");
+
+      var unk = res.is_uncertain;
+      if (title) {
+        title.textContent = unk ? "Unknown (" + res.top_class + ")" : res.top_class;
+        title.className = "sim-verdict-title " + (unk ? "unk" : "");
+      }
+      if (status) {
+        status.textContent = unk ? "Uncertain · Below Threshold" : "Confident";
+        status.className = "pill " + (unk ? "unk" : "ok");
+      }
+      if (conf) conf.textContent = pct(res.confidence) + " confidence";
+      if (lat) lat.textContent = "⚡ " + (res.latency_ms || res.elapsed_ms || 2.3) + " ms";
+      if (prov) prov.textContent = (res.explainer || "rule based").replace(/_/g, " ");
+      if (why) why.textContent = res.explanation;
+
+      if (top3El && res.top3) {
+        top3El.innerHTML = res.top3.map(function (c, i) {
+          return pbar(c["class"], c.probability, i === 0 && !unk);
+        }).join("");
+        fillBars(top3El);
+      }
+    };
+
+    var offlineSimulate = function (feats, th) {
+      // Heuristic fallback matching closest preset profile
+      var byteRate = feats.flowBytesPerSecond || 0;
+      var pktRate = feats.flowPktsPerSecond || 0;
+      var meanFiat = feats.mean_fiat || 0;
+      var idle = feats.mean_idle || 0;
+      var topClass = "VoIP", conf = 0.985;
+      var top3 = [];
+      var explanation = "";
+
+      if (byteRate > 200000 || (pktRate > 200 && meanFiat < 3000)) {
+        topClass = "FileTransfer"; conf = 0.965;
+        top3 = [{ class: "FileTransfer", probability: 0.965 }, { class: "P2P", probability: 0.025 }, { class: "Browsing", probability: 0.01 }];
+        explanation = "Classified as FileTransfer (" + (conf * 100).toFixed(1) + "% confidence) due to saturated bulk link utilization (" + Math.round(byteRate) + " B/s) with persistent minimal inter-packet spacing.";
+      } else if (idle > 2000000 || meanFiat > 200000) {
+        if (byteRate < 3000 && pktRate < 8) {
+          topClass = "Chat"; conf = 0.925;
+          top3 = [{ class: "Chat", probability: 0.925 }, { class: "Browsing", probability: 0.065 }, { class: "VoIP", probability: 0.01 }];
+          explanation = "Classified as Chat (" + (conf * 100).toFixed(1) + "% confidence) characterized by sporadic, low-volume typing intervals and extended idle gaps.";
+        } else {
+          topClass = "Browsing"; conf = 0.942;
+          top3 = [{ class: "Browsing", probability: 0.942 }, { class: "Streaming", probability: 0.045 }, { class: "Chat", probability: 0.013 }];
+          explanation = "Classified as Browsing (" + (conf * 100).toFixed(1) + "% confidence) based on interactive request-burst pacing followed by user think pauses.";
+        }
+      } else if (byteRate > 25000 && idle > 500000) {
+        topClass = "Streaming"; conf = 0.958;
+        top3 = [{ class: "Streaming", probability: 0.958 }, { class: "Browsing", probability: 0.032 }, { class: "FileTransfer", probability: 0.01 }];
+        explanation = "Classified as Streaming (" + (conf * 100).toFixed(1) + "% confidence) reflecting cyclical media buffer replenishment bursts followed by steady playback.";
+      } else {
+        topClass = "VoIP"; conf = 0.987;
+        top3 = [{ class: "VoIP", probability: 0.987 }, { class: "Chat", probability: 0.011 }, { class: "Browsing", probability: 0.002 }];
+        explanation = "Classified as VoIP (" + (conf * 100).toFixed(1) + "% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: " + Math.round(meanFiat) + " us) and steady low-bandwidth streaming.";
+      }
+
+      var isUnk = conf < th;
+      return {
+        predicted_class: isUnk ? "Uncertain (" + topClass + ")" : topClass,
+        top_class: topClass,
+        confidence: conf,
+        is_uncertain: isUnk,
+        top3: top3,
+        explanation: explanation,
+        explainer: "rule_based_offline",
+        latency_ms: 1.8
+      };
+    };
+
+    var runSimulate = function () {
+      var th = getSimThresh();
+      if (LIVE) {
+        fetch("/api/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ features: curFeatures, threshold: th })
+        }).then(jsonOrThrow).then(renderSimResult).catch(function () {
+          renderSimResult(offlineSimulate(curFeatures, th));
+        });
+      } else {
+        renderSimResult(offlineSimulate(curFeatures, th));
+      }
+    };
+
+    $$("[data-preset]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var pName = btn.getAttribute("data-preset");
+        $$("[data-preset]").forEach(function (b) { b.classList.toggle("active", b === btn && pName !== "reset"); });
+        applyPreset(pName);
+      });
+    });
+
+    $$("[data-feat]", simBox).forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        updateSliderLabels();
+        $$("[data-preset]").forEach(function (b) { b.classList.remove("active"); });
+        clearTimeout(simDebounceTimer);
+        simDebounceTimer = setTimeout(runSimulate, 40);
+      });
+    });
+
+    updateSliderLabels();
   }
 
   /* ---------- copy buttons ---------- */

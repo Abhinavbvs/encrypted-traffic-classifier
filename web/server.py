@@ -40,7 +40,7 @@ sys.path.insert(0, str(REPO_DIR))
 os.chdir(REPO_DIR)  # src.* modules resolve models/ and data/ relative to the repo root
 
 from src.llm_explainer import explain_flow  # noqa: E402
-from src.predict import load_artifacts, predict_flows, predict_pcap  # noqa: E402
+from src.predict import load_artifacts, predict_flows, predict_pcap, predict_one  # noqa: E402
 
 SAMPLES_DIR = REPO_DIR / "data" / "sample_pcaps"
 REPORTS_DIR = REPO_DIR / "reports"
@@ -130,6 +130,70 @@ def classify_pcap(path: Path, threshold: float, name: str) -> dict:
     }
 
 
+DEFAULT_FLOW_FEATURES = {
+    "duration": 9096924.0,
+    "total_fiat": 4402841.0,
+    "total_biat": 9070173.0,
+    "min_fiat": 56.0,
+    "min_biat": 14.0,
+    "max_fiat": 91307.0,
+    "max_biat": 78628.0,
+    "mean_fiat": 18739.0,
+    "mean_biat": 17361.0,
+    "flowPktsPerSecond": 59.67,
+    "flowBytesPerSecond": 10417.9,
+    "min_flowiat": 19.5,
+    "max_flowiat": 115094.0,
+    "mean_flowiat": 28189.0,
+    "std_flowiat": 26581.0,
+    "min_active": 0.0,
+    "mean_active": 0.0,
+    "max_active": 0.0,
+    "std_active": 0.0,
+    "min_idle": 0.0,
+    "mean_idle": 0.0,
+    "max_idle": 0.0,
+    "std_idle": 0.0,
+}
+
+
+def simulate_flow(user_params: dict, threshold: float = 0.5) -> dict:
+    """Run real-time single flow simulation with partial or full timing features."""
+    t0 = time.perf_counter()
+    flow = DEFAULT_FLOW_FEATURES.copy()
+    if user_params:
+        for k in FEATURES:
+            if k in user_params:
+                try:
+                    flow[k] = float(user_params[k])
+                except (TypeError, ValueError):
+                    pass
+    with INFER_LOCK:
+        res = predict_one(flow, MODEL, SCALER, FEATURES, LABELS, threshold)
+
+    pred_payload = {
+        "predicted_class": res["top3"][0]["class"],
+        "confidence": res["confidence"],
+        "top3": res["top3"],
+    }
+    exp = explain_flow(flow, pred_payload, preferred_provider=EXPLAINER)
+    elapsed = round((time.perf_counter() - t0) * 1000, 2)
+    return {
+        "predicted_class": res["predicted_class"],
+        "top_class": res["top3"][0]["class"],
+        "confidence": round(float(res["confidence"]), 6),
+        "is_uncertain": bool(res["is_uncertain"]),
+        "status": res["status"],
+        "top3": res["top3"],
+        "probabilities": {k: round(float(v), 6) for k, v in res["probabilities"].items()},
+        "explanation": exp.get("explanation"),
+        "explainer": exp.get("provider"),
+        "latency_ms": round(float(res.get("latency_ms", elapsed)), 4),
+        "elapsed_ms": elapsed,
+        "features": {k: _num(flow[k]) for k in FEATURES},
+    }
+
+
 def classify_batch(threshold: float) -> dict:
     import pandas as pd
 
@@ -149,6 +213,7 @@ def classify_batch(threshold: float) -> dict:
             "duration": _num(df.iloc[i]["duration"]),
             "flowBytesPerSecond": _num(df.iloc[i]["flowBytesPerSecond"]),
             "flowPktsPerSecond": _num(df.iloc[i]["flowPktsPerSecond"]),
+            "features": {k: _num(df.iloc[i][k]) for k in FEATURES},
         })
     counts = res["predicted_class"].value_counts().to_dict()
     return {"file": "data/processed/sample_raw_flows.csv", "threshold": threshold, "rows": rows,
@@ -266,6 +331,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(metrics())
             if path == "/api/batch":
                 return self._json(classify_batch(_threshold(qs)))
+            if path == "/api/simulate":
+                params = {k: v[0] for k, v in qs.items()}
+                return self._json(simulate_flow(params, _threshold(qs)))
             if path == "/api/classify":
                 name = Path(qs.get("sample", [""])[0]).name
                 p = SAMPLES_DIR / name
@@ -289,6 +357,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
+        if u.path == "/api/simulate":
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length > 0 else {}
+            except Exception:
+                body = {}
+            features = body.get("features", body) if isinstance(body, dict) else {}
+            thresh = float(body.get("threshold", 0.5)) if isinstance(body, dict) and "threshold" in body else _threshold(parse_qs(u.query))
+            return self._json(simulate_flow(features, thresh))
+
         if u.path != "/api/classify":
             return self._err(HTTPStatus.NOT_FOUND, "Unknown endpoint.")
         try:
