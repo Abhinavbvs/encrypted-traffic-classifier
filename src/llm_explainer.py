@@ -14,6 +14,7 @@ Supported Environment Variables (.env):
 - OPENAI_API_KEY
 - GEMINI_API_KEY
 - ANTHROPIC_API_KEY
+- XAI_API_KEY
 """
 
 from __future__ import annotations
@@ -180,6 +181,25 @@ def explain_with_cloud_api(
                 data = res.json()
                 text = data["content"][0]["text"].strip()
                 return text, "anthropic (claude-3-5-haiku)"
+        except Exception:
+            pass
+
+    # 5. xAI Grok API
+    xai_key = os.getenv("XAI_API_KEY")
+    if xai_key:
+        try:
+            url = "https://api.x.ai/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {xai_key}", "Content-Type": "application/json"}
+            payload = {
+                "model": "grok-2",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 150,
+                "temperature": 0.2,
+            }
+            res = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            if res.status_code == 200:
+                text = res.json()["choices"][0]["message"]["content"].strip()
+                return text, "xai (grok-2)"
         except Exception:
             pass
 

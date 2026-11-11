@@ -137,6 +137,7 @@ def header(active):
   <div class="hdr-mid"><span class="clock" data-clock></span></div>
   <div class="hdr-right">
     <span class="live-badge" data-live-badge hidden><span class="live-dot"></span>Live model</span>
+    <a class="st-bridge-btn" href="http://localhost:8501" target="_blank" rel="noopener" data-st-link title="Streamlit Dashboard (localhost:8501)"><span class="st-dot"></span>Streamlit ↗</a>
     <a class="btn sm" href="analyze.html">Classify a capture <span class="arr">→</span></a>
     <button class="menu-btn" data-menu-open aria-expanded="false" aria-controls="menu" aria-label="Open menu"><span></span></button>
   </div>
@@ -147,6 +148,7 @@ def header(active):
   <div class="menu-side">
     <div class="grp"><h4>Capabilities</h4>%s</div>
     <div class="grp"><h4>More</h4>
+      <a href="http://localhost:8501" target="_blank" rel="noopener">Streamlit dashboard (localhost:8501) ↗</a>
       <a href="system.html">Design system</a>
       <a href="%s" target="_blank" rel="noopener">GitHub repository ↗</a>
       <a href="%sreports/encrypted_traffic_classifier_demo.mp4" target="_blank" rel="noopener">Demo video (mp4) ↗</a>
@@ -518,6 +520,124 @@ def benchmarks():
   %s
 </div></section>
 
+
+<section class="sec" style="padding-top:0" id="matrix"><div class="wrap">
+  <div class="fig-head">
+    <div>
+      <div class="eyebrow">Interactive Diagnostics · 1,305 Held-out Test Flows</div>
+      <h2 class="h-m rv">Interactive Confusion Matrix Drill-Down.</h2>
+      <p class="lead" style="font-size:18px;margin-top:8px">Click any cell to inspect why flows were correctly classified or where boundary confusion occurred between traffic categories.</p>
+    </div>
+  </div>
+
+  <div class="cm-interactive-card rv">
+    <div class="cm-table-wrap table-scroll-x">
+      <table class="cm-grid-table">
+        <thead>
+          <tr>
+            <th class="cm-corner"><span class="mute">True \ Pred</span></th>
+            <th>Browsing</th>
+            <th>Streaming</th>
+            <th>VoIP</th>
+            <th>FileTransfer</th>
+            <th>P2P</th>
+            <th>Chat</th>
+            <th>Mail</th>
+          </tr>
+        </thead>
+        <tbody data-cm-body>
+          <!-- Row 1: Browsing -->
+          <tr>
+            <th class="cm-row-label">Browsing</th>
+            <td class="cm-cell cm-diag" data-true="Browsing" data-pred="Browsing" data-cnt="366" data-tot="375" data-pct="97.6">366</td>
+            <td class="cm-cell cm-confused" data-true="Browsing" data-pred="Streaming" data-cnt="5" data-reason="HTTP chunked video buffer fetches mimic bursty DOM resource loading in short capture windows.">5</td>
+            <td class="cm-cell cm-zero" data-true="Browsing" data-pred="VoIP" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="Browsing" data-pred="FileTransfer" data-cnt="1" data-reason="Large compressed asset download (font/image blob) sustained elevated bytes/sec temporarily.">1</td>
+            <td class="cm-cell cm-confused" data-true="Browsing" data-pred="P2P" data-cnt="2" data-reason="Multiple concurrent CDN connections created distributed multi-socket inter-arrival patterns.">2</td>
+            <td class="cm-cell cm-confused" data-true="Browsing" data-pred="Chat" data-cnt="1" data-reason="Brief reading pause with lightweight keep-alive pings resembled messaging cadence.">1</td>
+            <td class="cm-cell cm-zero" data-true="Browsing" data-pred="Mail" data-cnt="0">0</td>
+          </tr>
+          <!-- Row 2: Streaming -->
+          <tr>
+            <th class="cm-row-label">Streaming</th>
+            <td class="cm-cell cm-confused" data-true="Streaming" data-pred="Browsing" data-cnt="7" data-reason="Cyclical media buffer chunks (active burst followed by idle playback) look identical to multi-asset webpage loads over short observation intervals.">7</td>
+            <td class="cm-cell cm-diag" data-true="Streaming" data-pred="Streaming" data-cnt="59" data-tot="67" data-pct="88.1">59</td>
+            <td class="cm-cell cm-zero" data-true="Streaming" data-pred="VoIP" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="Streaming" data-pred="FileTransfer" data-cnt="1" data-reason="Initial full-resolution buffer filling saturated the pipe like a bulk TCP file download.">1</td>
+            <td class="cm-cell cm-zero" data-true="Streaming" data-pred="P2P" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="Streaming" data-pred="Chat" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="Streaming" data-pred="Mail" data-cnt="0">0</td>
+          </tr>
+          <!-- Row 3: VoIP -->
+          <tr>
+            <th class="cm-row-label">VoIP</th>
+            <td class="cm-cell cm-zero" data-true="VoIP" data-pred="Browsing" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="VoIP" data-pred="Streaming" data-cnt="1" data-reason="Continuous unidirectional audio packet stream had slight packet jitter near streaming thresholds.">1</td>
+            <td class="cm-cell cm-diag" data-true="VoIP" data-pred="VoIP" data-cnt="423" data-tot="424" data-pct="99.8">423</td>
+            <td class="cm-cell cm-zero" data-true="VoIP" data-pred="FileTransfer" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="VoIP" data-pred="P2P" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="VoIP" data-pred="Chat" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="VoIP" data-pred="Mail" data-cnt="0">0</td>
+          </tr>
+          <!-- Row 4: FileTransfer -->
+          <tr>
+            <th class="cm-row-label">FileTransfer</th>
+            <td class="cm-cell cm-confused" data-true="FileTransfer" data-pred="Browsing" data-cnt="3" data-reason="Throttled or interrupted downloads exhibited intermittent idle pauses resembling web browsing.">3</td>
+            <td class="cm-cell cm-confused" data-true="FileTransfer" data-pred="Streaming" data-cnt="3" data-reason="Chunked TCP transfers exhibited periodic rate-limiting similar to video player buffering.">3</td>
+            <td class="cm-cell cm-zero" data-true="FileTransfer" data-pred="VoIP" data-cnt="0">0</td>
+            <td class="cm-cell cm-diag" data-true="FileTransfer" data-pred="FileTransfer" data-cnt="119" data-tot="129" data-pct="92.2">119</td>
+            <td class="cm-cell cm-zero" data-true="FileTransfer" data-pred="P2P" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="FileTransfer" data-pred="Chat" data-cnt="3" data-reason="Small file transfer finished very quickly in only a few packets.">3</td>
+            <td class="cm-cell cm-confused" data-true="FileTransfer" data-pred="Mail" data-cnt="1" data-reason="Slow transfer rate with small TCP window size mimicked email client message sync.">1</td>
+          </tr>
+          <!-- Row 5: P2P -->
+          <tr>
+            <th class="cm-row-label">P2P</th>
+            <td class="cm-cell cm-zero" data-true="P2P" data-pred="Browsing" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="P2P" data-pred="Streaming" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="P2P" data-pred="VoIP" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="P2P" data-pred="FileTransfer" data-cnt="0">0</td>
+            <td class="cm-cell cm-diag" data-true="P2P" data-pred="P2P" data-cnt="139" data-tot="141" data-pct="98.6">139</td>
+            <td class="cm-cell cm-confused" data-true="P2P" data-pred="Chat" data-cnt="1" data-reason="Background peer handshake ping exchange without active file payload resembled chat keep-alive.">1</td>
+            <td class="cm-cell cm-confused" data-true="P2P" data-pred="Mail" data-cnt="1" data-reason="Periodic peer discovery beacon broadcast looked like an email polling timer.">1</td>
+          </tr>
+          <!-- Row 6: Chat -->
+          <tr>
+            <th class="cm-row-label">Chat</th>
+            <td class="cm-cell cm-confused" data-true="Chat" data-pred="Browsing" data-cnt="5" data-reason="Human typing cadence with variable idle think times overlaps with web page reading pauses.">5</td>
+            <td class="cm-cell cm-zero" data-true="Chat" data-pred="Streaming" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="Chat" data-pred="VoIP" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="Chat" data-pred="FileTransfer" data-cnt="2" data-reason="Sending image/audio snippet in chat produced short burst of bulk data transfer.">2</td>
+            <td class="cm-cell cm-confused" data-true="Chat" data-pred="P2P" data-cnt="2" data-reason="Peer-to-peer direct messaging session lacked central server flow pacing.">2</td>
+            <td class="cm-cell cm-diag" data-true="Chat" data-pred="Chat" data-cnt="124" data-tot="133" data-pct="93.2">124</td>
+            <td class="cm-cell cm-zero" data-true="Chat" data-pred="Mail" data-cnt="0">0</td>
+          </tr>
+          <!-- Row 7: Mail -->
+          <tr>
+            <th class="cm-row-label">Mail</th>
+            <td class="cm-cell cm-zero" data-true="Mail" data-pred="Browsing" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="Mail" data-pred="Streaming" data-cnt="0">0</td>
+            <td class="cm-cell cm-zero" data-true="Mail" data-pred="VoIP" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="Mail" data-pred="FileTransfer" data-cnt="1" data-reason="Large PDF or archive attachment sent over SMTP saturated the connection like bulk file transfer.">1</td>
+            <td class="cm-cell cm-zero" data-true="Mail" data-pred="P2P" data-cnt="0">0</td>
+            <td class="cm-cell cm-confused" data-true="Mail" data-pred="Chat" data-cnt="1" data-reason="Short plain-text email transmission resembled single chat message send.">1</td>
+            <td class="cm-cell cm-diag" data-true="Mail" data-pred="Mail" data-cnt="34" data-tot="36" data-pct="94.4">34</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Drill down detail card -->
+    <div class="cm-drilldown-card" data-cm-detail style="margin-top:20px;padding:16px 20px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="pill ok" data-cm-pill>True: Browsing → Pred: Browsing</span>
+        <span class="mono mute" data-cm-summary>366 of 375 flows (97.6%% recall)</span>
+      </div>
+      <p style="margin:10px 0 0;font-size:14.5px;color:var(--ink-2)" data-cm-text>Correctly identified flows. High burstiness followed by human think pauses (>5s idle) distinctly separates web navigation from continuous streaming.</p>
+    </div>
+  </div>
+</div></section>
+
 <section class="sec" style="padding-top:0" id="charts"><div class="wrap">
   <div class="fig-head"><div><div class="eyebrow">reports/plots</div><h2 class="h-m rv">The charts, straight from the repo.</h2></div></div>
   <div class="gallery">%s</div>
@@ -885,9 +1005,9 @@ def analyze():
   <div class="samples">""" + cards + """</div>
 
   <label class="drop mt-m" data-drop>
-    <input type="file" accept=".pcap,.pcapng,.cap" data-upload>
+    <input type="file" accept=".pcap,.pcapng,.cap" data-upload multiple>
     <span class="drop-ico" aria-hidden="true">⇪</span>
-    <span><b>Drop your own capture here</b> or click to choose a file</span>
+    <span><b>Drop your capture files here</b> or click to choose (single or multiple .pcap)</span>
     <span class="mono mute" data-drop-note>.pcap, .pcapng or .cap · up to 50 MB · parsed locally, payload discarded</span>
   </label>
 </div></section>

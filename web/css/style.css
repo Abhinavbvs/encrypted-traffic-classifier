@@ -702,3 +702,22 @@ h1, h2, h3, .h-xl, .h-l, .h-m, .hero h1, .final h2, .band h2, .ftr-big { font-fa
   .sim-layout { grid-template-columns: 1fr; }
   .sim-verdict-card { position: static; }
 }
+
+/* Streamlit Bridge Button */
+.st-bridge-btn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); color: var(--ink); text-decoration: none; transition: all .2s var(--ease); }
+.st-bridge-btn:hover { background: rgba(255,43,214,.12); border-color: var(--mag); color: #fff; transform: translateY(-1px); }
+.st-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff4b4b; display: inline-block; box-shadow: 0 0 8px rgba(255,75,75,.6); }
+.st-bridge-btn.st-online .st-dot { background: var(--ok); box-shadow: 0 0 8px rgba(43,230,160,.8); animation: pulse 1.6s infinite; }
+@media (max-width: 720px) { .st-bridge-btn { display: none; } }
+
+/* Interactive Confusion Matrix */
+.cm-interactive-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(18px, 2.5vw, 28px); }
+.cm-grid-table { width: 100%; border-collapse: separate; border-spacing: 4px; text-align: center; }
+.cm-grid-table th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; padding: 8px 6px; color: var(--mute); }
+.cm-row-label { text-align: right; font-weight: 500; color: var(--ink); padding-right: 12px; }
+.cm-cell { font-family: var(--mono); font-size: 13px; font-weight: 600; padding: 12px 8px; border-radius: 8px; cursor: pointer; transition: all .15s; }
+.cm-cell:hover { transform: scale(1.08); filter: brightness(1.25); z-index: 2; position: relative; }
+.cm-diag { background: rgba(43,230,160,.18); color: #5ff0b8; border: 1px solid rgba(43,230,160,.35); }
+.cm-confused { background: rgba(255,43,214,.16); color: #ff8ac8; border: 1px solid rgba(255,43,214,.3); }
+.cm-zero { background: rgba(255,255,255,.02); color: rgba(255,255,255,.2); }
+.cm-cell.active-cell { outline: 2px solid #fff; outline-offset: 2px; }

@@ -4,8 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PORT=8501
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
@@ -20,20 +19,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy application source code, models, and bundled datasets
+# Copy application source code, models, bundled datasets, and web assets
 COPY src/ ./src/
 COPY models/ ./models/
 COPY data/processed/ ./data/processed/
 COPY data/sample_pcaps/ ./data/sample_pcaps/
 COPY reports/ ./reports/
+COPY web/ ./web/
 COPY .streamlit/ ./.streamlit/
 COPY app.py .
 COPY README.md .
 
-# Healthcheck
+# Healthcheck for either web or streamlit
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+    CMD curl -f http://localhost:8600/api/health || curl -f http://localhost:8501/_stcore/health || exit 1
 
-EXPOSE 8501
+EXPOSE 8600 8501
 
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["python", "web/server.py", "--host", "0.0.0.0", "--port", "8600"]

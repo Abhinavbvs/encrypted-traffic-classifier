@@ -456,21 +456,39 @@
     var all = $("[data-run-all]");
     if (all) all.addEventListener("click", function () { again = runAll; runAll(); results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); });
 
-    var upload = function (file) {
-      if (!file) return;
+    var uploadFiles = function (files) {
+      if (!files || !files.length) return;
       if (!LIVE) { results.innerHTML = '<div class="run-err"><b>The local server is not running.</b> Start it with <code>python web/server.py</code> to classify your own captures.</div>'; return; }
+      
+      var fileList = Array.from(files);
       again = function () {
-        results.innerHTML = ""; var l = loading("Uploading " + file.name + "…", true); mark(null);
-        return classifyUpload(file, th()).then(function (res) { l.remove(); render(res, true); }).catch(function (e) { fail(e, l); });
+        results.innerHTML = "";
+        mark(null);
+        if (fileList.length === 1) {
+          var l = loading("Uploading " + fileList[0].name + "…", true);
+          return classifyUpload(fileList[0], th()).then(function (res) { l.remove(); render(res, true); }).catch(function (e) { fail(e, l); });
+        } else {
+          var qInfo = loading("Batch Queue: processing " + fileList.length + " PCAP files…", true);
+          return fileList.reduce(function (p, f, idx) {
+            return p.then(function () {
+              qInfo.innerHTML = "<b>Processing queue (" + (idx + 1) + "/" + fileList.length + "): " + esc(f.name) + "…</b><span class=\"typing\"><i></i><i></i><i></i></span>";
+              return classifyUpload(f, th()).then(function (res) { render(res, true); });
+            }).catch(function (e) {
+              results.innerHTML += '<div class="run-err"><b>' + esc(f.name) + ' failed:</b> ' + esc(e.message) + '</div>';
+            });
+          }, Promise.resolve()).then(function () {
+            qInfo.remove();
+          });
+        }
       };
       again(); results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
     };
     var drop = $("[data-drop]"), inp = $("[data-upload]");
-    if (inp) inp.addEventListener("change", function () { upload(inp.files[0]); inp.value = ""; });
+    if (inp) inp.addEventListener("change", function () { uploadFiles(inp.files); inp.value = ""; });
     if (drop) {
       ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
       ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
-      drop.addEventListener("drop", function (e) { if (e.dataTransfer && e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]); });
+      drop.addEventListener("drop", function (e) { if (e.dataTransfer && e.dataTransfer.files) uploadFiles(e.dataTransfer.files); });
     }
 
     /* Delegated events for Flow Results (View Toggle, Export Flow CSV, Copy JSON) */
@@ -838,4 +856,49 @@
       notice.classList.remove("show"); try { localStorage.setItem("mf-notice", "1"); } catch (e) {}
     }); });
   }
+
+  // Streamlit Bridge probe
+  var stLinks = $$("[data-st-link]");
+  if (stLinks.length) {
+    fetch("http://localhost:8501/healthz", { mode: "no-cors", cache: "no-store" })
+      .then(function () {
+        stLinks.forEach(function (l) { l.classList.add("st-online"); l.setAttribute("title", "Streamlit is active on port 8501 · click to open"); });
+      }).catch(function () {});
+  }
+
+
+  // Interactive Confusion Matrix Handler
+  var cmBody = $("[data-cm-body]");
+  if (cmBody) {
+    var dPill = $("[data-cm-pill]"), dSum = $("[data-cm-summary]"), dTxt = $("[data-cm-text]");
+    cmBody.addEventListener("click", function (e) {
+      var cell = e.target.closest(".cm-cell");
+      if (!cell) return;
+      $$(".cm-cell", cmBody).forEach(function (c) { c.classList.remove("active-cell"); });
+      cell.classList.add("active-cell");
+      var t = cell.getAttribute("data-true"), p = cell.getAttribute("data-pred"), cnt = cell.getAttribute("data-cnt");
+      var isDiag = t === p;
+      if (dPill) {
+        dPill.textContent = "True: " + t + " → Pred: " + p;
+        dPill.className = "pill " + (isDiag ? "ok" : (cnt === "0" ? "snap" : "unk"));
+      }
+      if (dSum) {
+        if (isDiag) {
+          dSum.textContent = cnt + " of " + cell.getAttribute("data-tot") + " flows (" + cell.getAttribute("data-pct") + "% recall)";
+        } else {
+          dSum.textContent = cnt + " flow" + (cnt === "1" ? "" : "s") + " misclassified (" + (cnt === "0" ? "perfect separation" : "boundary confusion") + ")";
+        }
+      }
+      if (dTxt) {
+        if (isDiag) {
+          dTxt.textContent = "Correctly classified flows. High statistical separation along primary timing features (inter-arrival cadence, packet rates, and active/idle periods).";
+        } else if (cnt === "0") {
+          dTxt.textContent = "Zero false classifications between " + t + " and " + p + ". The timing features for these two protocols are cleanly orthogonal.";
+        } else {
+          dTxt.textContent = cell.getAttribute("data-reason") || "Timing overlap in short duration observation windows.";
+        }
+      }
+    });
+  }
+
 })();

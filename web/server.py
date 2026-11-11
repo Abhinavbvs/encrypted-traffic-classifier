@@ -41,6 +41,7 @@ os.chdir(REPO_DIR)  # src.* modules resolve models/ and data/ relative to the re
 
 from src.llm_explainer import explain_flow  # noqa: E402
 from src.predict import load_artifacts, predict_flows, predict_pcap, predict_one  # noqa: E402
+from src.live_sniffer import sniff_and_classify, list_interfaces  # noqa: E402
 
 SAMPLES_DIR = REPO_DIR / "data" / "sample_pcaps"
 REPORTS_DIR = REPO_DIR / "reports"
@@ -334,6 +335,16 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/simulate":
                 params = {k: v[0] for k, v in qs.items()}
                 return self._json(simulate_flow(params, _threshold(qs)))
+            if path == "/api/interfaces":
+                return self._json({"interfaces": list_interfaces()})
+            if path == "/api/sniff":
+                dur = min(max(float(qs.get("duration", ["5"])[0]), 1.0), 30.0)
+                cnt = min(max(int(qs.get("count", ["100"])[0]), 10), 500)
+                iface = qs.get("iface", [None])[0]
+                with INFER_LOCK:
+                    res = sniff_and_classify(iface=iface, duration=dur, count=cnt, confidence_threshold=_threshold(qs),
+                                             model_artifacts=(MODEL, SCALER, FEATURES, LABELS))
+                return self._json(res)
             if path == "/api/classify":
                 name = Path(qs.get("sample", [""])[0]).name
                 p = SAMPLES_DIR / name

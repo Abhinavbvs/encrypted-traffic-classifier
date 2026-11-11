@@ -1,3 +1,15 @@
+---
+title: MetaFlow Encrypted Traffic Classifier
+emoji: 🛡️
+colorFrom: pink
+colorTo: purple
+sdk: streamlit
+sdk_version: 1.40.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # 🛡️ Encrypted Traffic Classifier (Without Payload Inspection)
 
 [![CI Pipeline](https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions/workflows/ci.yml/badge.svg)](https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions/workflows/ci.yml)
