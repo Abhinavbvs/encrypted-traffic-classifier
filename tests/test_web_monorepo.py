@@ -67,11 +67,26 @@ def _start_server(handler_cls):
 
 
 def test_built_pages_use_relative_studio_bridge():
-    """Generated web UI links to the same-origin /studio/ route instead of localhost:8501."""
+    """Generated web UI links to the same-origin /studio/ route and fixes license/slider/sniffer wiring."""
     repo_root = Path(__file__).resolve().parent.parent
     for page in ("index.html", "analyze.html", "benchmarks.html"):
         html = (repo_root / "web" / page).read_text(encoding="utf-8")
         assert 'href="/studio/"' in html
+
+    license_html = (repo_root / "web" / "license.html").read_text(encoding="utf-8")
+    assert 'href="../LICENSE"' not in license_html
+    assert "blob/main/LICENSE" in license_html
+
+    analyze_html = (repo_root / "web" / "analyze.html").read_text(encoding="utf-8")
+    feat_cols = json.loads((repo_root / "data" / "processed" / "feature_columns.json").read_text(encoding="utf-8"))
+    for feat in feat_cols:
+        assert f'data-feat="{feat}"' in analyze_html
+    assert "data-sniff-iface" in analyze_html
+    assert "data-sniff-btn" in analyze_html
+    assert "data-sim-drivers" in analyze_html
+
+    app_py = (repo_root / "app.py").read_text(encoding="utf-8")
+    assert "[← Back to MetaFlow Web UI](/)" in app_py
 
 
 def test_monorepo_proxy_http_put_and_websocket():

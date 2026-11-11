@@ -23,7 +23,7 @@ import pandas as pd
 import streamlit as st
 
 from src.pcap_extractor import extract_flows_from_pcap, EXPECTED_FEATURE_COLUMNS
-from src.predict import load_artifacts, predict_flows, predict_one, predict_pcap
+from src.predict import explain_feature_contributions, load_artifacts, predict_flows, predict_one, predict_pcap
 from src.llm_explainer import explain_flow
 
 st.set_page_config(
@@ -74,6 +74,7 @@ def get_artifacts():
 model, scaler, feature_cols, label_map = get_artifacts()
 
 # Sidebar
+st.sidebar.markdown("[← Back to MetaFlow Web UI](/)")
 st.sidebar.title("🛡️ Traffic Classifier")
 st.sidebar.markdown(
     """
@@ -300,6 +301,15 @@ if page == "🚀 PCAP Traffic Analyzer":
                     f"| Status: {pred_info['status']}"
                 )
                 st.info(f"**Explanation**:\n\n{expl_data['explanation']}")
+                shap_drivers = explain_feature_contributions(
+                    chosen_row, model, scaler, feature_cols, label_map, target_class=pred_info["top3"][0]["class"], top_k=5
+                )
+                if shap_drivers:
+                    st.markdown("**Top Timing Drivers (TreeSHAP Logit Contribution):**")
+                    drv_df = pd.DataFrame(shap_drivers).rename(
+                        columns={"feature": "Timing Feature", "shap": "SHAP Impact", "value": "Observed Value"}
+                    )
+                    st.dataframe(drv_df, use_container_width=True, hide_index=True)
                 st.caption(
                     f"Provider: **{expl_data['provider']}** ({expl_data['model']}) | "
                     f"Latency: {expl_data['latency_seconds']}s"
@@ -496,6 +506,18 @@ elif page == "⚙️ Interactive Flow Simulator":
         st.markdown("#### Computer Networks Explanation")
         expl = explain_flow(base_flow, pred)
         st.write(expl["explanation"])
+        sim_drivers = explain_feature_contributions(
+            base_flow, model, scaler, feature_cols, label_map, target_class=pred["top3"][0]["class"], top_k=4
+        )
+        if sim_drivers:
+            st.markdown("**Top Timing Drivers (TreeSHAP):**")
+            st.dataframe(
+                pd.DataFrame(sim_drivers).rename(
+                    columns={"feature": "Timing Feature", "shap": "SHAP Impact", "value": "Value"}
+                ),
+                use_container_width=True,
+                hide_index=True,
+            )
         st.caption(f"Provider: {expl['provider']} ({expl['model']})")
 
 

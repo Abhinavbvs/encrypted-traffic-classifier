@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.predict import load_artifacts, predict_flows, predict_one, validate_features
+from src.predict import explain_feature_contributions, load_artifacts, predict_flows, predict_one, validate_features
 
 
 @pytest.fixture(scope="module")
@@ -145,3 +145,29 @@ def test_predict_one(artifacts, feature_columns, label_map):
     assert "probabilities" in res
     assert len(res["probabilities"]) == len(label_map)
     assert res["predicted_class"] in label_map.values()
+
+
+def test_explain_feature_contributions(artifacts, feature_columns, label_map):
+    """Test exact per-flow LightGBM TreeSHAP feature driver computation and fallback."""
+    model, scaler, _, _ = artifacts
+    test_df = pd.read_csv("data/processed/test.csv")
+    raw_values = scaler.inverse_transform(test_df[feature_columns].iloc[[0]])[0]
+    row_dict = dict(zip(feature_columns, raw_values))
+
+    pred = predict_one(row_dict, model=model, scaler=scaler, feature_columns=feature_columns, label_map=label_map)
+    drivers = explain_feature_contributions(
+        row_dict, model, scaler, feature_columns, label_map, target_class=pred["top3"][0]["class"], top_k=5
+    )
+
+    assert len(drivers) == 5
+    for d in drivers:
+        assert d["feature"] in feature_columns
+        assert isinstance(d["shap"], float)
+        assert isinstance(d["value"], float)
+    assert [abs(d["shap"]) for d in drivers] == sorted([abs(d["shap"]) for d in drivers], reverse=True)
+
+    class _NoContribModel:
+        def predict(self, X, **kwargs):
+            raise TypeError("pred_contrib unsupported")
+
+    assert explain_feature_contributions(row_dict, _NoContribModel(), scaler, feature_columns, label_map) == []

@@ -51,7 +51,7 @@ cd encrypted-traffic-classifier
 pip install -r requirements.txt</pre></div>
     <h2 id="dashboard">2. Open the dashboard</h2><p>PCAP upload, batch inference, the live parameter simulator and the benchmark reports.</p><div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0">streamlit run app.py</pre></div>
     <h2 id="cli">3. Use the command line</h2><p>Classify a raw capture directly:</p><div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0">python src/predict.py --pcap data/sample_pcaps/voip_call.pcap --threshold 0.5</pre></div><p>Or classify flows you have already extracted:</p><div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0">python src/predict.py --input data/processed/sample_raw_flows.csv --output predictions.csv</pre></div>
-    <h2 id="tests">4. Run the tests</h2><p>32 tests cover PCAP extraction, empty and corrupt captures, the Streamlit UI, predictions and explainer fallbacks.</p><div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0">pytest -v</pre></div>
+    <h2 id="tests">4. Run the tests</h2><p>39 tests cover PCAP extraction, live sniffing, empty and corrupt captures, the Streamlit UI, monorepo routing, predictions and explainer fallbacks.</p><div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0">pytest -v</pre></div>
     <h2 id="docker">5. Deploy with Docker</h2><div class="code"><button class="copy" data-copy>Copy</button><pre style="margin:0"><span class="c"># build and run unified server (Web UI + /studio/ Streamlit)</span>
 docker build -t encrypted-traffic-classifier .
 docker run -p 8600:8600 encrypted-traffic-classifier

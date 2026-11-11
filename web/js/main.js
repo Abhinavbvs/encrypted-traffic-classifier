@@ -350,8 +350,10 @@
     std_idle: { cat: "Active / Idle", cls: "feat-cat-active", unit: "µs", desc: "Standard deviation of idle intervals" }
   };
 
-  function downloadCSV(filename, csvContent) {
-    var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  var fmt = function (v) { return typeof v === "number" ? v.toLocaleString("en-US", { maximumFractionDigits: 2 }) : esc(v); };
+
+  function downloadBlob(filename, mimeType, content) {
+    var blob = new Blob([content], { type: mimeType });
     var link = document.createElement("a");
     var url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
@@ -360,6 +362,28 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function downloadCSV(filename, csvContent) {
+    downloadBlob(filename, "text/csv;charset=utf-8;", csvContent);
+  }
+
+  function driversHTML(drivers) {
+    if (!drivers || !drivers.length) return "";
+    return '<div class="drivers-row">' +
+      '<span class="drivers-label">Top Timing Drivers (TreeSHAP Logit Contribution)</span>' +
+      '<div class="driver-chips">' +
+      drivers.map(function (d) {
+        var val = Number(d.shap || 0);
+        var sign = val >= 0 ? "+" : "";
+        var cls = val >= 0 ? "pos" : "neg";
+        return '<span class="driver-chip ' + cls + '" title="Observed feature value: ' + fmt(d.value) + '">' +
+          '<code>' + esc(d.feature) + '</code> ' +
+          '<i>' + sign + val.toFixed(2) + '</i>' +
+          '<span class="mute">(' + fmt(d.value) + ')</span></span>';
+      }).join("") +
+      "</div></div>";
   }
 
   /* ---------- Analyze page ---------- */
@@ -367,9 +391,41 @@
   if (results) {
     var thr = $("[data-an-threshold]"), thrOut = $("[data-an-threshold-out]"), again = null;
     var th = function () { return parseFloat(thr.value); };
-    var fmt = function (v) { return typeof v === "number" ? v.toLocaleString("en-US", { maximumFractionDigits: 2 }) : esc(v); };
+    var flowSeq = 0;
+    var allRendered = [];
+    var clearResults = function () { results.innerHTML = ""; allRendered = []; flowSeq = 0; };
 
-    var flowHTML = function (f, i) {
+    var updateResultsSummary = function () {
+      var prev = $("[data-results-summary]", results);
+      if (prev) prev.remove();
+      if (!allRendered.length) return;
+      var counts = {};
+      var files = {};
+      allRendered.forEach(function (entry) {
+        var label = entry.flow.is_uncertain ? "Unknown" : entry.flow.top_class;
+        counts[label] = (counts[label] || 0) + 1;
+        files[entry.file] = true;
+      });
+      var pills = Object.keys(counts).map(function (k) {
+        return "<span>" + esc(k) + "<b>" + counts[k] + "</b></span>";
+      }).join("");
+      var box = document.createElement("div");
+      box.className = "results-summary";
+      box.setAttribute("data-results-summary", "1");
+      box.innerHTML =
+        '<div class="results-summary-top">' +
+          '<div><b>All Classified Flows Summary</b> <span class="mono mute">· ' +
+          allRendered.length + ' flows across ' + Object.keys(files).length + ' source(s)</span></div>' +
+          '<div class="results-summary-actions">' +
+            '<button class="btn ghost sm" type="button" data-export-all-csv>📥 Export All Flows (CSV)</button>' +
+            '<button class="btn ghost sm" type="button" data-export-all-json>📥 Export All Flows (JSON)</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="counts mt-s">' + pills + "</div>";
+      results.insertBefore(box, results.firstChild);
+    };
+
+    var flowHTML = function (f, i, uid) {
       var unk = f.is_uncertain;
       var tuple = esc(f.src_ip) + ":" + esc(f.src_port) + " ⇄ " + esc(f.dst_ip) + ":" + esc(f.dst_port) + " · " + esc(f.protocol);
       var probs = Object.keys(f.probabilities).map(function (k) { return [k, f.probabilities[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
@@ -388,7 +444,7 @@
         return '"' + k + '","' + m.cat + '",' + (f.features[k] != null ? f.features[k] : 0) + ',"' + m.unit + '","' + m.desc.replace(/"/g, '""') + '"';
       }).join("\n");
 
-      return '<article class="flow" data-flow-id="' + i + '"><div>' +
+      return '<article class="flow" data-flow-id="' + uid + '"><div>' +
         '<div class="flow-tuple">Flow ' + (i + 1) + " · " + tuple + " · " + esc(f.packet_count) + " packets</div>" +
         '<div class="flow-verdict"><h3 class="' + (unk ? "unk" : "") + '">' + (unk ? "Unknown" : esc(f.top_class)) + "</h3>" +
         '<span class="conf">' + (unk ? "best guess " + esc(f.top_class) + " · " : "") + pct(f.confidence) + " confidence</span>" +
@@ -396,24 +452,25 @@
         '<p class="flow-why"><small>Why · ' + esc((f.explainer || "").replace(/_/g, " ")) + "</small>" + esc(f.explanation) + "</p></div>" +
         '<div class="probs">' + probs.map(function (p, j) { return pbar(p[0], p[1], j === 0 && !unk); }).join("") + "</div>" +
         '<div style="grid-column:1 / -1">' +
+          driversHTML(f.top_drivers) +
           '<div class="flow-inspect-bar">' +
             '<div class="flow-inspect-toggle">' +
-              '<button class="flow-inspect-btn active" data-view="grid" data-for="' + i + '">Summary Grid</button>' +
-              '<button class="flow-inspect-btn" data-view="table" data-for="' + i + '">Raw 23-Feature Table</button>' +
+              '<button class="flow-inspect-btn active" data-view="grid" data-for="' + uid + '">Summary Grid</button>' +
+              '<button class="flow-inspect-btn" data-view="table" data-for="' + uid + '">Raw 23-Feature Table</button>' +
             '</div>' +
             '<div class="flow-actions">' +
-              '<button class="btn ghost sm" data-flow-csv="' + i + '">📥 Export Flow CSV</button>' +
-              '<button class="btn ghost sm" data-flow-json="' + i + '">📋 Copy JSON</button>' +
+              '<button class="btn ghost sm" data-flow-csv="' + uid + '">📥 Export Flow CSV</button>' +
+              '<button class="btn ghost sm" data-flow-json="' + uid + '">📋 Copy JSON</button>' +
             '</div>' +
           '</div>' +
-          '<div class="flow-view-grid" id="fview-grid-' + i + '">' +
+          '<div class="flow-view-grid" id="fview-grid-' + uid + '">' +
             '<div class="fgrid">' + featsGrid + '</div>' +
           '</div>' +
-          '<div class="flow-view-table table-scroll-x" id="fview-table-' + i + '" style="display:none">' +
+          '<div class="flow-view-table table-scroll-x" id="fview-table-' + uid + '" style="display:none">' +
             '<table class="feat-table"><thead><tr><th>Feature Name</th><th>Category</th><th style="text-align:right">Value</th><th>Unit</th><th>Technical Significance</th></tr></thead><tbody>' + tableRows + '</tbody></table>' +
           '</div>' +
-          '<script type="application/json" id="raw-flow-' + i + '">' + flowJson.replace(/<\//g, "<\\/") + '<\/script>' +
-          '<script type="text/plain" id="csv-flow-' + i + '">' + flowCsv.replace(/<\//g, "<\\/") + '<\/script>' +
+          '<script type="application/json" id="raw-flow-' + uid + '">' + flowJson.replace(/<\//g, "<\\/") + '<\/script>' +
+          '<script type="text/plain" id="csv-flow-' + uid + '">' + flowCsv.replace(/<\//g, "<\\/") + '<\/script>' +
         '</div></article>';
     };
     var headHTML = function (res) {
@@ -423,13 +480,18 @@
         "<span>threshold <b>" + Number(res.threshold).toFixed(2) + "</b></span><span><b>" + (res.mode === "live" ? "live model" : "snapshot") + "</b></span></div></div>";
     };
     var render = function (res, append) {
-      if (!append) results.innerHTML = "";
+      if (!append) clearResults();
       var g = document.createElement("div"); g.className = "results";
-      g.innerHTML = headHTML(res) + (res.flows.length ? res.flows.map(flowHTML).join("") : '<p class="mute">' + esc(res.message || "No IP flows found.") + "</p>");
+      var cards = (res.flows || []).map(function (f, i) {
+        allRendered.push({ file: res.file, flow_index: i + 1, flow: f });
+        return flowHTML(f, i, flowSeq++);
+      }).join("");
+      g.innerHTML = headHTML(res) + (cards || '<p class="mute">' + esc(res.message || "No IP flows found.") + "</p>");
       results.appendChild(g); fillBars(g);
+      updateResultsSummary();
     };
     var loading = function (label, append) {
-      if (!append) results.innerHTML = "";
+      if (!append) clearResults();
       var d = document.createElement("div"); d.className = "run-head"; d.innerHTML = "<b>" + esc(label) + '</b><span class="typing"><i></i><i></i><i></i></span>';
       results.appendChild(d); return d;
     };
@@ -442,14 +504,14 @@
         .then(function (res) { l.remove(); render(res, true); }).catch(function (e) { fail(e, l); });
     };
     var runAll = function () {
-      results.innerHTML = "";
+      clearResults();
       var names = $$("[data-run]").map(function (b) { return b.getAttribute("data-run"); });
       return names.reduce(function (p, n) { return p.then(function () { return runSample(n, true); }); }, Promise.resolve()).then(function () { mark(null); });
     };
     $$("[data-run]").forEach(function (b) {
       b.addEventListener("click", function () {
         var n = b.getAttribute("data-run");
-        again = function () { results.innerHTML = ""; return runSample(n, true); };
+        again = function () { clearResults(); return runSample(n, true); };
         again(); results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
       });
     });
@@ -458,11 +520,11 @@
 
     var uploadFiles = function (files) {
       if (!files || !files.length) return;
-      if (!LIVE) { results.innerHTML = '<div class="run-err"><b>The local server is not running.</b> Start it with <code>python web/server.py</code> to classify your own captures.</div>'; return; }
-      
+      if (!LIVE) { clearResults(); results.innerHTML = '<div class="run-err"><b>The local server is not running.</b> Start it with <code>python web/server.py</code> to classify your own captures.</div>'; return; }
+
       var fileList = Array.from(files);
       again = function () {
-        results.innerHTML = "";
+        clearResults();
         mark(null);
         if (fileList.length === 1) {
           var l = loading("Uploading " + fileList[0].name + "…", true);
@@ -526,7 +588,116 @@
         }
         return;
       }
+      if (t.closest("[data-export-all-csv]") && allRendered.length) {
+        var featKeys = Object.keys(FEATURE_META);
+        var hdr = ["source_file", "flow_index", "src_ip", "src_port", "dst_ip", "dst_port", "protocol", "packet_count", "predicted_class", "top_class", "confidence", "is_uncertain", "explainer"].concat(featKeys).join(",");
+        var rows = allRendered.map(function (entry) {
+          var fl = entry.flow, fv = fl.features || {};
+          var meta = [
+            '"' + String(entry.file || "").replace(/"/g, '""') + '"',
+            entry.flow_index,
+            '"' + fl.src_ip + '"', fl.src_port,
+            '"' + fl.dst_ip + '"', fl.dst_port,
+            '"' + fl.protocol + '"', fl.packet_count,
+            '"' + (fl.is_uncertain ? "Unknown (" + fl.top_class + ")" : fl.top_class) + '"',
+            '"' + fl.top_class + '"',
+            fl.confidence, fl.is_uncertain,
+            '"' + (fl.explainer || "") + '"'
+          ];
+          return meta.concat(featKeys.map(function (k) { return fv[k] != null ? fv[k] : 0; })).join(",");
+        });
+        downloadCSV("metaflow_all_flows.csv", [hdr].concat(rows).join("\n"));
+        return;
+      }
+      if (t.closest("[data-export-all-json]") && allRendered.length) {
+        downloadBlob("metaflow_all_flows.json", "application/json;charset=utf-8;", JSON.stringify(allRendered, null, 2));
+        return;
+      }
     });
+
+    /* Live Network Interface Sniffer */
+    var sniffCard = $("[data-sniff-card]");
+    if (sniffCard) {
+      var sIface = $("[data-sniff-iface]"), sDur = $("[data-sniff-dur]"), sCount = $("[data-sniff-count]");
+      var sBtn = $("[data-sniff-btn]"), sRef = $("[data-sniff-refresh]"), sNote = $("[data-sniff-note]");
+
+      var loadInterfaces = function () {
+        if (!LIVE) {
+          if (sNote) sNote.textContent = "Snapshot mode — start local server (`python web/server.py`) for live interface capture.";
+          return Promise.resolve();
+        }
+        if (sNote) sNote.textContent = "Scanning active network interfaces…";
+        return fetch("/api/interfaces").then(jsonOrThrow).then(function (data) {
+          var list = (data && data.interfaces) || [];
+          if (sIface) {
+            sIface.innerHTML = '<option value="">Default active interface</option>' + list.map(function (item) {
+              var lbl = item.name + (item.ip ? " (" + item.ip + ")" : "") + (item.description && item.description !== item.name ? " · " + item.description : "");
+              return '<option value="' + esc(item.name) + '">' + esc(lbl) + "</option>";
+            }).join("");
+            sIface.disabled = false;
+          }
+          if (sNote) sNote.textContent = list.length
+            ? list.length + " interfaces detected · timing-only capture (payload discarded)"
+            : "Default interface ready (Windows requires Npcap in WinPcap-compatible mode)";
+        }).catch(function () {
+          if (sIface) sIface.disabled = false;
+          if (sNote) sNote.textContent = "Could not enumerate interfaces · using default interface";
+        });
+      };
+      liveReady.then(loadInterfaces);
+      if (sRef) sRef.addEventListener("click", function () { liveReady.then(loadInterfaces); });
+
+      if (sBtn) sBtn.addEventListener("click", function () {
+        if (!LIVE) {
+          clearResults();
+          results.innerHTML = '<div class="run-err"><b>The local server is not running.</b> Start it with <code>python web/server.py</code> to sniff live interfaces.</div>';
+          results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+          return;
+        }
+        var iface = sIface ? sIface.value : "";
+        var dur = sDur ? sDur.value : "5";
+        var cnt = sCount ? sCount.value : "100";
+        clearResults();
+        mark(null);
+        sBtn.disabled = true;
+        var l = loading("Capturing live packets (" + dur + "s" + (iface ? " on " + iface : "") + ")…", true);
+        results.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+
+        var qs = "/api/sniff?duration=" + encodeURIComponent(dur) + "&count=" + encodeURIComponent(cnt) + "&threshold=" + encodeURIComponent(th());
+        if (iface) qs += "&iface=" + encodeURIComponent(iface);
+
+        fetch(qs).then(jsonOrThrow).then(function (rawRes) {
+          l.remove();
+          sBtn.disabled = false;
+          if (rawRes.status === "error") {
+            results.innerHTML = '<div class="run-err"><b>Live capture error.</b> ' + esc(rawRes.message || "Packet sniffing failed.") + "</div>";
+            if (sNote) sNote.textContent = "Capture error — check Npcap (Windows) or root/CAP_NET_RAW permissions (Linux)";
+            return;
+          }
+          var res = Object.assign({ file: "live:" + (iface || "default"), latency_ms: 0, threshold: th(), mode: "live" }, rawRes);
+          if (sNote) sNote.textContent = "Captured " + (res.packets_captured || 0) + " packets · " + (res.flow_count || (res.flows || []).length) + " flows classified";
+          render(res, true);
+          again = function () {
+            clearResults();
+            var t = th();
+            var re = Object.assign({}, res, {
+              threshold: t,
+              flows: (res.flows || []).map(function (fl) {
+                var unk = fl.confidence < t;
+                return Object.assign({}, fl, {
+                  is_uncertain: unk,
+                  predicted_class: unk ? "Uncertain (" + fl.top_class + ")" : fl.top_class
+                });
+              })
+            });
+            render(re, true);
+          };
+        }).catch(function (e) {
+          sBtn.disabled = false;
+          fail(e, l);
+        });
+      });
+    }
 
     var bBtn = $("[data-batch]"), bOut = $("[data-batch-out]");
     var lastBatchData = null, batchViewMode = "compact";
@@ -616,8 +787,15 @@
     };
     if (bBtn) bBtn.addEventListener("click", runBatch);
 
-    thr.addEventListener("input", function () { thrOut.textContent = th().toFixed(2); });
-    thr.addEventListener("change", function () { if (again) again(); if (bOut && bOut.dataset.ran) runBatch(); });
+    thr.addEventListener("input", function () {
+      thrOut.textContent = th().toFixed(2);
+      document.dispatchEvent(new CustomEvent("metaflow:threshold"));
+    });
+    thr.addEventListener("change", function () {
+      if (again) again();
+      if (bOut && bOut.dataset.ran) runBatch();
+      document.dispatchEvent(new CustomEvent("metaflow:threshold"));
+    });
   }
 
   /* ---------- Interactive Single-Flow Simulator Controller ---------- */
@@ -713,6 +891,7 @@
       var why = $("[data-sim-explanation]");
       var prov = $("[data-sim-provider]");
       var lat = $("[data-sim-latency]");
+      var drvEl = $("[data-sim-drivers]");
 
       var unk = res.is_uncertain;
       if (title) {
@@ -733,6 +912,9 @@
           return pbar(c["class"], c.probability, i === 0 && !unk);
         }).join("");
         fillBars(top3El);
+      }
+      if (drvEl) {
+        drvEl.innerHTML = driversHTML(res.top_drivers || []);
       }
     };
 
@@ -779,6 +961,7 @@
         top3: top3,
         explanation: explanation,
         explainer: "rule_based_offline",
+        top_drivers: [],
         latency_ms: 1.8
       };
     };
@@ -815,7 +998,13 @@
       });
     });
 
+    document.addEventListener("metaflow:threshold", function () {
+      clearTimeout(simDebounceTimer);
+      simDebounceTimer = setTimeout(runSimulate, 40);
+    });
+
     updateSliderLabels();
+    liveReady.then(function () { if (LIVE) runSimulate(); });
   }
 
   /* ---------- copy buttons ---------- */

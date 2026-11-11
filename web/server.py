@@ -50,7 +50,7 @@ sys.path.insert(0, str(REPO_DIR))
 os.chdir(REPO_DIR)  # src.* modules resolve models/ and data/ relative to the repo root
 
 from src.llm_explainer import explain_flow  # noqa: E402
-from src.predict import load_artifacts, predict_flows, predict_pcap, predict_one  # noqa: E402
+from src.predict import explain_feature_contributions, load_artifacts, predict_flows, predict_pcap, predict_one  # noqa: E402
 from src.live_sniffer import sniff_and_classify, list_interfaces  # noqa: E402
 
 SAMPLES_DIR = REPO_DIR / "data" / "sample_pcaps"
@@ -243,6 +243,8 @@ def _flow_payload(i, row, feats, meta_cols) -> dict:
         "confidence": float(row["confidence"]),
         "top3": top3,
     }
+    with INFER_LOCK:
+        drivers = explain_feature_contributions(feats, MODEL, SCALER, FEATURES, LABELS, target_class=row["top1_class"], top_k=5)
     exp = explain_flow(feats, pred, preferred_provider=EXPLAINER)
     out = {
         "id": i,
@@ -253,6 +255,7 @@ def _flow_payload(i, row, feats, meta_cols) -> dict:
         "status": row["status"],
         "top3": top3,
         "probabilities": _prob_map(row),
+        "top_drivers": drivers,
         "explanation": exp.get("explanation"),
         "explainer": exp.get("provider"),
         "features": {k: _num(v) for k, v in feats.items()},
@@ -322,6 +325,7 @@ def simulate_flow(user_params: dict, threshold: float = 0.5) -> dict:
                     pass
     with INFER_LOCK:
         res = predict_one(flow, MODEL, SCALER, FEATURES, LABELS, threshold)
+        drivers = explain_feature_contributions(flow, MODEL, SCALER, FEATURES, LABELS, target_class=res["top3"][0]["class"], top_k=5)
 
     pred_payload = {
         "predicted_class": res["top3"][0]["class"],
@@ -338,6 +342,7 @@ def simulate_flow(user_params: dict, threshold: float = 0.5) -> dict:
         "status": res["status"],
         "top3": res["top3"],
         "probabilities": {k: round(float(v), 6) for k, v in res["probabilities"].items()},
+        "top_drivers": drivers,
         "explanation": exp.get("explanation"),
         "explainer": exp.get("provider"),
         "latency_ms": round(float(res.get("latency_ms", elapsed)), 4),

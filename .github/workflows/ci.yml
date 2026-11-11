@@ -43,7 +43,7 @@ jobs:
         run: |
           python src/generate_sample_pcaps.py
 
-      - name: Run Pytest Unit, Frontend, PCAP & End-to-End Tests (32 Tests)
+      - name: Run Pytest Unit, Frontend, PCAP & End-to-End Tests (39 Tests)
         run: |
           pytest -v
 

@@ -8,7 +8,7 @@ extracts the 23 timing features, and predicts traffic categories in real time.
 from __future__ import annotations
 
 import argparse
-import io
+import tempfile
 import sys
 import time
 from pathlib import Path
@@ -23,7 +23,7 @@ from scapy.all import conf, get_working_ifaces, sniff, wrpcap
 
 from src.llm_explainer import explain_flow
 from src.pcap_extractor import extract_flows_from_pcap
-from src.predict import load_artifacts, predict_flows
+from src.predict import explain_feature_contributions, load_artifacts, predict_flows
 
 
 def list_interfaces() -> List[Dict[str, str]]:
@@ -112,13 +112,16 @@ def sniff_and_classify(
             "elapsed_seconds": sniff_dur,
         }
 
-    # Write captured packets to in-memory PCAP buffer
-    pcap_buf = io.BytesIO()
-    wrpcap(pcap_buf, packets)
-    pcap_buf.seek(0)
-
-    # Extract 23 timing flow features
-    features_df, metadata_df = extract_flows_from_pcap(pcap_buf)
+    # Persist captured packets to a temporary PCAP for Scapy PcapReader extraction
+    tmp_path: Optional[Path] = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".pcap", delete=False) as tf:
+            tmp_path = Path(tf.name)
+        wrpcap(str(tmp_path), packets)
+        features_df, metadata_df = extract_flows_from_pcap(tmp_path)
+    finally:
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
     if len(features_df) == 0:
         return {
             "status": "no_flows",
@@ -147,6 +150,14 @@ def sniff_and_classify(
             {"class": row[f"top{k}_class"], "probability": round(float(row[f"top{k}_prob"]), 4)}
             for k in (1, 2, 3) if row.get(f"top{k}_class") is not None
         ]
+        probabilities = {
+            k[5:]: round(float(row[k]), 6)
+            for k in combined.columns
+            if k.startswith("prob_")
+        }
+        drivers = explain_feature_contributions(
+            feats, model, scaler, feature_cols, label_map, target_class=row["top1_class"], top_k=5
+        )
         exp = explain_flow(feats, {"predicted_class": row["top1_class"], "confidence": float(row["confidence"]), "top3": top3})
         flows.append({
             "id": i,
@@ -164,18 +175,26 @@ def sniff_and_classify(
             "is_uncertain": bool(row["is_uncertain"]),
             "status": row["status"],
             "top3": top3,
+            "probabilities": probabilities,
+            "top_drivers": drivers,
             "explanation": exp.get("explanation"),
             "explainer": exp.get("provider"),
             "features": feats,
         })
 
+    iface_name = iface or getattr(conf.iface, "name", "default")
     return {
         "status": "success",
-        "interface": iface or getattr(conf.iface, "name", "default"),
+        "file": f"live:{iface_name}",
+        "interface": iface_name,
+        "threshold": confidence_threshold,
+        "mode": "live",
         "packets_captured": len(packets),
         "flow_count": len(flows),
         "sniff_seconds": sniff_dur,
+        "latency_ms": round(infer_latency, 3),
         "inference_latency_ms": round(infer_latency, 3),
+        "elapsed_ms": round((time.perf_counter() - t0) * 1000, 1),
         "total_elapsed_seconds": round(time.perf_counter() - t0, 3),
         "flows": flows,
     }

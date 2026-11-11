@@ -342,7 +342,7 @@ def home():
   <div class="card-body"><h3>Unknown</h3><p>Anything below your confidence threshold is flagged for a person to look at.</p><div class="card-stats"><span>threshold <b>adjustable</b></span></div></div></article>"""
     stats = [("96.9", "%", "Test accuracy on unseen flows", True), ("2.3", " ms", "Inference per flow, CPU only", False),
              ("23", "", "Timing features, no payload", False), ("7", "", "Application classes", False),
-             ("8694", "", "Cleaned flows from ISCX VPN-NonVPN", False), ("32", "", "Tests passing in CI", False),
+             ("8694", "", "Cleaned flows from ISCX VPN-NonVPN", False), ("39", "", "Tests passing in CI", False),
              ("0", "", "Payload bytes ever read", True)]
     stat_html = "".join('<div class="stat%s rv"><b data-count="%s" data-suf="%s">0</b><span>%s</span></div>' % (" hot" if hot else "", v, s, l) for v, s, l, hot in stats)
     stat_html += '<div class="stat cta rv"><a class="btn light" href="benchmarks.html">All benchmarks <span class="arr">→</span></a></div>'
@@ -823,7 +823,7 @@ def demo():
 <section class="sec"><div class="wrap">
   <div class="video-frame rv"><canvas id="demoCanvas" data-rhythm="voip" data-labels></canvas>
     <div class="overlay">
-      <div class="row-between"><span class="pill ok">live rhythm</span><span class="mono" style="color:rgba(255,255,255,.6)">Streamlit · localhost:8501</span></div>
+      <div class="row-between"><span class="pill ok">live rhythm</span><span class="mono" style="color:rgba(255,255,255,.6)">Streamlit Studio · /studio/</span></div>
       <div><p class="mono" style="color:rgba(255,255,255,.55);margin:0 0 6px">Now classifying</p><h2 class="h-m" data-demo-title></h2><p style="max-width:56ch;color:rgba(255,255,255,.72);margin:10px 0 0" data-demo-text></p><p class="mono" style="color:#ff7ac0;margin:12px 0 0" data-demo-conf></p></div>
     </div>
   </div>
@@ -894,7 +894,7 @@ def get_started():
     <h2 id="install" style="margin-top:0">1. Install</h2>%s
     <h2 id="dashboard">2. Open the dashboard</h2><p>PCAP upload, batch inference, the live parameter simulator and the benchmark reports.</p>%s
     <h2 id="cli">3. Use the command line</h2><p>Classify a raw capture directly:</p>%s<p>Or classify flows you have already extracted:</p>%s
-    <h2 id="tests">4. Run the tests</h2><p>32 tests cover PCAP extraction, empty and corrupt captures, the Streamlit UI, predictions and explainer fallbacks.</p>%s
+    <h2 id="tests">4. Run the tests</h2><p>39 tests cover PCAP extraction, live sniffing, empty and corrupt captures, the Streamlit UI, monorepo routing, predictions and explainer fallbacks.</p>%s
     <h2 id="docker">5. Deploy with Docker</h2>%s
     <h2 id="site">6. Run this site with the live model</h2><p>The MetaFlow site lives in <code>web/</code>. Its server serves the pages and an API backed by the same <code>predict_pcap</code>, <code>predict_flows</code> and <code>explain_flow</code> functions the CLI uses.</p>%s
     <p>Then open <code>http://127.0.0.1:8600</code>. API routes: <code>/api/health</code>, <code>/api/metrics</code>, <code>/api/classify?sample=voip_call.pcap&amp;threshold=0.5</code>, <code>POST /api/classify</code> with a capture as the body, and <code>/api/batch</code>. After changing copy, rebuild with <code>python web/build.py</code>.</p>
@@ -963,8 +963,8 @@ def legal():
     pages = [
         ("license.html", "Licence", "MIT licence.", """<p>The encrypted-traffic-classifier project, presented here as MetaFlow, is released under the MIT licence.</p>
 <p>You may use, copy, modify, merge, publish, distribute, sublicense and sell copies of the software, provided the copyright notice and permission notice are included in all copies or substantial portions of it.</p>
-<p>The software is provided "as is", without warranty of any kind, express or implied. See the <a href="%sLICENSE" target="_blank" rel="noopener">LICENSE file</a> in the repository for the full text.</p>
-<h2>Dataset</h2><p>Training data comes from the ISCX VPN-NonVPN 2016 dataset published by the Canadian Institute for Cybersecurity, University of New Brunswick. Check its terms before redistributing it.</p>""" % BLOB),
+<p>The software is provided "as is", without warranty of any kind, express or implied. See the <a href="%s/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE file</a> in the repository for the full text.</p>
+<h2>Dataset</h2><p>Training data comes from the ISCX VPN-NonVPN 2016 dataset published by the Canadian Institute for Cybersecurity, University of New Brunswick. Check its terms before redistributing it.</p>""" % REPO),
         ("privacy.html", "Privacy", "Nothing about you is collected.", """<h2>This website</h2><p>This site sets no cookies, loads no analytics and sends no forms anywhere. The contact form is a local preview. One value in your browser's local storage remembers that you closed the privacy notice. Fonts load from Google Fonts.</p>
 <h2>The classifier</h2><p>MetaFlow is built so that privacy does not depend on policy. It reads packet headers to build flows, discards payload bytes as they are parsed, and computes timing statistics only. No content, credentials or personal data reach the model.</p>
 <p>When the optional cloud explanation tier is enabled, only the predicted class, its probabilities and the timing features are sent to the provider you configure. Leave the key unset to keep everything local.</p>"""),
@@ -990,6 +990,31 @@ def analyze():
   <div class="card-body"><h3>%s</h3><p>%s</p>
   <div class="scard-row"><button class="btn sm" data-run="%s">Classify <span class="arr">→</span></button><a class="btn sm ghost" href="%s%s" download>Download</a></div></div></article>"""
                     % (i + 1, KIND[n], "0.6" if KIND[n] in ("voip", "file") else "1", round(sizes.get(n, 0) / 1024), n, BLURB[n], n, PCAPS, n) for i, n in enumerate(SAMPLE_ORDER))
+    adv_specs = [
+        ("min_fiat", "Min Forward IAT", "µs", 0, 200000, 100, 19005),
+        ("max_fiat", "Max Forward IAT", "µs", 0, 15000000, 5000, 20997),
+        ("total_fiat", "Total Forward IAT", "µs", 0, 30000000, 100000, 2969564),
+        ("min_biat", "Min Backward IAT", "µs", 0, 200000, 100, 19005),
+        ("max_biat", "Max Backward IAT", "µs", 0, 15000000, 5000, 20997),
+        ("total_biat", "Total Backward IAT", "µs", 0, 30000000, 100000, 2969565),
+        ("mean_flowiat", "Mean Flow IAT", "µs", 0, 2000000, 500, 9948),
+        ("max_flowiat", "Max Flow IAT", "µs", 0, 15000000, 5000, 15997),
+        ("std_flowiat", "Std Dev Flow IAT", "µs", 0, 5000000, 500, 4982),
+        ("min_active", "Min Active Burst", "µs", 0, 15000000, 10000, 2974565),
+        ("max_active", "Max Active Burst", "µs", 0, 15000000, 10000, 2974565),
+        ("std_active", "Std Dev Active", "µs", 0, 5000000, 1000, 0),
+        ("min_idle", "Min Idle Gap", "µs", 0, 15000000, 10000, 0),
+        ("max_idle", "Max Idle Gap", "µs", 0, 15000000, 10000, 0),
+        ("std_idle", "Std Dev Idle", "µs", 0, 5000000, 1000, 0),
+    ]
+    adv_html = "".join(
+        f'<div class="sim-slider-row">'
+        f'<label class="sim-slider-label" for="sim-{feat}">{lbl} <code>{feat}</code></label>'
+        f'<span class="sim-slider-val" id="val-{feat}">{default:,} {unit}</span>'
+        f'<input class="sim-slider-input" id="sim-{feat}" type="range" min="{lo}" max="{hi}" step="{step}" value="{default}" data-feat="{feat}">'
+        f'</div>'
+        for feat, lbl, unit, lo, hi, step, default in adv_specs
+    )
     body = page_hero("Analyze", "04 · Analyze", "Run the real model.",
                      "Classify the captures that ship in data/sample_pcaps, drop in your own .pcap, or batch-score the bundled flow CSV. Every number on this page comes from models/best_model.pkl.",
                      '<div class="an-status rv rv-d3"><span class="pill ok" data-mode-pill>snapshot</span><span class="mono mute" data-mode-text>Checking for the local MetaFlow server…</span></div>')
@@ -1010,6 +1035,46 @@ def analyze():
     <span><b>Drop your capture files here</b> or click to choose (single or multiple .pcap)</span>
     <span class="mono mute" data-drop-note>.pcap, .pcapng or .cap · up to 50 MB · parsed locally, payload discarded</span>
   </label>
+
+  <div class="sniff-card mt-m" data-sniff-card>
+    <div class="sniff-head">
+      <div>
+        <div class="eyebrow" style="margin-bottom:4px">Live Interface Capture · Scapy</div>
+        <b>Capture &amp; classify live network traffic</b>
+      </div>
+      <span class="mono mute" data-sniff-note>Checking for local server and network interfaces…</span>
+    </div>
+    <div class="sniff-ctrl">
+      <label class="sniff-field">
+        <span class="mono mute">Interface</span>
+        <select data-sniff-iface disabled>
+          <option value="">Default active interface</option>
+        </select>
+      </label>
+      <label class="sniff-field">
+        <span class="mono mute">Window</span>
+        <select data-sniff-dur>
+          <option value="3">3 seconds</option>
+          <option value="5" selected>5 seconds</option>
+          <option value="10">10 seconds</option>
+          <option value="15">15 seconds</option>
+        </select>
+      </label>
+      <label class="sniff-field">
+        <span class="mono mute">Max packets</span>
+        <select data-sniff-count>
+          <option value="50">50 pkts</option>
+          <option value="100" selected>100 pkts</option>
+          <option value="250">250 pkts</option>
+          <option value="500">500 pkts</option>
+        </select>
+      </label>
+      <div class="sniff-actions">
+        <button class="btn ghost sm" type="button" data-sniff-refresh title="Refresh network interfaces">↻</button>
+        <button class="btn sm" type="button" data-sniff-btn>Capture Live Traffic <span class="arr">→</span></button>
+      </div>
+    </div>
+  </div>
 </div></section>
 
 <section class="sec-tight" id="results"><div class="wrap">
@@ -1048,7 +1113,7 @@ def analyze():
           <div class="sim-slider-row">
             <label class="sim-slider-label" for="sim-bytes">Bytes / Second <code>flowBytesPerSecond</code></label>
             <span class="sim-slider-val" id="val-flowBytesPerSecond">18,961 B/s</span>
-            <input class="sim-slider-input" id="sim-bytes" type="range" min="0" max="500000" step="500" value="18961" data-feat="flowBytesPerSecond">
+            <input class="sim-slider-input" id="sim-bytes" type="range" min="0" max="600000" step="500" value="18961" data-feat="flowBytesPerSecond">
           </div>
           <div class="sim-slider-row">
             <label class="sim-slider-label" for="sim-pkts">Packets / Second <code>flowPktsPerSecond</code></label>
@@ -1103,35 +1168,11 @@ def analyze():
           </div>
         </div>
 
-        <!-- Advanced fine tuner for remaining features -->
+        <!-- Advanced fine tuner for remaining 15 features (23 total) -->
         <details class="sim-group" style="padding:14px 18px">
-          <summary style="cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em">🎛️ Advanced: Fine-tune remaining 15 features</summary>
+          <summary style="cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em">🎛️ Advanced: Fine-tune remaining 15 features (23 total)</summary>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px">
-            <div class="sim-slider-row">
-              <label class="sim-slider-label"><code>std_flowiat</code></label>
-              <span class="sim-slider-val" id="val-std_flowiat">4,982 µs</span>
-              <input class="sim-slider-input" type="range" min="0" max="1000000" step="500" value="4982" data-feat="std_flowiat">
-            </div>
-            <div class="sim-slider-row">
-              <label class="sim-slider-label"><code>mean_flowiat</code></label>
-              <span class="sim-slider-val" id="val-mean_flowiat">9,948 µs</span>
-              <input class="sim-slider-input" type="range" min="0" max="1000000" step="500" value="9948" data-feat="mean_flowiat">
-            </div>
-            <div class="sim-slider-row">
-              <label class="sim-slider-label"><code>total_fiat</code></label>
-              <span class="sim-slider-val" id="val-total_fiat">2,969,564 µs</span>
-              <input class="sim-slider-input" type="range" min="0" max="30000000" step="100000" value="2969564" data-feat="total_fiat">
-            </div>
-            <div class="sim-slider-row">
-              <label class="sim-slider-label"><code>total_biat</code></label>
-              <span class="sim-slider-val" id="val-total_biat">2,969,565 µs</span>
-              <input class="sim-slider-input" type="range" min="0" max="30000000" step="100000" value="2969565" data-feat="total_biat">
-            </div>
-            <div class="sim-slider-row">
-              <label class="sim-slider-label"><code>max_flowiat</code></label>
-              <span class="sim-slider-val" id="val-max_flowiat">15,997 µs</span>
-              <input class="sim-slider-input" type="range" min="0" max="5000000" step="1000" value="15997" data-feat="max_flowiat">
-            </div>
+            """ + adv_html + """
           </div>
         </details>
       </div>
@@ -1163,6 +1204,7 @@ def analyze():
           <small><span>Computer Networks Technical Explanation</span><span class="sim-provider-tag" data-sim-provider>rule based</span></small>
           <p data-sim-explanation>Classified as VoIP (99.9% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: 19930.0 us, BIAT: 19930.0 us) and continuous low-bandwidth streaming (18961 B/s). This steady bidirectional cadence differs sharply from bursty request-response traffic like Chat.</p>
         </div>
+        <div class="sim-drivers" data-sim-drivers></div>
       </div>
     </div>
   </div>

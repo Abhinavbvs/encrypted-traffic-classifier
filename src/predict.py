@@ -287,6 +287,52 @@ def predict_one(
     }
 
 
+def explain_feature_contributions(
+    row_dict: Dict[str, Any],
+    model: Any,
+    scaler: Any,
+    feature_columns: List[str],
+    label_map: Dict[int, str],
+    target_class: Optional[str] = None,
+    top_k: int = 5,
+) -> List[Dict[str, Any]]:
+    """Compute exact per-flow LightGBM TreeSHAP feature drivers without external dependencies.
+
+    Returns up to ``top_k`` features ranked by absolute TreeSHAP contribution to the
+    predicted (or requested) class logit, or ``[]`` if the estimator does not expose
+    ``pred_contrib=True``.
+    """
+    try:
+        df = pd.DataFrame([{col: float(row_dict.get(col, 0.0)) for col in feature_columns}])
+        X_scaled = pd.DataFrame(scaler.transform(df[feature_columns]), columns=feature_columns)
+        contribs = model.predict(X_scaled, pred_contrib=True)
+        arr = np.asarray(contribs, dtype=float)
+        n_classes = len(label_map)
+        n_feats = len(feature_columns)
+        if arr.size != n_classes * (n_feats + 1):
+            return []
+        shaped = arr.reshape(n_classes, n_feats + 1)
+
+        if target_class and target_class in label_map.values():
+            cls_idx = next(k for k, v in label_map.items() if v == target_class)
+        else:
+            probs = model.predict_proba(X_scaled)[0]
+            cls_idx = int(np.argmax(probs))
+
+        shap_vals = shaped[cls_idx, :n_feats]
+        ranked = sorted(range(n_feats), key=lambda idx: abs(float(shap_vals[idx])), reverse=True)[:top_k]
+        return [
+            {
+                "feature": feature_columns[idx],
+                "shap": round(float(shap_vals[idx]), 4),
+                "value": round(float(df.iloc[0, idx]), 4),
+            }
+            for idx in ranked
+        ]
+    except Exception:
+        return []
+
+
 def predict_pcap(
     pcap_path: Union[str, Path],
     model: Any = None,

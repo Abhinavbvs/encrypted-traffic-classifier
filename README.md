@@ -14,7 +14,7 @@ license: mit
 [![CI Pipeline](https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions/workflows/ci.yml/badge.svg)](https://github.com/Abhinavbvs/encrypted-traffic-classifier/actions/workflows/ci.yml)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 32 Passing](https://img.shields.io/badge/Tests-32%20Passed-brightgreen.svg)](tests/)
+[![Tests: 39 Passing](https://img.shields.io/badge/Tests-39%20Passed-brightgreen.svg)](tests/)
 [![Latency: 2.3ms](https://img.shields.io/badge/Latency-2.3ms%2Fflow-purple.svg)](reports/metrics.json)
 [![Docker: Ready](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](Dockerfile)
 
@@ -199,7 +199,7 @@ python src/predict.py --pcap data/sample_pcaps/voip_call.pcap --threshold 0.5
 python src/predict.py --input data/processed/sample_raw_flows.csv --output predictions.csv
 ```
 
-### 4. Run Test Suite (32 Passing Tests)
+### 4. Run Test Suite (39 Passing Tests)
 Run the full test suite including PCAP extraction, empty/corrupt capture handling, Streamlit frontend UI simulation, model predictions, and explainer fallbacks:
 ```bash
 pytest -v

@@ -34,6 +34,33 @@
       "Chat": 0.001274,
       "Mail": 3e-06
      },
+     "top_drivers": [
+      {
+       "feature": "total_biat",
+       "shap": -2.6643,
+       "value": 2969564.9147
+      },
+      {
+       "feature": "mean_fiat",
+       "shap": 2.0034,
+       "value": 19929.9595
+      },
+      {
+       "feature": "mean_flowiat",
+       "shap": 1.7161,
+       "value": 9948.378
+      },
+      {
+       "feature": "max_flowiat",
+       "shap": 1.6605,
+       "value": 15996.933
+      },
+      {
+       "feature": "min_active",
+       "shap": -1.5039,
+       "value": 2974565.0291
+      }
+     ],
      "explanation": "Classified as VoIP (99.9% confidence) due to highly symmetric, low-jitter packet pacing (mean FIAT: 19930.0 us, BIAT: 19930.0 us) and continuous low-bandwidth streaming (18961 B/s). This steady bidirectional cadence differs sharply from bursty request-response traffic like Chat.",
      "explainer": "rule_based_fallback",
      "features": {
@@ -71,8 +98,8 @@
      "duration_sec": 2.975
     }
    ],
-   "latency_ms": 4.3,
-   "elapsed_ms": 1728.7,
+   "latency_ms": 3.284,
+   "elapsed_ms": 1748.8,
    "model": "LGBMClassifier"
   },
   "browsing_https.pcap": {
@@ -109,6 +136,33 @@
       "Chat": 0.875,
       "Mail": 7.8e-05
      },
+     "top_drivers": [
+      {
+       "feature": "min_flowiat",
+       "shap": 4.4846,
+       "value": 3044.8437
+      },
+      {
+       "feature": "flowBytesPerSecond",
+       "shap": 1.1313,
+       "value": 4022.6408
+      },
+      {
+       "feature": "min_idle",
+       "shap": -1.0273,
+       "value": 6523411.9892
+      },
+      {
+       "feature": "flowPktsPerSecond",
+       "shap": 0.9847,
+       "value": 4.6242
+      },
+      {
+       "feature": "mean_biat",
+       "shap": 0.9525,
+       "value": 344754.0402
+      }
+     ],
      "explanation": "Classified as Chat (87.5% confidence) characterized by sporadic, low-volume packet bursts with long idle periods between human typing events and minimal packet rates (4.6 pkts/s). This distinguishes it from high-frequency or streaming sessions like Browsing.",
      "explainer": "rule_based_fallback",
      "features": {
@@ -146,8 +200,8 @@
      "duration_sec": 6.92
     }
    ],
-   "latency_ms": 2.07,
-   "elapsed_ms": 1642.9,
+   "latency_ms": 2.659,
+   "elapsed_ms": 1671.6,
    "model": "LGBMClassifier"
   },
   "file_transfer.pcap": {
@@ -184,6 +238,33 @@
       "Chat": 0.005055,
       "Mail": 0.003933
      },
+     "top_drivers": [
+      {
+       "feature": "flowBytesPerSecond",
+       "shap": 4.8913,
+       "value": 1579874.2646
+      },
+      {
+       "feature": "min_flowiat",
+       "shap": 4.5741,
+       "value": 433.9218
+      },
+      {
+       "feature": "total_fiat",
+       "shap": -2.3273,
+       "value": 83342.0753
+      },
+      {
+       "feature": "total_biat",
+       "shap": 0.9364,
+       "value": 0.0
+      },
+      {
+       "feature": "min_fiat",
+       "shap": -0.8274,
+       "value": 433.9218
+      }
+     ],
      "explanation": "Classified as P2P (54.7% confidence) due to distributed bidirectional timing signatures with rapid inter-arrival variations across multiple peers (mean FIAT: 936.4 us). The continuous background exchange differs from standard client-server protocols like Browsing.",
      "explainer": "rule_based_fallback",
      "features": {
@@ -221,8 +302,8 @@
      "duration_sec": 0.083
     }
    ],
-   "latency_ms": 1.862,
-   "elapsed_ms": 1649.7,
+   "latency_ms": 3.536,
+   "elapsed_ms": 1677.7,
    "model": "LGBMClassifier"
   },
   "streaming_video.pcap": {
@@ -259,6 +340,33 @@
       "Chat": 0.000525,
       "Mail": 0.000399
      },
+     "top_drivers": [
+      {
+       "feature": "flowBytesPerSecond",
+       "shap": 3.1484,
+       "value": 20196.4934
+      },
+      {
+       "feature": "min_flowiat",
+       "shap": -2.0383,
+       "value": 126.8387
+      },
+      {
+       "feature": "std_flowiat",
+       "shap": 1.5106,
+       "value": 552040.8416
+      },
+      {
+       "feature": "total_fiat",
+       "shap": 1.1576,
+       "value": 150000.0954
+      },
+      {
+       "feature": "total_biat",
+       "shap": 1.1324,
+       "value": 5367369.8902
+      }
+     ],
      "explanation": "Classified as Browsing (99.5% confidence) based on interactive, bursty timing profiles consisting of fast initial page component requests followed by extended idle intervals (mean idle: 5152081.0 us) reflecting user reading time. The low continuous throughput (20196 B/s) distinguishes it from continuous streaming applications.",
      "explainer": "rule_based_fallback",
      "features": {
@@ -296,8 +404,8 @@
      "duration_sec": 5.382
     }
    ],
-   "latency_ms": 1.865,
-   "elapsed_ms": 1634.2,
+   "latency_ms": 2.264,
+   "elapsed_ms": 1667.8,
    "model": "LGBMClassifier"
   }
  },
@@ -343,7 +451,7 @@
    "enabled": true,
    "mode": "eager",
    "url": "/studio/",
-   "running": false
+   "running": true
   },
   "samples": [
    {
@@ -919,6 +1027,6 @@
    "FileTransfer": 1,
    "Chat": 1
   },
-  "latency_ms": 0.2731
+  "latency_ms": 0.2677
  }
 }
