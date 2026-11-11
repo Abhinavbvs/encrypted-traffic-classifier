@@ -6,25 +6,35 @@ Run from the repository root:
 
 Routes
     GET  /api/health                         model status, classes, bundled sample captures
+    GET  /api/studio-status                  status of the embedded Streamlit Studio sidecar
     GET  /api/metrics                        reports/metrics.json + reports/cv_results.csv
     GET  /api/classify?sample=<name>.pcap    classify a capture from data/sample_pcaps
     POST /api/classify                       classify an uploaded capture (raw body, X-Filename header)
     GET  /api/batch                          classify data/processed/sample_raw_flows.csv
+    GET  /api/interfaces                     list local network interfaces for live sniffing
+    GET  /api/sniff                          capture & classify live packets from an interface
+    POST/GET /api/simulate                   real-time 23-feature parameter simulation
     All of them accept ?threshold=0.0-0.99 (default 0.5).
+    GET  /studio/  (HTTP + WebSocket)        embedded Streamlit Studio reverse proxy (same port)
     GET  /reports/...  /data/sample_pcaps/...  repository files, read-only
     GET  /...                                the site in web/
 
-Only the standard library is used for HTTP; inference goes through src.predict and
-src.llm_explainer exactly as the CLI and the Streamlit app do.
+Only the standard library is used for HTTP & WebSocket proxying; inference goes through
+src.predict and src.llm_explainer exactly as the CLI and the Streamlit app do.
 """
 from __future__ import annotations
 
 import argparse
+import atexit
 import csv
+import http.client
 import json
 import math
 import mimetypes
 import os
+import select
+import socket
+import subprocess
 import sys
 import tempfile
 import threading
@@ -49,6 +59,50 @@ BATCH_CSV = REPO_DIR / "data" / "processed" / "sample_raw_flows.csv"
 MAX_UPLOAD = 50 * 1024 * 1024
 EXPLAINER = os.getenv("METAFLOW_EXPLAINER", "auto")  # auto | ollama | cloud | rule_fallback
 
+STUDIO_PREFIX = "/studio"
+STUDIO_MODE = os.getenv("METAFLOW_STUDIO_MODE", "eager").strip().lower()  # eager | lazy | off
+_STUDIO_LOCK = threading.Lock()
+_STUDIO_PROC: subprocess.Popen | None = None
+_STUDIO_PORT: int = int(os.getenv("METAFLOW_STUDIO_PORT", "8501"))
+_HOP_BY_HOP = frozenset({
+    "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
+    "te", "trailers", "transfer-encoding", "upgrade",
+})
+
+_STUDIO_SPLASH_HTML = b"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="refresh" content="2">
+  <title>Starting MetaFlow Streamlit Studio...</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0a0b0e;color:#f4f4f6;font:15px/1.5 system-ui,-apple-system,sans-serif}
+    .card{max-width:440px;padding:28px 30px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);text-align:center}
+    .spin{width:34px;height:34px;margin:0 auto 16px;border-radius:50%;border:3px solid rgba(255,255,255,.14);border-top-color:#ff2d95;animation:sp .8s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    h1{margin:0 0 8px;font-size:19px}
+    p{margin:0;color:rgba(244,244,246,.68);font-size:14px}
+    a{color:#ff5cb0;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spin"></div>
+    <h1>Starting Streamlit Studio...</h1>
+    <p>Preparing the interactive 23-feature dashboard inside MetaFlow. This page refreshes automatically.</p>
+    <p style="margin-top:14px"><a href="/">&larr; Back to MetaFlow</a></p>
+  </div>
+  <script>
+    (function poll(){
+      fetch('/api/studio-status', {cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+        if(d && d.running){ location.reload(); } else { setTimeout(poll, 700); }
+      }).catch(function(){ setTimeout(poll, 1000); });
+    })();
+  </script>
+</body>
+</html>"""
+
 mimetypes.add_type("text/plain; charset=utf-8", ".md")
 mimetypes.add_type("text/csv; charset=utf-8", ".csv")
 mimetypes.add_type("application/vnd.tcpdump.pcap", ".pcap")
@@ -59,6 +113,103 @@ print("Loading model artefacts...", flush=True)
 MODEL, SCALER, FEATURES, LABELS = load_artifacts()
 INFER_LOCK = threading.Lock()  # LightGBM and scapy are not guaranteed thread-safe
 print("Model ready: %s, %d features, %d classes" % (type(MODEL).__name__, len(FEATURES), len(LABELS)), flush=True)
+
+
+def _probe_studio(port: int, timeout: float = 0.4) -> bool:
+    """Return True if an upstream Streamlit server mounted at /studio responds healthy."""
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", port, timeout=timeout)
+        conn.request("GET", "%s/_stcore/health" % STUDIO_PREFIX)
+        resp = conn.getresponse()
+        body = resp.read()
+        conn.close()
+        return resp.status == 200 and body.strip() == b"ok"
+    except Exception:
+        return False
+
+
+def _port_in_use(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.2)
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def _resolve_studio_port(preferred: int) -> int:
+    """Reuse a compatible /studio instance or bind an unused local port."""
+    if _probe_studio(preferred) or not _port_in_use(preferred):
+        return preferred
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def ensure_studio() -> bool:
+    """Ensure the internal Streamlit Studio sidecar process is started."""
+    global _STUDIO_PROC, _STUDIO_PORT
+    if STUDIO_MODE == "off":
+        return False
+    if _probe_studio(_STUDIO_PORT):
+        return True
+    with _STUDIO_LOCK:
+        if _probe_studio(_STUDIO_PORT):
+            return True
+        if _STUDIO_PROC is not None and _STUDIO_PROC.poll() is None:
+            return True
+        _STUDIO_PORT = _resolve_studio_port(_STUDIO_PORT)
+        if _probe_studio(_STUDIO_PORT):
+            return True
+        cmd = [
+            sys.executable, "-m", "streamlit", "run", str(REPO_DIR / "app.py"),
+            "--server.port", str(_STUDIO_PORT),
+            "--server.address", "127.0.0.1",
+            "--server.baseUrlPath", STUDIO_PREFIX,
+            "--server.headless", "true",
+            "--server.enableCORS", "false",
+            "--server.enableXsrfProtection", "false",
+            "--browser.gatherUsageStats", "false",
+        ]
+        _STUDIO_PROC = subprocess.Popen(cmd, cwd=str(REPO_DIR))
+        print("Streamlit Studio sidecar starting on http://127.0.0.1:%d%s/ (proxied at %s/)"
+              % (_STUDIO_PORT, STUDIO_PREFIX, STUDIO_PREFIX), flush=True)
+        return True
+
+
+def wait_for_studio(timeout: float = 15.0) -> bool:
+    """Launch Streamlit Studio if needed and wait briefly until its health endpoint is ready."""
+    if not ensure_studio():
+        return False
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if _probe_studio(_STUDIO_PORT, timeout=0.35):
+            return True
+        time.sleep(0.2)
+    return False
+
+
+def stop_studio():
+    """Terminate the managed Streamlit sidecar cleanly on server shutdown."""
+    global _STUDIO_PROC
+    with _STUDIO_LOCK:
+        proc = _STUDIO_PROC
+        _STUDIO_PROC = None
+    if proc is not None and proc.poll() is None:
+        try:
+            proc.terminate()
+            proc.wait(timeout=4)
+        except Exception:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+
+
+def studio_status() -> dict:
+    return {
+        "enabled": STUDIO_MODE != "off",
+        "mode": STUDIO_MODE,
+        "url": STUDIO_PREFIX + "/",
+        "running": _probe_studio(_STUDIO_PORT, timeout=0.3),
+    }
 
 
 def _num(v):
@@ -237,6 +388,7 @@ def health() -> dict:
         "features": FEATURES,
         "classes": [LABELS[k] for k in sorted(LABELS)],
         "explainer": EXPLAINER,
+        "studio": studio_status(),
         "samples": [{"name": p.name, "bytes": p.stat().st_size} for p in sorted(SAMPLES_DIR.glob("*.pcap*"))],
     }
 
@@ -259,6 +411,130 @@ class Handler(BaseHTTPRequestHandler):
 
     def _err(self, status, msg):
         self._json({"error": msg}, status)
+
+    def _tunnel_studio_ws(self):
+        """Bidirectionally relay WebSocket frames between browser and internal Streamlit."""
+        if not wait_for_studio(timeout=15.0):
+            return self._err(HTTPStatus.SERVICE_UNAVAILABLE, "Streamlit Studio did not become ready in time.")
+        upstream = None
+        try:
+            upstream = socket.create_connection(("127.0.0.1", _STUDIO_PORT), timeout=10)
+            lines = ["%s %s HTTP/1.1" % (self.command, self.path)]
+            for k, v in self.headers.items():
+                kl = k.lower()
+                if kl == "host":
+                    continue
+                if kl == "origin":
+                    lines.append("Origin: http://127.0.0.1:%d" % _STUDIO_PORT)
+                else:
+                    lines.append("%s: %s" % (k, v))
+            lines.append("Host: 127.0.0.1:%d" % _STUDIO_PORT)
+            upstream.sendall(("\r\n".join(lines) + "\r\n\r\n").encode("latin-1"))
+
+            upstream.settimeout(None)
+            client = self.connection
+            client.settimeout(None)
+            sockets = [client, upstream]
+            while True:
+                readable, _, exceptional = select.select(sockets, [], sockets, 300.0)
+                if exceptional or not readable:
+                    break
+                for src in readable:
+                    data = src.recv(65536)
+                    if not data:
+                        return
+                    dst = upstream if src is client else client
+                    dst.sendall(data)
+        except OSError:
+            pass
+        finally:
+            self.close_connection = True
+            if upstream is not None:
+                try:
+                    upstream.close()
+                except OSError:
+                    pass
+
+    def _proxy_studio(self, u):
+        """Forward /studio HTTP/WebSocket traffic to the local Streamlit process."""
+        path = unquote(u.path)
+        if STUDIO_MODE == "off":
+            return self._err(HTTPStatus.NOT_FOUND, "Embedded Streamlit Studio is disabled (METAFLOW_STUDIO_MODE=off).")
+
+        if path == STUDIO_PREFIX:
+            target = STUDIO_PREFIX + "/" + (("?" + u.query) if u.query else "")
+            self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
+            self.send_header("Location", target)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+
+        if self.headers.get("Upgrade", "").lower() == "websocket":
+            return self._tunnel_studio_ws()
+
+        if not _probe_studio(_STUDIO_PORT, timeout=0.35):
+            ensure_studio()
+            accept = self.headers.get("Accept", "")
+            if self.command == "GET" and "text/html" in accept:
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(_STUDIO_SPLASH_HTML)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(_STUDIO_SPLASH_HTML)
+                return
+            if not wait_for_studio(timeout=12.0):
+                return self._err(HTTPStatus.SERVICE_UNAVAILABLE, "Streamlit Studio is starting; please retry.")
+
+        req_len = int(self.headers.get("Content-Length") or 0)
+        req_body = self.rfile.read(req_len) if req_len > 0 else None
+
+        fwd_headers = {}
+        for k, v in self.headers.items():
+            kl = k.lower()
+            if kl in _HOP_BY_HOP or kl == "host":
+                continue
+            if kl == "origin":
+                fwd_headers[k] = "http://127.0.0.1:%d" % _STUDIO_PORT
+            else:
+                fwd_headers[k] = v
+        fwd_headers["Host"] = "127.0.0.1:%d" % _STUDIO_PORT
+
+        conn = http.client.HTTPConnection("127.0.0.1", _STUDIO_PORT, timeout=60)
+        try:
+            conn.request(self.command, self.path, body=req_body, headers=fwd_headers)
+            resp = conn.getresponse()
+            body = resp.read()
+            self.send_response(resp.status, resp.reason)
+            for k, v in resp.getheaders():
+                kl = k.lower()
+                if kl in _HOP_BY_HOP or kl == "content-length":
+                    continue
+                if kl == "location":
+                    prefix = "http://127.0.0.1:%d" % _STUDIO_PORT
+                    if v.startswith(prefix):
+                        v = v[len(prefix):] or (STUDIO_PREFIX + "/")
+                self.send_header(k, v)
+            if self.command == "HEAD":
+                cl = resp.getheader("Content-Length")
+                if cl is not None:
+                    self.send_header("Content-Length", cl)
+                self.end_headers()
+            else:
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                if body:
+                    self.wfile.write(body)
+        finally:
+            conn.close()
+
+    def _maybe_studio(self) -> bool:
+        u = urlparse(self.path)
+        path = unquote(u.path)
+        if path == STUDIO_PREFIX or path.startswith(STUDIO_PREFIX + "/"):
+            self._proxy_studio(u)
+            return True
+        return False
 
     def _file(self, root: Path, rel: str):
         root = root.resolve()
@@ -322,12 +598,16 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- routing
     def do_GET(self):
+        if self._maybe_studio():
+            return
         u = urlparse(self.path)
         qs = parse_qs(u.query)
         path = unquote(u.path)
         try:
             if path == "/api/health":
                 return self._json(health())
+            if path == "/api/studio-status":
+                return self._json(studio_status())
             if path == "/api/metrics":
                 return self._json(metrics())
             if path == "/api/batch":
@@ -367,6 +647,8 @@ class Handler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_POST(self):
+        if self._maybe_studio():
+            return
         u = urlparse(self.path)
         if u.path == "/api/simulate":
             try:
@@ -406,18 +688,46 @@ class Handler(BaseHTTPRequestHandler):
             except OSError:
                 pass
 
+    def do_PUT(self):
+        if self._maybe_studio():
+            return
+        self._err(HTTPStatus.METHOD_NOT_ALLOWED, "PUT not supported for this route.")
+
+    def do_DELETE(self):
+        if self._maybe_studio():
+            return
+        self._err(HTTPStatus.METHOD_NOT_ALLOWED, "DELETE not supported for this route.")
+
+    def do_OPTIONS(self):
+        if self._maybe_studio():
+            return
+        self._err(HTTPStatus.METHOD_NOT_ALLOWED, "OPTIONS not supported for this route.")
+
 
 def main():
-    ap = argparse.ArgumentParser(description="Serve the MetaFlow site with a live classification API.")
-    ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=8600)
+    global STUDIO_MODE, _STUDIO_PORT
+    ap = argparse.ArgumentParser(description="Serve the MetaFlow site with a live classification API and embedded Streamlit Studio.")
+    ap.add_argument("--host", default=os.getenv("HOST", "127.0.0.1"))
+    ap.add_argument("--port", type=int, default=int(os.getenv("PORT", "8600")))
+    ap.add_argument("--studio-mode", choices=("eager", "lazy", "off"), default=STUDIO_MODE)
+    ap.add_argument("--studio-port", type=int, default=_STUDIO_PORT)
     a = ap.parse_args()
+    STUDIO_MODE = a.studio_mode
+    _STUDIO_PORT = a.studio_port
+
+    atexit.register(stop_studio)
+    if STUDIO_MODE == "eager":
+        threading.Thread(target=ensure_studio, daemon=True).start()
+
     httpd = ThreadingHTTPServer((a.host, a.port), Handler)
-    print("MetaFlow running at http://%s:%d  (Ctrl+C to stop)" % (a.host, a.port), flush=True)
+    print("MetaFlow running at http://%s:%d  (Streamlit Studio at /studio/, mode=%s)"
+          % (a.host, a.port, STUDIO_MODE), flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        stop_studio()
 
 
 if __name__ == "__main__":

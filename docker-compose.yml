@@ -1,26 +1,17 @@
 version: '3.8'
 
 services:
-  # MetaFlow Landing Site & REST Classification API (Port 8600)
-  metaflow-web:
+  # Unified MetaFlow Monorepo Service (Port 8600):
+  #   - MetaFlow Web UI & REST API: http://localhost:8600/
+  #   - Embedded Streamlit Studio: http://localhost:8600/studio/
+  metaflow:
     build: .
-    container_name: metaflow-web
+    container_name: metaflow
     command: ["python", "web/server.py", "--host", "0.0.0.0", "--port", "8600"]
     ports:
       - "8600:8600"
     environment:
       - PYTHONUNBUFFERED=1
-      - OLLAMA_HOST=http://host.docker.internal:11434
-    restart: unless-stopped
-
-  # Streamlit Data Science & Diagnostic Dashboard (Port 8501)
-  metaflow-streamlit:
-    build: .
-    container_name: metaflow-streamlit
-    command: ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-    ports:
-      - "8501:8501"
-    environment:
-      - PYTHONUNBUFFERED=1
+      - METAFLOW_STUDIO_MODE=eager
       - OLLAMA_HOST=http://host.docker.internal:11434
     restart: unless-stopped

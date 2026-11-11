@@ -28,29 +28,11 @@ if exist ".venv\Scripts\python.exe" (
 )
 
 echo.
-echo [*] Starting MetaFlow Web Server on http://127.0.0.1:8600 ...
-start "MetaFlow Web Server (Port 8600)" /B !PY_BIN! web/server.py --port 8600
-
-echo [*] Starting Streamlit Dashboard on http://127.0.0.1:8501 ...
-start "MetaFlow Streamlit App (Port 8501)" /B !PY_BIN! -m streamlit run app.py --server.port 8501 --server.headless true
-
-:: Wait 3 seconds for ports to bind
-timeout /t 3 /nobreak >nul
-
-echo.
-echo ======================================================================
-echo  [+] MetaFlow Web UI:    http://127.0.0.1:8600
-echo  [+] Streamlit App:      http://127.0.0.1:8501
-echo  [+] Live Analyzer:      http://127.0.0.1:8600/analyze.html
-echo ======================================================================
-echo.
-echo Opening default browser...
-start http://127.0.0.1:8600
-
-echo.
-echo Both servers are actively running in this background session.
-echo Press Ctrl+C or close this window when you wish to stop them.
+echo [*] Starting unified MetaFlow server on http://127.0.0.1:8600 ...
+echo     - MetaFlow Web UI:  http://127.0.0.1:8600/
+echo     - Live Analyzer:    http://127.0.0.1:8600/analyze.html
+echo     - Streamlit Studio: http://127.0.0.1:8600/studio/ (auto-managed)
 echo.
 
-:: Keep script alive to hold process window
-cmd /k
+start "Open Browser" cmd /c "timeout /t 3 /nobreak >nul && start http://127.0.0.1:8600"
+!PY_BIN! web/server.py --port 8600

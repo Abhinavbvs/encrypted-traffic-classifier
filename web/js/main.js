@@ -857,13 +857,28 @@
     }); });
   }
 
-  // Streamlit Bridge probe
+  // Streamlit Studio Bridge probe (monorepo same-origin proxy at /studio/)
   var stLinks = $$("[data-st-link]");
   if (stLinks.length) {
-    fetch("http://localhost:8501/healthz", { mode: "no-cors", cache: "no-store" })
-      .then(function () {
-        stLinks.forEach(function (l) { l.classList.add("st-online"); l.setAttribute("title", "Streamlit is active on port 8501 · click to open"); });
-      }).catch(function () {});
+    if (location.protocol === "file:") {
+      stLinks.forEach(function (l) {
+        l.setAttribute("href", "http://localhost:8501");
+        l.setAttribute("title", "Open standalone Streamlit (localhost:8501)");
+      });
+    } else {
+      fetch("/api/studio-status", { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.enabled) {
+            stLinks.forEach(function (l) {
+              l.classList.add("st-online");
+              l.setAttribute("title", d.running
+                ? "Streamlit Studio is live at /studio/ · click to open"
+                : "Streamlit Studio ready on demand at /studio/ · click to launch");
+            });
+          }
+        }).catch(function () {});
+    }
   }
 
 

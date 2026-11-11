@@ -1,22 +1,18 @@
 services:
-  # MetaFlow Landing Site & Live REST API
+  # Single unified MetaFlow Web Service:
+  #   - MetaFlow Landing Site & REST API -> /
+  #   - Embedded Streamlit Studio        -> /studio/
   - type: web
-    name: metaflow-web
+    name: metaflow
     runtime: python
     buildCommand: pip install -r requirements.txt && python web/build.py
     startCommand: python web/server.py --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: METAFLOW_EXPLAINER
         value: auto
-
-  # Streamlit Interactive Dashboard
-  - type: web
-    name: metaflow-streamlit
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
+      # Lazy mode boots fast under 512MB RAM and auto-starts Streamlit when /studio/ is clicked
+      - key: METAFLOW_STUDIO_MODE
+        value: lazy

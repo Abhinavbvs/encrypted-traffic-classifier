@@ -137,7 +137,7 @@ def header(active):
   <div class="hdr-mid"><span class="clock" data-clock></span></div>
   <div class="hdr-right">
     <span class="live-badge" data-live-badge hidden><span class="live-dot"></span>Live model</span>
-    <a class="st-bridge-btn" href="http://localhost:8501" target="_blank" rel="noopener" data-st-link title="Streamlit Dashboard (localhost:8501)"><span class="st-dot"></span>Streamlit ↗</a>
+    <a class="st-bridge-btn" href="/studio/" target="_blank" rel="noopener" data-st-link title="Open embedded Streamlit Studio (/studio/)"><span class="st-dot"></span>Streamlit Studio ↗</a>
     <a class="btn sm" href="analyze.html">Classify a capture <span class="arr">→</span></a>
     <button class="menu-btn" data-menu-open aria-expanded="false" aria-controls="menu" aria-label="Open menu"><span></span></button>
   </div>
@@ -148,7 +148,7 @@ def header(active):
   <div class="menu-side">
     <div class="grp"><h4>Capabilities</h4>%s</div>
     <div class="grp"><h4>More</h4>
-      <a href="http://localhost:8501" target="_blank" rel="noopener">Streamlit dashboard (localhost:8501) ↗</a>
+      <a href="/studio/" target="_blank" rel="noopener" data-st-link>Streamlit Studio (/studio/) ↗</a>
       <a href="system.html">Design system</a>
       <a href="%s" target="_blank" rel="noopener">GitHub repository ↗</a>
       <a href="%sreports/encrypted_traffic_classifier_demo.mp4" target="_blank" rel="noopener">Demo video (mp4) ↗</a>
@@ -840,12 +840,12 @@ def demo():
 </div></section>
 
 <section class="sec" style="padding-top:0"><div class="wrap split">
-  <div><div class="eyebrow">Run it yourself</div><h2 class="h-m rv">The same dashboard, on your machine.</h2><p class="lead rv rv-d1" style="font-size:18px">One command starts it locally. Docker exposes it on port 8501.</p></div>
+  <div><div class="eyebrow">Run it yourself</div><h2 class="h-m rv">The same dashboard, on your machine.</h2><p class="lead rv rv-d1" style="font-size:18px">One server exposes MetaFlow Web UI at <code>/</code> and Streamlit Studio at <code>/studio/</code> on port 8600.</p></div>
   <div class="rv">%s<div class="mt-s"></div>%s</div>
 </div></section>
 """ % (chapters,
        ('<figure class="shot rv"><video controls preload="metadata" src="media/metaflow_walkthrough.mp4"></video><figcaption><span>MetaFlow walkthrough · every page and the live model</span><span>web/media/metaflow_walkthrough.mp4</span></figcaption></figure>' if walk else ""),
-       REP, code("streamlit run app.py"), code("docker run -p 8501:8501 encrypted-traffic-classifier"))
+       REP, code("python web/server.py --port 8600"), code("docker run -p 8600:8600 encrypted-traffic-classifier"))
     body += analyzer()
     write("demo.html", "Demo · MetaFlow", "Watch MetaFlow classify VoIP, browsing, file transfer and streaming captures.", "demo.html", body, snapshot=True)
 
@@ -919,7 +919,7 @@ def get_started():
        code("python src/predict.py --pcap data/sample_pcaps/voip_call.pcap --threshold 0.5"),
        code("python src/predict.py --input data/processed/sample_raw_flows.csv --output predictions.csv"),
        code("pytest -v"),
-       code('<span class="c"># build and run</span>\ndocker build -t encrypted-traffic-classifier .\ndocker run -p 8501:8501 encrypted-traffic-classifier\n\n<span class="c"># or</span>\ndocker-compose up -d'),
+       code('<span class="c"># build and run unified server (Web UI + /studio/ Streamlit)</span>\ndocker build -t encrypted-traffic-classifier .\ndocker run -p 8600:8600 encrypted-traffic-classifier\n\n<span class="c"># or</span>\ndocker-compose up -d'),
        code("python web/server.py"),
        REPO + "/", REPO)
     body += faq_block()

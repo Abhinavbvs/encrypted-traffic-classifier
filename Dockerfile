@@ -1,10 +1,13 @@
-# Production-ready Docker container for Encrypted Traffic Classifier
+# Production-ready monorepo Docker image for MetaFlow (Web UI + REST API + Embedded Streamlit Studio)
 FROM python:3.11-slim
 
-# Set environment variables
+# Environment variables (writable HOME/MPLCONFIGDIR supports non-root Hugging Face Spaces & PaaS)
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PORT=8600 \
+    HOME=/tmp \
+    MPLCONFIGDIR=/tmp/matplotlib
 
 WORKDIR /app
 
@@ -30,10 +33,13 @@ COPY .streamlit/ ./.streamlit/
 COPY app.py .
 COPY README.md .
 
-# Healthcheck for either web or streamlit
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8600/api/health || curl -f http://localhost:8501/_stcore/health || exit 1
+# Ensure /tmp cache dirs and /app work smoothly for non-root UIDs (e.g. HF Spaces UID 1000)
+RUN chmod -R a+rX /app && mkdir -p /tmp/matplotlib && chmod -R 777 /tmp
 
-EXPOSE 8600 8501
+# Healthcheck against the unified MetaFlow server (serves / and /studio/)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8600}/api/health || exit 1
 
-CMD ["python", "web/server.py", "--host", "0.0.0.0", "--port", "8600"]
+EXPOSE 8600
+
+CMD ["sh", "-c", "python web/server.py --host 0.0.0.0 --port ${PORT:-8600}"]

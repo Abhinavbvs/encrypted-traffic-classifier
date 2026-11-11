@@ -3,9 +3,8 @@ title: MetaFlow Encrypted Traffic Classifier
 emoji: 🛡️
 colorFrom: pink
 colorTo: purple
-sdk: streamlit
-sdk_version: 1.40.0
-app_file: app.py
+sdk: docker
+app_port: 8600
 pinned: false
 license: mit
 ---
@@ -173,19 +172,19 @@ cd encrypted-traffic-classifier
 pip install -r requirements.txt
 ```
 
-### 2. Interactive Web Interfaces
+### 2. Interactive Web Interfaces (Monorepo Single-Port Deployment)
 
-**Option A: Streamlit Interactive Dashboard (Port 8501)**
-Launch the interactive dashboard with PCAP ingestion, batch inference, live parameter simulator, and benchmark reports:
+**Option A: Unified MetaFlow Web UI + Embedded Streamlit Studio (Port 8600 — Recommended)**
+Launch one unified server exposing the MetaFlow Web UI & REST API at `/` and the full interactive Streamlit Studio at `/studio/`:
 ```bash
-streamlit run app.py
+python web/server.py --port 8600
+# Open http://127.0.0.1:8600/         -> MetaFlow Web UI
+# Open http://127.0.0.1:8600/studio/  -> Embedded Streamlit Studio (same port!)
 ```
 
-**Option B: MetaFlow Web UI & Live API (Port 8600)**
-Launch the standalone landing page and live HTTP inference API (zero external HTTP dependencies):
+**Option B: Standalone Streamlit Dashboard Only (Port 8501)**
 ```bash
-python web/server.py
-# Open http://127.0.0.1:8600 in your browser
+streamlit run app.py
 ```
 
 ### 3. Command-Line Inference (CLI)
@@ -212,8 +211,8 @@ Run the production-ready containerized dashboard:
 # Build the Docker image
 docker build -t encrypted-traffic-classifier .
 
-# Run the container
-docker run -p 8501:8501 encrypted-traffic-classifier
+# Run unified monorepo container (Web UI at / + Streamlit Studio at /studio/)
+docker run -p 8600:8600 encrypted-traffic-classifier
 
 # Or using Docker Compose
 docker-compose up -d
